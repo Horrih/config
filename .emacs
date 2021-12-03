@@ -34,17 +34,17 @@ There are two things you can do about this warning:
   (size-indication-mode 't) ; display size indication
   (delete-selection-mode 1) ; Si un texte est sélectionné, on s'attend à ce que taper du nouveau texte supprime la sélection
   (show-paren-mode 1) ;surligne en couleur les parentheses correspondantes
-  (setq indent-tabs-mode nil) ; Ne pas utiliser de tabs pour indenter
+  (setq-default show-trailing-whitespace t) ; Afficher les espaces
+  (setq-default indent-tabs-mode nil) ; Ne pas utiliser de tabs pour indenter
   (setq default-tab-width 4) ; Taille des tabulations
-  (setq show-trailing-whitespace t) ; Afficher les espaces
+  (setq c-basic-offset 4)    ; Offset standard entre deux lignes : 4 espaces
   (menu-bar-mode -1) ; Hide Menu bar
   (fset 'yes-or-no-p 'y-or-n-p) ; Abreviate Yes/No
   (setq compilation-always-kill t) ; Ne pas demander si je veux interrompre la compilation en cours
-  ; (setq compile-command "make -sj6 && ./bin/Tests")
-  (setq compile-command "python -m unittest")
+  (c-set-offset (quote cpp-macro) 0 nil) ;Indentation des macros C/C++ comme du code classique
+  (c-set-offset 'substatement-open 0) ;Pas d'indentation ajoutée sur les accolades : on veut qu'elles soie
   (setq make-backup-files nil) ; Suppresssion des fichiers de backup (filename~)
   (setq create-lockfiles nil)) ; Suppresssion des fichiers de lock (.#filename)
-
 ;; Theme utilisé pour les couleurs générales
 (use-package vscode-dark-plus-theme
   :ensure t
@@ -105,20 +105,20 @@ will be killed."
 ;; Raccourcis remaniés
 (progn
   (global-set-key (kbd "C-c c"  ) 'comment-or-uncomment-region)
-  ;; (global-set-key (kbd "M-g"    ) 'goto-line)
-  ;; (global-set-key (kbd "M-s"    ) 'multi-occur-in-matching-buffers) ; Recherche d'un texte/regex
-  ;; (global-set-key (kbd "C-j"    ) 'delete-backward-char) ;Possibilité de supprimer comme backspace
-  ;; (global-set-key (kbd "M-j"    ) 'backward-kill-word)   ;Possibilité de supprimer comme backspace
-  ;; (global-set-key (kbd "M-p"    ) 'backward-paragraph) ; Paragraphe précédent
-  ;; (global-set-key (kbd "M-n"    ) 'forward-paragraph) ; Paragraphe suivant
-  ;; (global-set-key (kbd "M-m"    ) 'exit-minibuffer) ;Possibilité de valider dans le minibuffer avec Alt-M
+  (global-set-key (kbd "M-g"    ) 'goto-line)
+  (global-set-key (kbd "M-s"    ) 'multi-occur-in-matching-buffers) ; Recherche d'un texte/regex
+  (global-set-key (kbd "C-j"    ) 'delete-backward-char) ;Possibilité de supprimer comme backspace
+  (global-set-key (kbd "M-j"    ) 'backward-kill-word)   ;Possibilité de supprimer comme backspace
+  (global-set-key (kbd "M-p"    ) 'backward-paragraph) ; Paragraphe précédent
+  (global-set-key (kbd "M-n"    ) 'forward-paragraph) ; Paragraphe suivant
+  (global-set-key (kbd "M-m"    ) 'exit-minibuffer) ;Possibilité de valider dans le minibuffer avec Alt-M
   (global-set-key (kbd "C-c o"  ) 'ff-find-other-file) ; to switch between header and implementation
   (global-set-key (kbd "<f8>"   ) 'recompile) ; Recompile le projet
   (global-set-key (kbd "S-<f8>" ) 'compile)   ; Compile le projet
   (global-set-key (kbd "M-[ 3 4 ~" ) 'compile)   ; Compile le projet
   (global-set-key (kbd "C-<f8>" ) 'kill-compilation) ; Interrompt la compilation en cours
   (global-set-key (kbd "<f2>"   ) 'rename-file-and-buffer) ; Renomme le fichier courant
-  (global-set-key (kbd "<f5>"   ) 'refresh-buffer-no-confirm) ; Rafraichit le fichier courant sans confirmation
+  (global-set-key (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Rafraichit le fichier courant sans confirmation
   (global-set-key (kbd "<f6>"   ) 'revert-all-file-buffers) ; Rafraichit les fichiers ouverts quand on change de branche
   (global-set-key (kbd "C-c g"  ) 'magit-status) ; affichage du buffer de travail magit
   (global-set-key (kbd "M-S-<right>") 'enlarge-window-horizontally) ; Redimensionner les fenêtres horizontalement
@@ -175,6 +175,7 @@ will be killed."
   :hook
   (
    (python-mode . lsp)
+   (c++-mode . lsp)
    (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp
   :init (setq lsp-keymap-prefix "C-c l")
@@ -191,8 +192,14 @@ will be killed."
   :ensure t
   :config
   (with-eval-after-load "lsp-mode"
-    (add-to-list 'lsp-disabled-clients 'pyls)
-    (add-to-list 'lsp-enabled-clients 'jedi)))
+    (when (string-equal major-mode "python-mode")
+      (add-to-list 'lsp-disabled-clients 'pyls)
+      (add-to-list 'lsp-enabled-clients 'jedi))))
+
+;; Support des fichiers gitlab-ci
+(use-package yaml-mode
+  :ensure t)
+
 
 ;; Cacher/Montrer le contenu d'accolades ou if/else
 (defun hide-show-mode-hook()
@@ -202,8 +209,14 @@ will be killed."
   (local-set-key (kbd "C-c H") 'hs-show-all) ;Montrer toutes les zones cachées
   (local-set-key (kbd "C-c M-h") 'hs-hide-all)) ; Tout cacher
 
-(add-hook 'python-mode-hook 'hide-show-mode-hook)
-(add-hook 'c++-mode-hook 'hide-show-mode-hook)
+(add-hook 'python-mode-hook (lambda()
+                              (message "calling python hook")
+                              (hide-show-mode-hook)
+                              (set (make-local-variable 'compile-command) "python -m unittest")))
+(add-hook 'c++-mode-hook (lambda()
+                           (message "calling cpp hook")
+                           (hide-show-mode-hook)
+                           (set (make-local-variable 'compile-command) "make -j4")))
 (add-hook 'emacs-lisp-mode-hook 'hide-show-mode-hook)
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
@@ -213,7 +226,8 @@ will be killed."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(vscode-dark-plus-theme helm which-key use-package magit)))
+ '(package-selected-packages
+   '(yaml-mode vscode-dark-plus-theme helm which-key use-package magit)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
