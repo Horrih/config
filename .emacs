@@ -26,6 +26,10 @@ There are two things you can do about this warning:
   (package-refresh-contents)
   (package-install 'use-package))
 
+(use-package esup
+  :ensure t
+  :config (setq esup-depth 0))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;    CUSTOMISATION       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (progn
   (setq debug-on-error 't) ; Debugger si erreur rencontrée à la lecture de ce fichier
@@ -120,7 +124,6 @@ will be killed."
   (global-set-key (kbd "<f2>"   ) 'rename-file-and-buffer) ; Renomme le fichier courant
   (global-set-key (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Rafraichit le fichier courant sans confirmation
   (global-set-key (kbd "<f6>"   ) 'revert-all-file-buffers) ; Rafraichit les fichiers ouverts quand on change de branche
-  (global-set-key (kbd "C-c g"  ) 'magit-status) ; affichage du buffer de travail magit
   (global-set-key (kbd "M-S-<right>") 'enlarge-window-horizontally) ; Redimensionner les fenêtres horizontalement
   (global-set-key (kbd "M-S-<left>") 'shrink-window-horizontally)
   (global-set-key (kbd "M-S-<down>") 'enlarge-window)
@@ -131,6 +134,7 @@ will be killed."
 ;; Front end pour Git
 (use-package magit
   :ensure t
+  :bind ("C-c g" . magit-status)
   :config
   (setq magit-no-confirm t)
   (setq magit-visit-ref-behavior '(checkout-any focus-on-ref)))
@@ -168,6 +172,10 @@ will be killed."
   (flycheck-mode . (lambda()
                      (when (string-equal major-mode "python-mode")
                        (flycheck-add-next-checker 'lsp 'python-flake8)))))
+
+(use-package yasnippet
+  :ensure t
+  :defer t)
 
 ;; Fonctions de coloration syntaxique et d'autocomplétion
 (use-package lsp-mode
