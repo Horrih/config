@@ -28,6 +28,7 @@ There are two things you can do about this warning:
 
 (use-package esup
   :ensure t
+  :commands esup
   :config (setq esup-depth 0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;    CUSTOMISATION       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -148,11 +149,13 @@ will be killed."
 ;; On rebind certaines commandes natives d'emacs vers les fonctions de helm
 (use-package helm
   :ensure t
-  :config
-  (helm-mode 1)
-  (define-key global-map [remap find-file] #'helm-find-files)
-  (define-key global-map [remap execute-extended-command] #'helm-M-x)
-  (define-key global-map [remap switch-to-buffer] #'helm-mini))
+  :bind (("C-h v" . describe-variable) ;;Lazy loading of helm-mode on help buffers
+         ("C-h k" . describe-key)
+         ("C-h f" . describe-function)
+         ("M-x"   . helm-M-x) ;;Rebind traditional methods to helm methods
+         ("C-x f" . helm-find-files)
+         ("C-x b" . helm-mini))
+  :config (helm-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;     PACKAGES DE DEV       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -166,16 +169,18 @@ will be killed."
   :ensure t
   :bind ("C-c t" . treemacs))
 
+(use-package lsp-treemacs
+  :ensure t
+  :bind ("C-c e" . lsp-treemacs-errors-list)) ; Trouver les erreurs dans les fichiers analysés
+
+;; Coloration syntaxique, alimentéee par LSP
 (use-package flycheck
   :ensure t
-  :hook
-  (flycheck-mode . (lambda()
-                     (when (string-equal major-mode "python-mode")
-                       (flycheck-add-next-checker 'lsp 'python-flake8)))))
+  :defer t)
 
 (use-package yasnippet
   :ensure t
-  :defer t)
+  :hook (lsp . yasnippet))
 
 ;; Fonctions de coloration syntaxique et d'autocomplétion
 (use-package lsp-mode
@@ -189,42 +194,46 @@ will be killed."
   :init (setq lsp-keymap-prefix "C-c l")
   :config
   (setq lsp-enable-links nil)
-  (yas-global-mode)
+  (yas-minor-mode)
+  (require 'lsp-diagnostics)
+  (lsp-diagnostics-flycheck-enable)
+  (require 'flycheck)
+  (with-eval-after-load "lsp-mode"
+    (when (string-equal major-mode "python-mode")
+      (message "Adding flake8")
+      (flycheck-add-next-checker 'lsp 'python-flake8)))
   :bind (("C-c j" . lsp-find-definition) ; Jump vers la définition d'une fonction
          ("C-c J" . lsp-find-references) ; Trouver les références d'une fonction
-         ("C-c e" . lsp-treemacs-errors-list) ; Trouver les erreurs dans les fichiers analysés
          ("C-h l" . lsp-describe-thing-at-point))) ; Trouver les erreurs dans les fichiers analysés
 
 ;; Backend de lsp mode pour code python
 (use-package lsp-jedi
   :ensure t
-  :config
-  (with-eval-after-load "lsp-mode"
-    (when (string-equal major-mode "python-mode")
-      (add-to-list 'lsp-disabled-clients 'pyls)
-      (add-to-list 'lsp-enabled-clients 'jedi))))
+  :defer t
+  :hook (python-mode . (lambda()
+                         (require 'lsp-jedi)
+                         (with-eval-after-load "lsp-mode"
+                           ;(add-to-list 'lsp-disabled-clients 'pyls 'pylsp)
+                           (add-to-list 'lsp-enabled-clients 'jedi)))))
 
 ;; Support des fichiers gitlab-ci
 (use-package yaml-mode
-  :ensure t)
-
+  :ensure t
+  :mode "\\.yml\\'")
 
 ;; Cacher/Montrer le contenu d'accolades ou if/else
 (defun hide-show-mode-hook()
   (hs-minor-mode)
-  (message "Activation de HS MODE")
   (local-set-key (kbd "C-c h") 'hs-toggle-hiding) ; Cacher/Montrer section courante
   (local-set-key (kbd "C-c H") 'hs-show-all) ;Montrer toutes les zones cachées
   (local-set-key (kbd "C-c M-h") 'hs-hide-all)) ; Tout cacher
 
 (add-hook 'python-mode-hook (lambda()
-                              (message "calling python hook")
                               (hide-show-mode-hook)
-                              (set (make-local-variable 'compile-command) "python -m unittest")))
+                              (setq compile-command "python -m unittest")))
 (add-hook 'c++-mode-hook (lambda()
-                           (message "calling cpp hook")
                            (hide-show-mode-hook)
-                           (set (make-local-variable 'compile-command) "make -j4")))
+                           (setq compile-command "make -j4")))
 (add-hook 'emacs-lisp-mode-hook 'hide-show-mode-hook)
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
