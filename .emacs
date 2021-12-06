@@ -34,7 +34,8 @@ There are two things you can do about this warning:
 ;;;;;;;;;;;;;;;;;;;;;;;;;    CUSTOMISATION       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (progn
   (setq debug-on-error 't) ; Debugger si erreur rencontrée à la lecture de ce fichier
-  (column-number-mode 't) ; display column numbers
+  (column-number-mode 't) ; display column numbers in the status line
+  (global-display-line-numbers-mode 't) ; display line numbers on the left
   (line-number-mode 't) ; display line number
   (size-indication-mode 't) ; display size indication
   (delete-selection-mode 1) ; Si un texte est sélectionné, on s'attend à ce que taper du nouveau texte supprime la sélection
@@ -165,6 +166,11 @@ will be killed."
   :bind (("C-c f" . projectile-find-file)
          ("C-c s" . projectile-ag)))
 
+; Utilisé par projectile-ag
+(use-package ag
+  :ensure t
+  :defer t)
+
 (use-package treemacs
   :ensure t
   :bind ("C-c t" . treemacs))
@@ -182,15 +188,43 @@ will be killed."
   :ensure t
   :hook (lsp . yasnippet))
 
+;; Support des fichiers web dont vue.js
+(use-package web-mode
+  :ensure t
+  :mode ("\\.css\\'" "\\.html\\'")
+  :config
+  (setq web-mode-script-padding 0)
+  (setq web-mode-markup-indent-offset 2))
+
+(use-package prettier-js
+  :ensure t
+  :hook (my-ts-mode . prettier-js-mode)
+  :config
+  (setq prettier-js-args '("--semi" "false"
+                           "--single-quote" "false"
+                           "--tab-width" "4"
+                           "--trailing-comma" "all"
+                           "--print-width" "100")))
+
+(define-derived-mode my-ts-mode web-mode "TypeScript(web)"
+     "A major mode derived from web-mode, for editing .ts files with LSP support.")
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . my-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . my-ts-mode))
+(define-derived-mode my-vue-mode web-mode "Vue(web)"
+     "A major mode derived from web-mode, for editing .vue files with LSP support.")
+(add-to-list 'auto-mode-alist '("\\.vue\\'" . my-vue-mode))
+
 ;; Fonctions de coloration syntaxique et d'autocomplétion
 (use-package lsp-mode
   :ensure t
   :hook
   (
-   (python-mode . lsp)
-   (c++-mode . lsp)
-   (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp
+   (python-mode . lsp-deferred)
+   (c++-mode    . lsp-deferred)
+   (my-vue-mode . lsp-deferred)
+   (my-ts-mode  . lsp-deferred)
+   (lsp-mode    . lsp-enable-which-key-integration))
+  :commands lsp lsp-deferred
   :init (setq lsp-keymap-prefix "C-c l")
   :config
   (setq lsp-enable-links nil)
@@ -213,7 +247,6 @@ will be killed."
   :hook (python-mode . (lambda()
                          (require 'lsp-jedi)
                          (with-eval-after-load "lsp-mode"
-                           ;(add-to-list 'lsp-disabled-clients 'pyls 'pylsp)
                            (add-to-list 'lsp-enabled-clients 'jedi)))))
 
 ;; Support des fichiers gitlab-ci
@@ -235,19 +268,24 @@ will be killed."
                            (hide-show-mode-hook)
                            (setq compile-command "make -j4")))
 (add-hook 'emacs-lisp-mode-hook 'hide-show-mode-hook)
+(add-hook 'my-vue-mode-hook (lambda()
+                              (local-set-key (kbd "C-x C-s") (lambda() ; Call format buffer on save
+                                                               (interactive "*")
+                                                               (lsp-format-buffer)
+                                                               (save-buffer)))
+                              (setq lsp-vetur-format-default-formatter-html "js-beautify-html")
+                              (setq lsp-vetur-format-default-formatter-options
+                                '((js-beautify-html
+                                   (wrap_attributes . "preserve")
+                                   (indent_size . 2)
+                                   (wrap_attributes_indent_size . 2))
+                                  (prettier
+                                   (singleQuote . :json-false)
+                                   (printWidth . 100)
+                                   (tabWidth . 4)
+                                   (trailingComma . "all")
+                                   (vueIndentScriptAndStyle . :json-false)
+                                   (semi . :json-false))))
+                              ))
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
-;;;;;;;;;;;;;;;;;;;;;;      GÉNÉRÉ PAR EMACS     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(yaml-mode vscode-dark-plus-theme helm which-key use-package magit)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(magit-filename ((t (:foreground "white")))))
