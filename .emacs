@@ -1,8 +1,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;  GESTIONNAIRE D'EXTENSION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Startup optimization time to avoid garbage collection during init
+(setq gc-cons-threshold 64000000)
+(add-hook 'after-init-hook #'(lambda ()(setq gc-cons-threshold 800000)))
 
-;; Ajout du dépot d'extensions MELPA
+;; Add the main user repository of packages called MELPA
 ;; cf Getting Started https://melpa.org/
-;; ELPA, le dépot par défaut, n'a pas grand chose...
+;; ELPA, the default repository, has much less available
 (require 'package)
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
@@ -22,41 +25,45 @@ There are two things you can do about this warning:
     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
 (package-initialize)
 
+;; Install use-package if not installed yet
+;; Use package will be used as a package loader in this file
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+(setq use-package-always-ensure t) ; Install the package if not available yet
 
+;; Launch the esup command to measure startup time of each emacs plugin
 (use-package esup
-  :ensure t
   :commands esup
   :config (setq esup-depth 0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;    CUSTOMISATION       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (progn
-  (setq debug-on-error 't) ; Debugger si erreur rencontrée à la lecture de ce fichier
-  (column-number-mode 't) ; display column numbers in the status line
-  (global-display-line-numbers-mode 't) ; display line numbers on the left
-  (line-number-mode 't) ; display line number
-  (size-indication-mode 't) ; display size indication
-  (delete-selection-mode 1) ; Si un texte est sélectionné, on s'attend à ce que taper du nouveau texte supprime la sélection
-  (show-paren-mode 1) ;surligne en couleur les parentheses correspondantes
-  (setq-default show-trailing-whitespace t) ; Afficher les espaces
-  (setq-default indent-tabs-mode nil) ; Ne pas utiliser de tabs pour indenter
-  (setq default-tab-width 4) ; Taille des tabulations
-  (setq c-basic-offset 4)    ; Offset standard entre deux lignes : 4 espaces
+  (setq debug-on-error 't) ; Display the stacktrace if error encountered in one of the lisp method
+  (column-number-mode 't) ; Display column numbers in the status line
+  (global-display-line-numbers-mode 't) ; Display line numbers on the left
+  (line-number-mode 't) ; Display line number
+  (size-indication-mode 't) ; Display size indication
+  (delete-selection-mode 1) ; If text is selected, we expect that typing will replace the selection
+  (show-paren-mode 1) ; Highlight the matching parenthesis
+  (setq-default show-trailing-whitespace t) ; Show in red the spaces forgotten at the end of lines
+  (setq-default indent-tabs-mode nil) ; Use spaces for indent
+  (setq default-tab-width 4) ; Number of spaces inserted by tab
+  (setq c-basic-offset    4) ; Base indent size when indented automatically
   (menu-bar-mode -1) ; Hide Menu bar
   (fset 'yes-or-no-p 'y-or-n-p) ; Abreviate Yes/No
-  (setq compilation-always-kill t) ; Ne pas demander si je veux interrompre la compilation en cours
-  (c-set-offset (quote cpp-macro) 0 nil) ;Indentation des macros C/C++ comme du code classique
-  (c-set-offset 'substatement-open 0) ;Pas d'indentation ajoutée sur les accolades : on veut qu'elles soie
-  (setq make-backup-files nil) ; Suppresssion des fichiers de backup (filename~)
-  (setq create-lockfiles nil)) ; Suppresssion des fichiers de lock (.#filename)
-;; Theme utilisé pour les couleurs générales
-(use-package vscode-dark-plus-theme
-  :ensure t
-  :config (load-theme 'vscode-dark-plus t))
+  (setq compilation-always-kill t) ; Do not ask for confirmation when I stop current compilation
+  (c-set-offset (quote cpp-macro) 0 nil) ; Indent C/C++ macros as normal code
+  (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
+  (setq make-backup-files nil) ; Do not use backup files (filename~)
+  (setq create-lockfiles nil) ; Do not use lock files (.#filename)
+  (if (file-directory-p "~/.org") ; Use this folder as org mode agenda files location if it exists
+    (setq org-agenda-files '("~/.org"))))
 
-;; Fonction pour renommer le fichier courant
+;; Main color theme
+(use-package vscode-dark-plus-theme :config (load-theme 'vscode-dark-plus t))
+
+;; Rename current file
 ;; source: http://steve.yegge.googlepages.com/my-dot-emacs-file
 (defun rename-file-and-buffer (new-name)
   "Renames both current buffer and file it's visiting to NEW-NAME."
@@ -73,7 +80,7 @@ There are two things you can do about this warning:
           (set-visited-file-name new-name)
           (set-buffer-modified-p nil))))))
 
-;; F5 : revert-buffer sans confirmation
+;; Revert-buffer without confirmation prompt
 (defun revert-buffer-no-confirm(&optional force-reverting)
     "Interactive call to revert-buffer. Ignoring the auto-save
  file and not requesting for confirmation. When the current buffer
@@ -84,7 +91,7 @@ There are two things you can do about this warning:
         (revert-buffer :ignore-auto :noconfirm)
       (error "The buffer has been modified")))
 
-;; Fonction qui rafraichit les buffers ouverts (par exemple après changement de branche git)
+;; Refresh all buffers when all have been modified (e.g. git branch change from CLI)
 (defun revert-all-file-buffers ()
   "Refresh all open file buffers without confirmation.
 Buffers in modified (not yet saved) state in emacs will not be reverted. They
@@ -108,96 +115,84 @@ will be killed."
             (message "Killed non-existing/unreadable file buffer: %s" filename))))))
   (message "Finished reverting buffers containing unmodified files."))
 
-;; Raccourcis remaniés
+;; My custom shortcuts
 (progn
-  (global-set-key (kbd "C-c c"  ) 'comment-or-uncomment-region)
-  (global-set-key (kbd "M-g"    ) 'goto-line)
-  (global-set-key (kbd "M-s"    ) 'multi-occur-in-matching-buffers) ; Recherche d'un texte/regex
-  (global-set-key (kbd "C-j"    ) 'delete-backward-char) ;Possibilité de supprimer comme backspace
-  (global-set-key (kbd "M-j"    ) 'backward-kill-word)   ;Possibilité de supprimer comme backspace
-  (global-set-key (kbd "M-p"    ) 'backward-paragraph) ; Paragraphe précédent
-  (global-set-key (kbd "M-n"    ) 'forward-paragraph) ; Paragraphe suivant
-  (global-set-key (kbd "M-m"    ) 'exit-minibuffer) ;Possibilité de valider dans le minibuffer avec Alt-M
-  (global-set-key (kbd "C-c o"  ) 'ff-find-other-file) ; to switch between header and implementation
-  (global-set-key (kbd "<f8>"   ) 'recompile) ; Recompile le projet
-  (global-set-key (kbd "S-<f8>" ) 'compile)   ; Compile le projet
-  (global-set-key (kbd "M-[ 3 4 ~" ) 'compile)   ; Compile le projet
-  (global-set-key (kbd "C-<f8>" ) 'kill-compilation) ; Interrompt la compilation en cours
-  (global-set-key (kbd "<f2>"   ) 'rename-file-and-buffer) ; Renomme le fichier courant
-  (global-set-key (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Rafraichit le fichier courant sans confirmation
-  (global-set-key (kbd "<f6>"   ) 'revert-all-file-buffers) ; Rafraichit les fichiers ouverts quand on change de branche
-  (global-set-key (kbd "M-S-<right>") 'enlarge-window-horizontally) ; Redimensionner les fenêtres horizontalement
+  (global-set-key (kbd "C-c c"  ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
+  (global-set-key (kbd "M-g"    ) 'goto-line) ; New binding for going to the n-th line
+  (global-set-key (kbd "M-s"    ) 'multi-occur-in-matching-buffers) ; Search in all buffers
+  (global-set-key (kbd "C-j"    ) 'delete-backward-char) ; Delete like backspace
+  (global-set-key (kbd "M-j"    ) 'backward-kill-word)   ; Delete like backspace + ctrl
+  (global-set-key (kbd "M-p"    ) 'backward-paragraph) ; Previous paragraph
+  (global-set-key (kbd "M-n"    ) 'forward-paragraph) ; Next paragraph
+  (global-set-key (kbd "M-m"    ) 'exit-minibuffer) ; Enable alt+M to use enter. Useful when you forget to release alt when typing commands
+  (global-set-key (kbd "C-c o"  ) 'ff-find-other-file) ; Switch between header and implementation
+  (global-set-key (kbd "<f8>"   ) 'recompile) ; Recompile the project with the last compilation command
+  (global-set-key (kbd "S-<f8>"    ) 'compile)   ; Compile the project and ask for compilation command
+  (global-set-key (kbd "M-[ 3 4 ~" ) 'compile)   ; Compile the project ans ask for compilation command
+  (global-set-key (kbd "C-<f8>" ) 'kill-compilation) ; Stop current compilation
+  (global-set-key (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
+  (global-set-key (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
+  (global-set-key (kbd "<f6>"   ) 'revert-all-file-buffers) ;; Refreshes all the current files/buffers
+
+  ;; Resize the window when split using split screen (C-2 or C-3)
+  (global-set-key (kbd "M-S-<right>") 'enlarge-window-horizontally)
   (global-set-key (kbd "M-S-<left>") 'shrink-window-horizontally)
   (global-set-key (kbd "M-S-<down>") 'enlarge-window)
   (global-set-key (kbd "M-S-<up>") 'shrink-window))
 
 ;;;;;;;;;;;;;;;;;;;;;;     PACKAGES GENERAUX     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Front end pour Git
+;; Git front end (amazing!)
 (use-package magit
-  :ensure t
   :bind ("C-c g" . magit-status)
+  :custom-face (magit-filename ((t :foreground "white"))) ; Otherwise untracked files have the same color as title in git status
   :config
   (setq magit-no-confirm t)
   (setq magit-visit-ref-behavior '(checkout-any focus-on-ref)))
 
-;; Fournit les raccourcis quand on cherche une commande en tapant le début des raccourcis
-(use-package which-key
-  :ensure t
-  :config (which-key-mode))
+;; Displays command shortcuts when typing commands
+(use-package which-key :config (which-key-mode))
 
-;; Recherche simplifiée de commandes/variables/etc
-;; On rebind certaines commandes natives d'emacs vers les fonctions de helm
+;; User friendly search of commands/variables etc
+;; We rebind some of emacs commands to use helm instead
 (use-package helm
-  :ensure t
-  :bind (("C-h v" . describe-variable) ;;Lazy loading of helm-mode on help buffers
-         ("C-h k" . describe-key)
-         ("C-h f" . describe-function)
-         ("M-x"   . helm-M-x) ;;Rebind traditional methods to helm methods
+  :bind (("M-x"   . helm-M-x) ; Rebind traditional methods to helm methods
          ("C-x f" . helm-find-files)
          ("C-x b" . helm-mini))
-  :config (helm-mode))
+  :defer 2 ; We always want helm but not to slow the initial startup
+  :config (helm-mode)(message "helm-loaded"))
 
-;;;;;;;;;;;;;;;;;;;;;;     PACKAGES DE DEV       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;        DEV PACKAGES       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Fonctions de recherche dans le projet courant
+;; Search files or strings in the current project
 (use-package projectile
-  :ensure t
   :bind (("C-c f" . projectile-find-file)
          ("C-c s" . projectile-ag)))
 
-; Utilisé par projectile-ag
-(use-package ag
-  :ensure t
-  :defer t)
+;; Used by projectile-ag
+(use-package ag :defer t)
 
-(use-package treemacs
-  :ensure t
-  :bind ("C-c t" . treemacs))
+;; Displays the current project on the left as in an IDE
+(use-package treemacs :bind ("C-c t" . treemacs))
 
-(use-package lsp-treemacs
-  :ensure t
-  :bind ("C-c e" . lsp-treemacs-errors-list)) ; Trouver les erreurs dans les fichiers analysés
+;; Displays LSP errors using treemacs
+(use-package lsp-treemacs :bind ("C-c e" . lsp-treemacs-errors-list))
 
-;; Coloration syntaxique, alimentéee par LSP
-(use-package flycheck
-  :ensure t
-  :defer t)
+;; Syntax highlighting, used by lsp
+(use-package flycheck :defer t)
 
-(use-package yasnippet
-  :ensure t
-  :hook (lsp . yasnippet))
+;; Dependency used by lsp to insert snippets. Used by some lsp commands
+(use-package yasnippet :hook (lsp . yasnippet))
 
-;; Support des fichiers web dont vue.js
+;; Support various web files, used by my custom modes : my-vue-mode & my-ts-mode
 (use-package web-mode
-  :ensure t
   :mode ("\\.css\\'" "\\.html\\'")
   :config
-  (setq web-mode-script-padding 0)
-  (setq web-mode-markup-indent-offset 2))
+  (setq web-mode-script-padding 0) ;; For vue.js SFC : no initial padding in the script section
+  (setq web-mode-markup-indent-offset 2)) ;; For html : use an indent of size 2 (default is 4)
 
+;; Formatting on save, used by my-ts-mode for .js and .ts files
 (use-package prettier-js
-  :ensure t
   :hook (my-ts-mode . prettier-js-mode)
   :config
   (setq prettier-js-args '("--semi" "false"
@@ -206,17 +201,19 @@ will be killed."
                            "--trailing-comma" "all"
                            "--print-width" "100")))
 
+;; Custom mode for js/ts files, derived from web-mode  to enable LSP on these files
 (define-derived-mode my-ts-mode web-mode "TypeScript(web)"
      "A major mode derived from web-mode, for editing .ts files with LSP support.")
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . my-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.js\\'" . my-ts-mode))
+
+;; Custom mode for .vue files, derived from web-mode, to enable LSP Vetur (VLS) options
 (define-derived-mode my-vue-mode web-mode "Vue(web)"
      "A major mode derived from web-mode, for editing .vue files with LSP support.")
 (add-to-list 'auto-mode-alist '("\\.vue\\'" . my-vue-mode))
 
-;; Fonctions de coloration syntaxique et d'autocomplétion
+;; Completion and syntax highlighting backend API, available for most languages
 (use-package lsp-mode
-  :ensure t
   :hook
   (
    (python-mode . lsp-deferred)
@@ -236,38 +233,43 @@ will be killed."
     (when (string-equal major-mode "python-mode")
       (message "Adding flake8")
       (flycheck-add-next-checker 'lsp 'python-flake8)))
-  :bind (("C-c j" . lsp-find-definition) ; Jump vers la définition d'une fonction
-         ("C-c J" . lsp-find-references) ; Trouver les références d'une fonction
-         ("C-h l" . lsp-describe-thing-at-point))) ; Trouver les erreurs dans les fichiers analysés
+  :bind (("C-c j" . lsp-find-definition) ; Jump to a fonction definition
+         ("C-c J" . lsp-find-references) ; Find references to this function
+         ("C-h l" . lsp-describe-thing-at-point))) ; Display the documentation for this function
 
-;; Backend de lsp mode pour code python
+;; Enable JEDI as an LSP backend
 (use-package lsp-jedi
-  :ensure t
   :defer t
   :hook (python-mode . (lambda()
                          (require 'lsp-jedi)
                          (with-eval-after-load "lsp-mode"
                            (add-to-list 'lsp-enabled-clients 'jedi)))))
 
-;; Support des fichiers gitlab-ci
-(use-package yaml-mode
-  :ensure t
-  :mode "\\.yml\\'")
+;; Support gitlab-ci.yml
+(use-package yaml-mode :mode "\\.yml\\'")
 
-;; Cacher/Montrer le contenu d'accolades ou if/else
+;; Hide/show sections of code : current function, class, or if/else section
 (defun hide-show-mode-hook()
   (hs-minor-mode)
-  (local-set-key (kbd "C-c h") 'hs-toggle-hiding) ; Cacher/Montrer section courante
-  (local-set-key (kbd "C-c H") 'hs-show-all) ;Montrer toutes les zones cachées
-  (local-set-key (kbd "C-c M-h") 'hs-hide-all)) ; Tout cacher
+  (local-set-key (kbd "C-c h") 'hs-toggle-hiding) ; Hide or show the current area
+  (local-set-key (kbd "C-c H") 'hs-show-all) ; Reveal all hidden areas
+  (local-set-key (kbd "C-c M-h") 'hs-hide-all)) ; Hide all areas
 
+;; Custom hook for python to enable various options
 (add-hook 'python-mode-hook (lambda()
                               (hide-show-mode-hook)
                               (setq compile-command "python -m unittest")))
+
+;; Custom hook for c++ to enable various options
 (add-hook 'c++-mode-hook (lambda()
                            (hide-show-mode-hook)
                            (setq compile-command "make -j4")))
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+
+;; Custom hook for lsp to enable various options
 (add-hook 'emacs-lisp-mode-hook 'hide-show-mode-hook)
+
+;; Custom hook for vue SFC to enable various options
 (add-hook 'my-vue-mode-hook (lambda()
                               (local-set-key (kbd "C-x C-s") (lambda() ; Call format buffer on save
                                                                (interactive "*")
@@ -287,5 +289,3 @@ will be killed."
                                    (vueIndentScriptAndStyle . :json-false)
                                    (semi . :json-false))))
                               ))
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-
