@@ -260,6 +260,29 @@ will be killed."
                               (hide-show-mode-hook)
                               (setq compile-command "python -m unittest")))
 
+;; Add include guards to the current file
+(defun include-guards(text)
+  "Adds include guards in the current file, useful for C/C++ devs
+
+It will add the following code :
+
+     #ifndef TEXT
+     #define TEXT
+     // Current file content
+     #endif //TEXT
+"
+  (interactive
+   (list
+    (let* ((default (replace-regexp-in-string "\\." "_" (upcase (buffer-name))))
+           (prompt (format "Include guard text (default %s): " default)))
+      (read-string prompt nil  nil default))))
+  (save-excursion
+    (goto-char 0)
+    (insert (format "#ifndef %s\n#define %s\n" text text))
+    (goto-char (max-char))
+    (insert (format "#endif // %s" text))
+    ))
+
 ;; Custom hook for c++ to enable various options
 (add-hook 'c++-mode-hook (lambda()
                            (hide-show-mode-hook)
