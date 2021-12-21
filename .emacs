@@ -144,7 +144,7 @@ will be killed."
 
 ;; Git front end (amazing!)
 (use-package magit
-  :bind ("C-c g" . magit-status)
+  :bind ("C-x g" . magit-status)
   :custom-face (magit-filename ((t :foreground "white"))) ; Otherwise untracked files have the same color as title in git status
   :config
   (setq magit-no-confirm t)
@@ -259,6 +259,8 @@ will be killed."
 (add-hook 'python-mode-hook (lambda()
                               (hide-show-mode-hook)
                               (setq compile-command "python -m unittest")))
+(add-hook 'term-mode-hook (lambda ()
+                            (setq show-trailing-whitespace nil)))
 
 ;; Add include guards to the current file
 (defun include-guards(text)
