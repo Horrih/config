@@ -39,7 +39,7 @@ There are two things you can do about this warning:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;    CUSTOMISATION       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (progn
-  (setq debug-on-error 't) ; Display the stacktrace if error encountered in one of the lisp method
+  (setq debug-on-error nil) ; Display the stacktrace if error encountered in one of the lisp method
   (column-number-mode 't) ; Display column numbers in the status line
   (global-display-line-numbers-mode 't) ; Display line numbers on the left
   (line-number-mode 't) ; Display line number
@@ -57,8 +57,9 @@ There are two things you can do about this warning:
   (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
   (setq make-backup-files nil) ; Do not use backup files (filename~)
   (setq create-lockfiles nil) ; Do not use lock files (.#filename)
+  (setq compile-command "make -j8") ; Default compilation command
   (if (file-directory-p "~/.org") ; Use this folder as org mode agenda files location if it exists
-    (setq org-agenda-files '("~/.org"))))
+      (setq org-agenda-files '("~/.org"))))
 
 ;; Main color theme
 (use-package vscode-dark-plus-theme :config (load-theme 'vscode-dark-plus t))
@@ -117,6 +118,7 @@ will be killed."
 
 ;; My custom shortcuts
 (progn
+  (global-set-key (kbd "C-x k"  ) 'kill-current-buffer) ; Kill current buffer
   (global-set-key (kbd "C-c c"  ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
   (global-set-key (kbd "M-g"    ) 'goto-line) ; New binding for going to the n-th line
   (global-set-key (kbd "M-s"    ) 'multi-occur-in-matching-buffers) ; Search in all buffers
@@ -256,9 +258,9 @@ will be killed."
   (local-set-key (kbd "C-c M-h") 'hs-hide-all)) ; Hide all areas
 
 ;; Custom hook for python to enable various options
-(add-hook 'python-mode-hook (lambda()
-                              (hide-show-mode-hook)
-                              (setq compile-command "python -m unittest")))
+(add-hook 'python-mode-hook 'hide-show-mode-hook)
+
+;; Custom hook for terminal
 (add-hook 'term-mode-hook (lambda ()
                             (setq show-trailing-whitespace nil)))
 
@@ -286,9 +288,7 @@ It will add the following code :
     ))
 
 ;; Custom hook for c++ to enable various options
-(add-hook 'c++-mode-hook (lambda()
-                           (hide-show-mode-hook)
-                           (setq compile-command "make -j4")))
+(add-hook 'c++-mode-hook 'hide-show-mode-hook)
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
 ;; Custom hook for lsp to enable various options
