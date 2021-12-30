@@ -314,3 +314,22 @@ It will add the following code :
                                    (vueIndentScriptAndStyle . :json-false)
                                    (semi . :json-false))))
                               ))
+
+;; Handle terminal colors in the compilation buffer
+(use-package ansi-color
+  :config
+  (defun colorize-compile()
+    (when (eq major-mode 'compilation-mode)
+      (ansi-color-apply-on-region compilation-filter-start (point-max))))
+  :hook (compilation-filter . colorize-compile))
+
+;; Set compilation regex for errors
+(add-hook 'compilation-mode-hook (lambda()
+  (let ((custom-error-list '(
+        ;; Insert your custom regexps here
+        (jest-error "^.*\(\\(.*\\):\\([0-9]+\\):\\([0-9]+\\)\).*$" 1 2 3)
+        )))
+    (setq compilation-error-regexp-alist ())
+    (dolist (err custom-error-list)
+      (add-to-list 'compilation-error-regexp-alist (car err))
+      (add-to-list 'compilation-error-regexp-alist-alist err)))))
