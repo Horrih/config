@@ -116,6 +116,11 @@ will be killed."
             (message "Killed non-existing/unreadable file buffer: %s" filename))))))
   (message "Finished reverting buffers containing unmodified files."))
 
+(defun switch-to-compilation-other-window()
+  "Switches to the compilation buffer in another window"
+  (interactive)
+  (switch-to-buffer-other-window "*compilation*"))
+
 ;; My custom shortcuts
 (progn
   (global-set-key (kbd "C-x k"  ) 'kill-current-buffer) ; Kill current buffer
@@ -131,6 +136,7 @@ will be killed."
   (global-set-key (kbd "<f8>"   ) 'recompile) ; Recompile the project with the last compilation command
   (global-set-key (kbd "S-<f8>"    ) 'compile)   ; Compile the project and ask for compilation command
   (global-set-key (kbd "M-[ 3 4 ~" ) 'compile)   ; Compile the project ans ask for compilation command
+  (global-set-key (kbd "C-S-<f8>"  ) 'switch-to-compilation-other-window) ; Switches to the compilation buffer
   (global-set-key (kbd "C-<f8>" ) 'kill-compilation) ; Stop current compilation
   (global-set-key (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
   (global-set-key (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
@@ -162,7 +168,14 @@ will be killed."
          ("C-x f" . helm-find-files)
          ("C-x b" . helm-mini))
   :defer 2 ; We always want helm but not to slow the initial startup
-  :config (helm-mode)(message "helm-loaded"))
+  :config
+  (helm-mode)
+
+  ; We switch tab and ctrl-z actions to be more "natural"
+  (define-key helm-map (kbd "TAB") #'helm-execute-persistent-action)
+  (define-key helm-map (kbd "<tab>") #'helm-execute-persistent-action)
+  (define-key helm-map (kbd "C-z") #'helm-select-action)
+  (setq helm-buffer-max-length 40))
 
 ;;;;;;;;;;;;;;;;;;;;;;        DEV PACKAGES       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
