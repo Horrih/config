@@ -52,12 +52,10 @@ There are two things you can do about this warning:
   (setq c-basic-offset    4) ; Base indent size when indented automatically
   (menu-bar-mode -1) ; Hide Menu bar
   (fset 'yes-or-no-p 'y-or-n-p) ; Abreviate Yes/No
-  (setq compilation-always-kill t) ; Do not ask for confirmation when I stop current compilation
   (c-set-offset (quote cpp-macro) 0 nil) ; Indent C/C++ macros as normal code
   (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
   (setq make-backup-files nil) ; Do not use backup files (filename~)
   (setq create-lockfiles nil) ; Do not use lock files (.#filename)
-  (setq compile-command "make -j8") ; Default compilation command
   (if (file-directory-p "~/.org") ; Use this folder as org mode agenda files location if it exists
       (setq org-agenda-files '("~/.org"))))
 
@@ -116,10 +114,37 @@ will be killed."
             (message "Killed non-existing/unreadable file buffer: %s" filename))))))
   (message "Finished reverting buffers containing unmodified files."))
 
+;;;;;;;;;;;;;;;;;;         Compilation options           ;;;;;;;;;;;;;;;;;;;;;;;
 (defun switch-to-compilation-other-window()
   "Switches to the compilation buffer in another window"
   (interactive)
   (switch-to-buffer-other-window "*compilation*"))
+
+;; Handle terminal colors in the compilation buffer
+(use-package ansi-color
+  :config
+  (defun colorize-compile()
+    (when (eq major-mode 'compilation-mode)
+      (ansi-color-apply-on-region compilation-filter-start (point-max))))
+  :hook (compilation-filter . colorize-compile))
+
+(setq compilation-always-kill t) ; Do not ask for confirmation when I stop current compilation
+(setq compile-command "make -j8") ; Default compilation command
+
+;; Set compilation regex for errors
+(add-hook 'compilation-mode-hook (lambda()
+  (let ((custom-error-list '(
+        ;; Insert your custom regexps here
+        (jest-error "^.*\(\\(.*\\):\\([0-9]+\\):\\([0-9]+\\)\).*$" 1 2 3)
+        (gcc-error "^[ ]*\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*error:\\|  required from here\\).*$" 1 2 3)
+        (gcc-warning "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): warning:.*$" 1 2 3 1)
+        (gcc-info "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): note:.*$" 1 2 3 0)
+    )))
+    (setq compilation-error-regexp-alist ())
+    (dolist (err custom-error-list)
+      (add-to-list 'compilation-error-regexp-alist (car err))
+      (add-to-list 'compilation-error-regexp-alist-alist err)))))
+
 
 ;; My custom shortcuts
 (progn
@@ -141,6 +166,7 @@ will be killed."
   (global-set-key (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
   (global-set-key (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
   (global-set-key (kbd "<f6>"   ) 'revert-all-file-buffers) ;; Refreshes all the current files/buffers
+  (global-set-key (kbd "<f12>"  ) 'include-c-header) ;; Shortcuts for a #include directive
 
   ;; Resize the window when split using split screen (C-2 or C-3)
   (global-set-key (kbd "M-S-<right>") 'enlarge-window-horizontally)
@@ -300,6 +326,12 @@ It will add the following code :
     (insert (format "#endif // %s" text))
     ))
 
+(defun include-c-header(val)
+  "Adds a #include \"VAL.h\" at point and saves the file"
+  (interactive "MHeader file name: ")
+  (insert (format "#include \"%s.h\"\n" val))
+  (save-buffer))
+
 ;; Custom hook for c++ to enable various options
 (add-hook 'c++-mode-hook 'hide-show-mode-hook)
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
@@ -327,22 +359,3 @@ It will add the following code :
                                    (vueIndentScriptAndStyle . :json-false)
                                    (semi . :json-false))))
                               ))
-
-;; Handle terminal colors in the compilation buffer
-(use-package ansi-color
-  :config
-  (defun colorize-compile()
-    (when (eq major-mode 'compilation-mode)
-      (ansi-color-apply-on-region compilation-filter-start (point-max))))
-  :hook (compilation-filter . colorize-compile))
-
-;; Set compilation regex for errors
-(add-hook 'compilation-mode-hook (lambda()
-  (let ((custom-error-list '(
-        ;; Insert your custom regexps here
-        (jest-error "^.*\(\\(.*\\):\\([0-9]+\\):\\([0-9]+\\)\).*$" 1 2 3)
-        )))
-    (setq compilation-error-regexp-alist ())
-    (dolist (err custom-error-list)
-      (add-to-list 'compilation-error-regexp-alist (car err))
-      (add-to-list 'compilation-error-regexp-alist-alist err)))))
