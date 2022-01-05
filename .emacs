@@ -136,17 +136,19 @@ will be killed."
 (setq compile-command "make -j8") ; Default compilation command
 
 ;; Set compilation regex for errors
-(add-hook 'compilation-mode-hook (lambda()
-  (let ((custom-error-list '(
+(let ((enabled-regexps ())
+      (custom-error-list '(
         ;; Insert your custom regexps here
         (jest-error "^.*\(\\(.*\\):\\([0-9]+\\):\\([0-9]+\\)\).*$" 1 2 3)
         (gcc-error "^[ ]*\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*error:\\|  required from here\\).*$" 1 2 3)
         (gcc-warning "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): warning:.*$" 1 2 3 1)
         (gcc-info "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): note:.*$" 1 2 3 0)
-    )))
-    (setq compilation-error-regexp-alist ())
+      )))
+  (dolist (err custom-error-list)
+    (add-to-list 'enabled-regexps (car err)))
+  (custom-set-variables `(compilation-error-regexp-alist ',enabled-regexps))
+  (add-hook 'compilation-mode-hook (lambda()
     (dolist (err custom-error-list)
-      (add-to-list 'compilation-error-regexp-alist (car err))
       (add-to-list 'compilation-error-regexp-alist-alist err)))))
 
 
