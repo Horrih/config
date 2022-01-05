@@ -43,6 +43,7 @@ There are two things you can do about this warning:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;    CUSTOMISATION       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (progn
+  (setq ring-bell-function 'ignore)
   (setq debug-on-error nil) ; Display the stacktrace if error encountered in one of the lisp method
   (column-number-mode 't) ; Display column numbers in the status line
   (global-display-line-numbers-mode 't) ; Display line numbers on the left
