@@ -215,7 +215,9 @@ will be killed."
          ("C-c s" . projectile-ag)))
 
 ;; Used by projectile-ag
-(use-package ag :defer t)
+(use-package ag
+  :defer t
+  :config (setq ag-highlight-search t))
 
 ;; Displays the current project on the left as in an IDE
 (use-package treemacs :bind ("C-c t" . treemacs))
