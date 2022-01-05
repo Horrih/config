@@ -33,6 +33,7 @@ There are two things you can do about this warning:
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+(require 'use-package-ensure)
 (setq use-package-always-ensure t) ; Install the package if not available yet
 
 ;; Launch the esup command to measure startup time of each emacs plugin
