@@ -197,7 +197,7 @@ will be killed."
   :bind (("M-x"   . helm-M-x) ; Rebind traditional methods to helm methods
          ("C-x f" . helm-find-files)
          ("C-x b" . helm-mini))
-  :defer 2 ; We always want helm but not to slow the initial startup
+  :demand
   :config
   (helm-mode)
 
