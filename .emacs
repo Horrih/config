@@ -1,3 +1,6 @@
+;; -*- lexical-binding: t -*-
+;;Lexical binding enables using variables defined with let in lambda functions called later
+
 ;;;;;;;;;;;;;;;;;;;;;;;  GESTIONNAIRE D'EXTENSION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Startup optimization time to avoid garbage collection during init
 (setq gc-cons-threshold 64000000)
