@@ -229,6 +229,9 @@ will be killed."
 ;; Displays LSP errors using treemacs
 (use-package lsp-treemacs :bind ("C-c e" . lsp-treemacs-errors-list))
 
+;; Completion frontend, used by lsp
+(use-package company :defer t)
+
 ;; Syntax highlighting, used by lsp
 (use-package flycheck :defer t)
 
