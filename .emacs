@@ -144,6 +144,7 @@ will be killed."
         (gcc-error "^[ ]*\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*error:\\|  required from here\\).*$" 1 2 3)
         (gcc-warning "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): warning:.*$" 1 2 3 1)
         (gcc-info "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): note:.*$" 1 2 3 0)
+        (qt-test "^   Loc: \\[\\(.*\\)\(\\([0-9]+\\)\)\\]$" 1 2)
       )))
   (dolist (err custom-error-list)
     (add-to-list 'enabled-regexps (car err)))
@@ -242,8 +243,8 @@ will be killed."
 (use-package web-mode
   :mode ("\\.css\\'" "\\.html\\'")
   :config
-  (setq web-mode-script-padding 0) ;; For vue.js SFC : no initial padding in the script section
-  (setq web-mode-markup-indent-offset 2)) ;; For html : use an indent of size 2 (default is 4)
+  (setq web-mode-script-padding 0) ; For vue.js SFC : no initial padding in the script section
+  (setq web-mode-markup-indent-offset 2)) ; For html : use an indent of size 2 (default is 4)
 
 ;; Formatting on save, used by my-ts-mode for .js and .ts files
 (use-package prettier-js
