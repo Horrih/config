@@ -160,8 +160,8 @@ will be killed."
   (global-set-key (kbd "C-c c"  ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
   (global-set-key (kbd "M-g"    ) 'goto-line) ; New binding for going to the n-th line
   (global-set-key (kbd "M-s"    ) 'multi-occur-in-matching-buffers) ; Search in all buffers
-  (global-set-key (kbd "C-j"    ) 'delete-backward-char) ; Delete like backspace
-  (global-set-key (kbd "M-j"    ) 'backward-kill-word)   ; Delete like backspace + ctrl
+  ;; (global-set-key (kbd "C-j"    ) 'delete-backward-char) ; Delete like backspace
+  ;; (global-set-key (kbd "M-j"    ) 'backward-kill-word)   ; Delete like backspace + ctrl
   (global-set-key (kbd "M-p"    ) 'backward-paragraph) ; Previous paragraph
   (global-set-key (kbd "M-n"    ) 'forward-paragraph) ; Next paragraph
   (global-set-key (kbd "M-m"    ) 'exit-minibuffer) ; Enable alt+M to use enter. Useful when you forget to release alt when typing commands
@@ -373,3 +373,81 @@ It will add the following code :
                                    (vueIndentScriptAndStyle . :json-false)
                                    (semi . :json-false))))
                               ))
+
+;;;;;;;;;;;;;;;;;;;;;;; Modal edition mode using ijkl for movement   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun key-binding-redirect(from to)
+  "Returns a keymap cons bound to FROM which will call the method bound to TO"
+  `(,from .
+          (lambda (&optional args)
+            ,(format "Redirects function call from binding '%s' to '%s' (%s)" from to (key-binding to))
+            (interactive "P")
+            (call-interactively (key-binding ,to)))))
+
+(define-minor-mode ijkl-local-mode
+  "Minor mode to be able to move using ijkl"
+  :lighter " ijkl"
+  :init-value nil
+  :keymap `(([t] . ignore)
+            (,(kbd "z") . ijkl-local-mode)
+            (,(kbd "h") . ,help-map) ; Use the help functions
+            (,(kbd "C-g") . nil) ; Do not override C-g binding
+            (,(kbd "C-h") . nil) ; Do not override C-h binding
+            (,(kbd "C-x") . nil) ; Do not override C-x binding
+            (,(kbd "M-x") . nil) ; Do not override M-x binding
+            (,(kbd "TAB") . nil) ; Do not override tab binding
+            (,(kbd "C-m") . nil) ; Do not override M-x binding
+            (,(kbd "C-n") . nil) ; Do not override C-n binding
+            (,(kbd "C-p") . nil) ; Do not override C-p binding
+            (,(kbd "C-z") . nil) ; Do not override C-z binding
+            (,(kbd "C-s") . nil) ; Do not override C-s binding
+            (,(kbd "C-r") . nil) ; Do not override C-r binding
+            ,(key-binding-redirect (kbd "m") (kbd "C-m"))
+            (,(kbd "&") . delete-other-windows)
+            (,(kbd "é") . split-window-below)
+            (,(kbd "\"") . split-window-right)
+            (,(kbd "é") . other-window)
+            (,(kbd "'") . other-window)
+            (,(kbd "w") . save-buffer)
+            ,(key-binding-redirect (kbd "f") (kbd "C-x f"))
+            ,(key-binding-redirect (kbd "b") (kbd "C-x b"))
+            (,(kbd "r") . recenter-top-bottom)
+            (,(kbd "<SPC>") . set-mark-command)
+            (,(kbd "c") . kill-ring-save)
+            (,(kbd "x") . kill-region)
+            (,(kbd "y") . yank)
+            (,(kbd "_") . undo)
+            (,(kbd "j") . backward-char)
+            (,(kbd "C-j") . backward-word)
+            (,(kbd "M-j") . beginning-of-line)
+            (,(kbd "l") . forward-char)
+            (,(kbd "C-l") . forward-word)
+            (,(kbd "M-l") . end-of-line)
+            ,(key-binding-redirect (kbd "i") (kbd "C-p"))
+            (,(kbd "M-i") . (lambda() (interactive)(previous-line 7)))
+            (,(kbd "C-M-i") . beginning-of-buffer)
+            ,(key-binding-redirect (kbd "k") (kbd "C-n"))
+            (,(kbd "M-k") . (lambda() (interactive)(next-line 7)))
+            (,(kbd "C-M-k") . end-of-buffer)
+            (,(kbd "u") . delete-backward-char)
+            (,(kbd "C-u") . backward-kill-word)
+            (,(kbd "M-u") . (lambda() (interactive)(kill-line 0)))
+            (,(kbd "C-u") . backward-kill-word)
+            (,(kbd "o") . delete-forward-char)
+            (,(kbd "C-o") . kill-word)
+            (,(kbd "M-o") . kill-line)
+            (,(kbd "g") . magit-status)
+            (,(kbd "G") . goto-line)
+            )
+  (setq emulation-mode-map-alist '((ijkl-local-mode . ijkl-local-mode-map)))
+  )
+
+(define-globalized-minor-mode ijkl-mode ijkl-local-mode
+  (lambda()
+    "Only enable the ijkl-local-mode on traditional buffers"
+    (unless (or (minibufferp)
+                (string-match "[Gg]it" (format "%s" major-mode))
+                (string-equal (buffer-name) "COMMIT_EDITMSG"))
+      (ijkl-local-mode))))
+(ijkl-mode)
+(use-package key-chord :config (key-chord-mode))
+(key-chord-define-global "zz" 'ijkl-local-mode)
