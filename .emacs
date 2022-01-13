@@ -379,7 +379,7 @@ It will add the following code :
   "Returns a keymap cons bound to FROM which will call the method bound to TO"
   `(,from .
           (lambda (&optional args)
-            ,(format "Redirects function call from binding '%s' to '%s' (%s)" from to (key-binding to))
+            ,(format "Redirects function call from binding '%s' to '%s' (`%s')" from to (key-binding to))
             (interactive "P")
             (call-interactively (key-binding ,to)))))
 
@@ -405,7 +405,6 @@ It will add the following code :
             (,(kbd "&") . delete-other-windows)
             (,(kbd "é") . split-window-below)
             (,(kbd "\"") . split-window-right)
-            (,(kbd "é") . other-window)
             (,(kbd "'") . other-window)
             (,(kbd "w") . save-buffer)
             ,(key-binding-redirect (kbd "f") (kbd "C-x f"))
@@ -449,5 +448,82 @@ It will add the following code :
                 (string-equal (buffer-name) "COMMIT_EDITMSG"))
       (ijkl-local-mode))))
 (ijkl-mode)
+
 (use-package key-chord :config (key-chord-mode))
 (key-chord-define-global "zz" 'ijkl-local-mode)
+
+;; Change color of the mode line according to the mode (command, edit, unsaved)
+(let ((default-color (face-background 'mode-line)))
+  (add-hook 'post-command-hook
+            (lambda ()
+              (set-face-background 'mode-line
+                                   (cond ((not ijkl-local-mode) "green")
+                                          (t default-color))))))
+
+;;;;;;;;;;;;;;;;;;;;;;; Reimplementation of a mark ring ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;(customize-set-variable 'helm-advice-push-mark nil)
+(defvar global-mark-previous ()
+  "List containing previous mark positions, combining the ideas of `mark-ring'  and `global-mark-ring'.
+This mark-ring will record all mark positions globally, multiple times per buffer")
+
+(defvar global-mark-next ()
+  "List containing next mark positions, used to revert the effects of `global-mark-previous'")
+
+(defvar bidirectional-mark-ring-max 40
+  "Maximum size of `global-mark-previous'.  Start discarding off end if gets this big.")
+
+(defun bidirectional-push-mark-advice(&optional location nomsg activate)
+  (interactive)
+  (when (mark t)
+    (let ((old (nth bidirectional-mark-ring-max global-mark-previous))
+          (history-delete-duplicates nil))
+      (add-to-history 'global-mark-previous (copy-marker (mark-marker)) bidirectional-mark-ring-max)
+      (setq global-mark-next ()) ; Reset the global mark next when the user performs other actions
+      (when old
+        (set-marker old nil)))))
+
+(advice-add 'push-mark :after #'bidirectional-push-mark-advice)
+(defun marker-is-point-p (marker)
+  "Tests if MARKER is current point"
+  (and (eq (marker-buffer marker) (current-buffer))
+       (= (marker-position marker) (point))))
+
+(defun jump-to-marker(marker)
+  "Jumps to the given MARKER buffer/position"
+  (let* ((buffer (marker-buffer marker))
+	 (position (marker-position marker)))
+    (set-buffer buffer)
+    (goto-char position)
+    (set-marker (mark-marker) marker)
+    (switch-to-buffer buffer)))
+
+(defun backward-mark()
+  "Records the current position at mark and jump to previous mark"
+  (interactive)
+  (let* ((target (mark-marker))
+         (current target))
+    (cond ((not current) (setq target nil))
+          ((marker-is-point-p current) (setq target (car (cdr global-mark-previous))))
+          (t (push-mark)))
+    (if (not target)
+        (user-error "No previous mark position")
+      (push (copy-marker (mark-marker)) global-mark-next)
+      (pop global-mark-previous)
+      (jump-to-marker (car global-mark-previous)))))
+
+(defun forward-mark()
+  "Records the current position at mark and jump to previous mark"
+  (interactive)
+  (let* ((target (car global-mark-next))
+         (prev (car global-mark-previous)))
+    (if (not target)
+        (user-error "No next mark position")
+      (unless (and prev (marker-is-point-p prev))
+        (push-mark))
+      (push (copy-marker target) global-mark-previous)
+      (pop global-mark-next)
+      (jump-to-marker target))))
+
+(define-key ijkl-local-mode-map (kbd "a") 'backward-mark)
+(define-key ijkl-local-mode-map (kbd "e") 'forward-mark)
+
