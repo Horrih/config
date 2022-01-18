@@ -120,6 +120,18 @@ will be killed."
             (message "Killed non-existing/unreadable file buffer: %s" filename))))))
   (message "Finished reverting buffers containing unmodified files."))
 
+;; ** switch-to-last-buffer
+(defun switch-to-last-buffer()
+  "Use `switch-to-buffer' to visit the last buffer"
+  (interactive)
+  (switch-to-buffer nil))
+
+;; ** delete-start-or-previous-line
+(defun delete-start-or-previous-line()
+  "Use `kill-line' to delete either the start of the line, or the previous line if empty"
+  (interactive)
+  (kill-line (if (= (line-beginning-position) (point)) -1 0)))
+
 ;; * Compilation options
 ;; ** Compilation misc
 (setq compilation-always-kill t) ; Do not ask for confirmation when I stop current compilation
@@ -525,7 +537,7 @@ the call to TO will be an alias to the default keymaps"
 (key-alias  ijkl-local-mode-map (kbd "C-M-k") (kbd "M->"))
 (define-key ijkl-local-mode-map (kbd "u") 'delete-backward-char)
 (define-key ijkl-local-mode-map (kbd "C-u") 'backward-kill-word)
-(define-key ijkl-local-mode-map (kbd "M-u") (lambda() (interactive)(kill-line (if (= (line-beginning-position) (point)) -1 0))))
+(define-key ijkl-local-mode-map (kbd "M-u") 'delete-start-or-previous-line)
 (define-key ijkl-local-mode-map (kbd "o") 'delete-forward-char)
 (define-key ijkl-local-mode-map (kbd "C-o") 'kill-word)
 (define-key ijkl-local-mode-map (kbd "M-o") 'kill-line)
@@ -557,8 +569,8 @@ the call to TO will be an alias to the default keymaps"
 ;; ** Key chords
 (use-package key-chord :config (key-chord-mode))
 (key-chord-define-global "zz" 'ijkl-local-mode)
-(key-chord-define ijkl-local-mode-map "bb" 'switch-to-prev-buffer)
 (key-chord-define ijkl-local-mode-map "cc" 'kill-region)
+(key-chord-define ijkl-local-mode-map "bb" 'switch-to-last-buffer)
 
 ;; ** Hydra outline
 (defhydra outline(ijkl-local-mode-map "à")
