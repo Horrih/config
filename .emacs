@@ -411,6 +411,7 @@ It will add the following code :
             (,(kbd "C-s") . nil) ; Do not override C-s binding
             (,(kbd "C-r") . nil) ; Do not override C-r binding
             ,(key-binding-redirect (kbd "m") (kbd "C-m"))
+            ,(key-binding-redirect (kbd "M-m") (kbd "M-<RET>"))
             (,(kbd "&") . delete-other-windows)
             (,(kbd "é") . split-window-below)
             (,(kbd "\"") . split-window-right)
@@ -428,10 +429,10 @@ It will add the following code :
             (,(kbd "M-j") . beginning-of-line)
             (,(kbd "l") . forward-char)
             (,(kbd "C-l") . forward-word)
-            (,(kbd "M-l") . end-of-line)
+            (,(kbd "M-l") . move-end-of-line)
             ,(key-binding-redirect (kbd "i") (kbd "C-p"))
             (,(kbd "M-i") . (lambda() (interactive)(previous-line 7)))
-            (,(kbd "C-M-i") . beginning-of-buffer)
+            (,(kbd "C-M-i") . move-beginning-of-buffer)
             ,(key-binding-redirect (kbd "k") (kbd "C-n"))
             (,(kbd "M-k") . (lambda() (interactive)(next-line 7)))
             (,(kbd "C-M-k") . end-of-buffer)
@@ -458,9 +459,11 @@ It will add the following code :
 (ijkl-mode)
 
 
-;; ** Define some
+;; ** Key chords
 (use-package key-chord :config (key-chord-mode))
 (key-chord-define-global "zz" 'ijkl-local-mode)
+(key-chord-define ijkl-local-mode-map "bb" 'switch-to-prev-buffer)
+(key-chord-define ijkl-local-mode-map "cc" 'kill-region)
 
 ;; ** Change color of the mode line according to the mode (command, edit, unsaved)
 (let ((default-color (face-background 'mode-line)))
@@ -481,14 +484,29 @@ It will add the following code :
   ("s" outline-show-subtree "show all subtree")
   ("TAB" outline-show-children "show direct children")
   ("q" outline-hide-sublevels "hide-all")
-  ("d" outline-hide-subtree "hide subtree"))
+  ("h" outline-hide-subtree "hide subtree"))
+
+;; ** Hydra hide/show
+(defhydra hydra-hide-show (:exit t)
+  "Hydra for hide-show commands"
+  ("t" hs-toggle-hiding "Toggle H/S")
+  ("a" hs-show-all "Show all")
+  ("q" hs-hide-all "Hide all")
+  ("l" hs-hide-level "Hide Level")
+  ("s" hs-show-block "Show block")
+  ("h" hs-hide-block "Hide block"))
+(key-chord-define ijkl-local-mode-map "hh" 'hydra-hide-show/body)
 
 ;; ** Hydra find
 (defhydra find(ijkl-local-mode-map "f" :exit t)
   "find"
-  ("f" helm-find-files "helm-find-files")
+  ("d" helm-find-files "helm-find-files")
+  ("j" lsp-find-definition "LSP jump to def")
+  ("l" lsp-describe-thing-at-point "LSP help")
+  ("j" lsp-find-definition "lsp jump to def")
   ("s" projectile-ag "ag")
-  ("d" projectile-find-file "projectile-find-file"))
+  ("o" ff-find-other-file "switch header/cpp")
+  ("f" projectile-find-file "projectile-find-file"))
 
 ;; * Reimplementation of a mark ring
 ;; ** Define the global variables used
