@@ -543,16 +543,19 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   "Jumps to the given MARKER buffer/position"
   (let* ((buffer (marker-buffer marker))
 	 (position (marker-position marker)))
+    (set-marker (mark-marker) marker)
     (set-buffer buffer)
     (goto-char position)
-    (set-marker (mark-marker) marker)
+    (when (hs-overlay-at position)
+      (hs-show-block)
+      (goto-char position))
     (switch-to-buffer buffer)))
 
 ;; ** bakckward-mark() : main back function
 (defun backward-mark()
   "Records the current position at mark and jump to previous mark"
   (interactive)
-  (let* ((target (mark-marker))
+  (let* ((target (car global-mark-previous))
          (current target))
     (cond ((not current) (setq target nil))
           ((marker-is-point-p current) (setq target (car (cdr global-mark-previous))))
