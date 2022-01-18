@@ -156,32 +156,6 @@ will be killed."
     (dolist (err custom-error-list)
       (add-to-list 'compilation-error-regexp-alist-alist err)))))
 
-;; * Global shortcuts
-(progn
-  (global-set-key (kbd "C-x k"  ) 'kill-current-buffer) ; Kill current buffer
-  (global-set-key (kbd "C-c c"  ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
-  (global-set-key (kbd "M-g"    ) 'goto-line) ; New binding for going to the n-th line
-  (global-set-key (kbd "M-s"    ) 'multi-occur-in-matching-buffers) ; Search in all buffers
-  (global-set-key (kbd "M-p"    ) 'backward-paragraph) ; Previous paragraph
-  (global-set-key (kbd "M-n"    ) 'forward-paragraph) ; Next paragraph
-  (global-set-key (kbd "M-m"    ) 'exit-minibuffer) ; Enable alt+M to use enter. Useful when you forget to release alt when typing commands
-  (global-set-key (kbd "C-c o"  ) 'ff-find-other-file) ; Switch between header and implementation
-  (global-set-key (kbd "<f8>"   ) 'recompile) ; Recompile the project with the last compilation command
-  (global-set-key (kbd "S-<f8>"    ) 'compile)   ; Compile the project and ask for compilation command
-  (global-set-key (kbd "M-[ 3 4 ~" ) 'compile)   ; Compile the project ans ask for compilation command
-  (global-set-key (kbd "C-S-<f8>"  ) 'switch-to-compilation-other-window) ; Switches to the compilation buffer
-  (global-set-key (kbd "C-<f8>" ) 'kill-compilation) ; Stop current compilation
-  (global-set-key (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
-  (global-set-key (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
-  (global-set-key (kbd "<f6>"   ) 'revert-all-file-buffers) ;; Refreshes all the current files/buffers
-  (global-set-key (kbd "<f12>"  ) 'include-c-header) ;; Shortcuts for a #include directive
-
-  ;; Resize the window when split using split screen (C-2 or C-3)
-  (global-set-key (kbd "M-S-<right>") 'enlarge-window-horizontally)
-  (global-set-key (kbd "M-S-<left>") 'shrink-window-horizontally)
-  (global-set-key (kbd "M-S-<down>") 'enlarge-window)
-  (global-set-key (kbd "M-S-<up>") 'shrink-window))
-
 ;; * General usage packages
 ;; ** magit : Git front end (amazing!)
 (use-package magit
@@ -380,133 +354,6 @@ It will add the following code :
                                    (semi . :json-false))))
                               ))
 
-;; * Modal edition mode using ijkl for movement
-;; ** key-binding-redirect(from to)
-(defun key-binding-redirect(from to)
-  "Returns a keymap cons bound to FROM which will call the method bound to TO"
-  `(,from .
-          (lambda (&optional args)
-            ,(format "Redirects function call from binding '%s' to '%s' (`%s')" from to (key-binding to))
-            (interactive "P")
-            (call-interactively (key-binding ,to)))))
-
-;; ** Main keybindings
-(define-minor-mode ijkl-local-mode
-  "Minor mode to be able to move using ijkl"
-  :lighter " ijkl"
-  :init-value nil
-  :keymap `(([t] . ignore)
-            (,(kbd "z") . ijkl-local-mode)
-            (,(kbd "h") . ,help-map) ; Use the help functions
-            (,(kbd "C-g") . nil) ; Do not override C-g binding
-            (,(kbd "C-h") . nil) ; Do not override C-h binding
-            (,(kbd "C-x") . nil) ; Do not override C-x binding
-            (,(kbd "C-c") . nil) ; Do not override C-x binding
-            (,(kbd "M-x") . nil) ; Do not override M-x binding
-            (,(kbd "TAB") . nil) ; Do not override tab binding
-            (,(kbd "C-m") . nil) ; Do not override M-x binding
-            (,(kbd "C-n") . nil) ; Do not override C-n binding
-            (,(kbd "C-p") . nil) ; Do not override C-p binding
-            (,(kbd "C-z") . nil) ; Do not override C-z binding
-            (,(kbd "C-s") . nil) ; Do not override C-s binding
-            (,(kbd "C-r") . nil) ; Do not override C-r binding
-            ,(key-binding-redirect (kbd "m") (kbd "C-m"))
-            ,(key-binding-redirect (kbd "M-m") (kbd "M-<RET>"))
-            (,(kbd "&") . delete-other-windows)
-            (,(kbd "é") . split-window-below)
-            (,(kbd "\"") . split-window-right)
-            (,(kbd "'") . other-window)
-            (,(kbd "w") . save-buffer)
-            ,(key-binding-redirect (kbd "b") (kbd "C-x b"))
-            (,(kbd "r") . recenter-top-bottom)
-            (,(kbd "<SPC>") . set-mark-command)
-            (,(kbd "c") . kill-ring-save)
-            (,(kbd "x") . kill-region)
-            (,(kbd "y") . yank)
-            (,(kbd "_") . undo)
-            (,(kbd "j") . backward-char)
-            (,(kbd "C-j") . backward-word)
-            (,(kbd "M-j") . beginning-of-line)
-            (,(kbd "l") . forward-char)
-            (,(kbd "C-l") . forward-word)
-            (,(kbd "M-l") . move-end-of-line)
-            ,(key-binding-redirect (kbd "i") (kbd "C-p"))
-            (,(kbd "M-i") . (lambda() (interactive)(previous-line 7)))
-            (,(kbd "C-M-i") . move-beginning-of-buffer)
-            ,(key-binding-redirect (kbd "k") (kbd "C-n"))
-            (,(kbd "M-k") . (lambda() (interactive)(next-line 7)))
-            (,(kbd "C-M-k") . end-of-buffer)
-            (,(kbd "u") . delete-backward-char)
-            (,(kbd "C-u") . backward-kill-word)
-            (,(kbd "M-u") . (lambda() (interactive)(kill-line 0)))
-            (,(kbd "C-u") . backward-kill-word)
-            (,(kbd "o") . delete-forward-char)
-            (,(kbd "C-o") . kill-word)
-            (,(kbd "M-o") . kill-line)
-            (,(kbd "g") . magit-status)
-            (,(kbd "G") . goto-line)
-            )
-  (setq emulation-mode-map-alist '((ijkl-local-mode . ijkl-local-mode-map)))
-  )
-
-(define-globalized-minor-mode ijkl-mode ijkl-local-mode
-  (lambda()
-    "Only enable the ijkl-local-mode on traditional buffers"
-    (unless (or (minibufferp)
-                (string-match "[Gg]it" (format "%s" major-mode))
-                (string-equal (buffer-name) "COMMIT_EDITMSG"))
-      (ijkl-local-mode))))
-(ijkl-mode)
-
-
-;; ** Key chords
-(use-package key-chord :config (key-chord-mode))
-(key-chord-define-global "zz" 'ijkl-local-mode)
-(key-chord-define ijkl-local-mode-map "bb" 'switch-to-prev-buffer)
-(key-chord-define ijkl-local-mode-map "cc" 'kill-region)
-
-;; ** Change color of the mode line according to the mode (command, edit, unsaved)
-(let ((default-color (face-background 'mode-line)))
-  (add-hook 'post-command-hook
-            (lambda ()
-              (set-face-background 'mode-line
-                                   (cond ((not ijkl-local-mode) "red")
-                                         (t default-color))))))
-
-;; ** Hydra outline
-(defhydra outline(ijkl-local-mode-map "à")
-  "outline"
-  ("t" outline-hide-body "tree")
-  ("u" outline-up-heading "up")
-  ("n" outline-next-visible-heading "next")
-  ("p" outline-previous-visible-heading "prev")
-  ("a" outline-show-all "show all")
-  ("s" outline-show-subtree "show all subtree")
-  ("TAB" outline-show-children "show direct children")
-  ("q" outline-hide-sublevels "hide-all")
-  ("h" outline-hide-subtree "hide subtree"))
-
-;; ** Hydra hide/show
-(defhydra hydra-hide-show (:exit t)
-  "Hydra for hide-show commands"
-  ("t" hs-toggle-hiding "Toggle H/S")
-  ("a" hs-show-all "Show all")
-  ("q" hs-hide-all "Hide all")
-  ("l" hs-hide-level "Hide Level")
-  ("s" hs-show-block "Show block")
-  ("h" hs-hide-block "Hide block"))
-(key-chord-define ijkl-local-mode-map "hh" 'hydra-hide-show/body)
-
-;; ** Hydra find
-(defhydra find(ijkl-local-mode-map "f" :exit t)
-  "find"
-  ("d" helm-find-files "helm-find-files")
-  ("j" lsp-find-definition "LSP jump to def")
-  ("l" lsp-describe-thing-at-point "LSP help")
-  ("j" lsp-find-definition "lsp jump to def")
-  ("s" projectile-ag "ag")
-  ("o" ff-find-other-file "switch header/cpp")
-  ("f" projectile-find-file "projectile-find-file"))
 
 ;; * Reimplementation of a mark ring
 ;; ** Define the global variables used
@@ -580,6 +427,170 @@ This mark-ring will record all mark positions globally, multiple times per buffe
       (pop global-mark-next)
       (jump-to-marker target))))
 
-;; ** keybindings
-(define-key ijkl-local-mode-map (kbd "a") 'backward-mark)
-(define-key ijkl-local-mode-map (kbd "e") 'forward-mark)
+;; * Modal edition mode using ijkl for movement
+;; ** key-alias()
+;;(format "Redirects function call from '%s' to '%s' (initially `%s')" from to (key-binding to))
+
+(defun key-alias2(keymap from to &optional inside-keymap)
+  "Binds the key-binding FROM to the function called by typing TO.
+
+If inside-keymap is not nil, the TO binding will be set to nil inside the KEYMAP, so that
+the call to TO will be an alias to the default keymaps"
+  (unless inside-keymap
+    (define-key keymap to nil))
+  (define-key keymap from
+    (lambda (&optional args)
+      "Test"
+      (interactive "P")
+      (call-interactively (key-binding to)))))
+
+;; ** ijkl minor mode definition
+(define-minor-mode ijkl-local-mode
+  "Minor mode to be able to move using ijkl"
+  :lighter " ijkl"
+  :init-value nil
+  :keymap '(([t] . ignore)   ; The actual keymaps are defined later below
+            ("z" . ijkl-local-mode))
+  (add-to-list 'emulation-mode-map-alists '(ijkl-local-mode . ijkl-local-mode-map))
+  )
+
+;; ** ijkl global mode definition
+(define-globalized-minor-mode ijkl-mode ijkl-local-mode
+  (lambda()
+    "Only enable the ijkl-local-mode on traditional buffers"
+    (unless (or (minibufferp)
+                (string-match "[Gg]it" (format "%s" major-mode))
+                (string-equal (buffer-name) "COMMIT_EDITMSG"))
+      (ijkl-local-mode))))
+(ijkl-mode)
+
+;; ** Change color of the mode line according to the mode (command, edit, unsaved)
+(let ((default-color (face-background 'mode-line)))
+  (add-hook 'post-command-hook
+            (lambda ()
+              (set-face-background 'mode-line
+                                   (cond ((not ijkl-local-mode) "red")
+                                         (t default-color))))))
+
+;; * Main keybindings
+;; ** Helper macro key-alias
+(defmacro key-alias(keymap from to &optional inside-keymap)
+  "Binds the key-binding FROM to the function called by typing TO.
+
+If inside-keymap is not nil, the TO binding will be set to nil inside the KEYMAP, so that
+the call to TO will be an alias to the default keymaps"
+  `(progn
+     (unless ,inside-keymap
+       (define-key ,keymap ,to nil))
+     (defun ,(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to)))(&optional args)
+       ,(format "Forwards the interactive call from %s to %s (bound by default to `%s')" from to (key-binding (eval to)))
+       (interactive "P")
+       (call-interactively (key-binding ,(eval to))))
+       (define-key ,keymap ,from ',(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to))))
+    ))
+
+;; ** ijkl mode bindings
+(define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
+(define-key ijkl-local-mode-map (kbd "C-g") nil) ; Do not override C-g binding
+(define-key ijkl-local-mode-map (kbd "C-x") nil) ; Do not override C-x binding
+(define-key ijkl-local-mode-map (kbd "C-c") nil) ; Do not override C-x binding
+(define-key ijkl-local-mode-map (kbd "M-x") nil) ; Do not override M-x binding
+(define-key ijkl-local-mode-map (kbd "TAB") nil) ; Do not override tab binding
+(define-key ijkl-local-mode-map (kbd "C-z") nil) ; Do not override C-z binding
+(define-key ijkl-local-mode-map (kbd "C-s") nil) ; Do not override C-s binding
+(define-key ijkl-local-mode-map (kbd "C-r") nil) ; Do not override C-r binding
+(key-alias  ijkl-local-mode-map (kbd "m"  ) (kbd "C-m"))
+(key-alias  ijkl-local-mode-map (kbd "M-m") (kbd "M-<RET>"))
+(key-alias  ijkl-local-mode-map (kbd "&"  ) (kbd "C-x 1"))
+(define-key ijkl-local-mode-map (kbd "é"  ) (kbd "C-x 2"))
+(key-alias  ijkl-local-mode-map (kbd "\"" ) (kbd "C-x 3"))
+(key-alias  ijkl-local-mode-map (kbd "'"  ) (kbd "C-x o"))
+(key-alias  ijkl-local-mode-map (kbd "w"  ) (kbd "C-x C-s"))
+(key-alias  ijkl-local-mode-map (kbd "b"  ) (kbd "C-x b"))
+(define-key ijkl-local-mode-map (kbd "r"  ) 'recenter-top-bottom)
+(key-alias  ijkl-local-mode-map (kbd "c"  ) (kbd "M-w"))
+(key-alias  ijkl-local-mode-map (kbd "y"  ) (kbd "C-y"))
+(key-alias  ijkl-local-mode-map (kbd "_"  ) (kbd "C-_"))
+(key-alias  ijkl-local-mode-map (kbd "j"  ) (kbd "C-b"))
+(key-alias  ijkl-local-mode-map (kbd "C-j") (kbd "M-b"))
+(key-alias  ijkl-local-mode-map (kbd "M-j") (kbd "C-a"))
+(key-alias  ijkl-local-mode-map (kbd "l"  ) (kbd "C-f"))
+(key-alias  ijkl-local-mode-map (kbd "C-l") (kbd "M-f"))
+(key-alias  ijkl-local-mode-map (kbd "M-l") (kbd "C-e"))
+(key-alias  ijkl-local-mode-map (kbd "i") (kbd "C-p"))
+(define-key ijkl-local-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
+(key-alias  ijkl-local-mode-map (kbd "C-M-i") (kbd "M-<"))
+(key-alias  ijkl-local-mode-map (kbd "k") (kbd "C-n"))
+(define-key ijkl-local-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
+(key-alias  ijkl-local-mode-map (kbd "C-M-k") (kbd "M->"))
+(define-key ijkl-local-mode-map (kbd "u") 'delete-backward-char)
+(define-key ijkl-local-mode-map (kbd "C-u") 'backward-kill-word)
+(define-key ijkl-local-mode-map (kbd "M-u") (lambda() (interactive)(kill-line (if (= (line-beginning-position) (point)) -1 0))))
+(define-key ijkl-local-mode-map (kbd "o") 'delete-forward-char)
+(define-key ijkl-local-mode-map (kbd "C-o") 'kill-word)
+(define-key ijkl-local-mode-map (kbd "M-o") 'kill-line)
+(define-key ijkl-local-mode-map (kbd "g") 'goto-line)
+(key-alias  ijkl-local-mode-map (kbd "<SPC>") (kbd "C-@"))
+
+;; ** Misc
+(define-key ijkl-local-mode-map (kbd "G"   ) 'magit-status)
+(define-key ijkl-local-mode-map (kbd "/"   ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
+(define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
+(define-key ijkl-local-mode-map (kbd "<f8>"      ) 'recompile) ; Recompile the project with the last compilation command
+(define-key ijkl-local-mode-map (kbd "S-<f8>"    ) 'compile)   ; Compile the project and ask for compilation command
+(define-key ijkl-local-mode-map (kbd "M-[ 3 4 ~" ) 'compile)   ; Compile the project ans ask for compilation command
+(define-key ijkl-local-mode-map (kbd "C-S-<f8>"  ) 'switch-to-compilation-other-window) ; Switches to the compilation buffer
+(define-key ijkl-local-mode-map (kbd "C-<f8>" ) 'kill-compilation) ; Stop current compilation
+(define-key ijkl-local-mode-map (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
+(define-key ijkl-local-mode-map (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
+(define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ;; Refreshes all the current files/buffers
+(define-key ijkl-local-mode-map (kbd "<f12>"  ) 'include-c-header) ;; Shortcuts for a #include directive
+(define-key ijkl-local-mode-map (kbd "a"      ) 'backward-mark) ;; Reimplementation of a mark ring
+(define-key ijkl-local-mode-map (kbd "e"      ) 'forward-mark)  ;; Reimplementation of a mark ring
+
+;; ** Resize the window when split using split screen (C-2 or C-3)
+(define-key ijkl-local-mode-map (kbd "M-S-<right>") 'enlarge-window-horizontally)
+(define-key ijkl-local-mode-map (kbd "M-S-<left>") 'shrink-window-horizontally)
+(define-key ijkl-local-mode-map (kbd "M-S-<down>") 'enlarge-window)
+(define-key ijkl-local-mode-map (kbd "M-S-<up>") 'shrink-window)
+
+;; ** Key chords
+(use-package key-chord :config (key-chord-mode))
+(key-chord-define-global "zz" 'ijkl-local-mode)
+(key-chord-define ijkl-local-mode-map "bb" 'switch-to-prev-buffer)
+(key-chord-define ijkl-local-mode-map "cc" 'kill-region)
+
+;; ** Hydra outline
+(defhydra outline(ijkl-local-mode-map "à")
+  "outline"
+  ("t" outline-hide-body "tree")
+  ("u" outline-up-heading "up")
+  ("n" outline-next-visible-heading "next")
+  ("p" outline-previous-visible-heading "prev")
+  ("a" outline-show-all "show all")
+  ("s" outline-show-subtree "show all subtree")
+  ("TAB" outline-show-children "show direct children")
+  ("q" outline-hide-sublevels "hide-all")
+  ("h" outline-hide-subtree "hide subtree"))
+
+;; ** Hydra hide/show
+(defhydra hydra-hide-show (:exit t)
+  "Hydra for hide-show commands"
+  ("t" hs-toggle-hiding "Toggle H/S")
+  ("a" hs-show-all "Show all")
+  ("q" hs-hide-all "Hide all")
+  ("l" hs-hide-level "Hide Level")
+  ("s" hs-show-block "Show block")
+  ("h" hs-hide-block "Hide block"))
+(key-chord-define ijkl-local-mode-map "hh" 'hydra-hide-show/body)
+
+;; ** Hydra find
+(defhydra find(ijkl-local-mode-map "f" :exit t)
+  "find"
+  ("d" helm-find-files "helm-find-files")
+  ("j" lsp-find-definition "LSP jump to def")
+  ("l" lsp-describe-thing-at-point "LSP help")
+  ("j" lsp-find-definition "lsp jump to def")
+  ("s" projectile-ag "ag")
+  ("o" ff-find-other-file "switch header/cpp")
+  ("f" projectile-find-file "projectile-find-file"))
