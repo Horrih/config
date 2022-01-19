@@ -44,6 +44,18 @@ There are two things you can do about this warning:
 ;; ** Main color theme : vscode-dark-plus-theme
 (use-package vscode-dark-plus-theme :config (load-theme 'vscode-dark-plus t))
 
+;; ** Welcome dashboard
+(use-package dashboard
+    :ensure t
+    :diminish dashboard-mode
+    :config
+    (setq dashboard-items '((projects . 5)
+                            (bookmarks . 10)
+                            (recents  . 10)
+                            ))
+    (dashboard-setup-startup-hook))
+(add-hook 'dashboard-mode-hook (lambda()(setq show-trailing-whitespace nil)))
+
 ;; ** Misc
 (progn
   (setq ring-bell-function 'ignore)
@@ -472,6 +484,7 @@ the call to TO will be an alias to the default keymaps"
     "Only enable the ijkl-local-mode on traditional buffers"
     (unless (or (minibufferp)
                 (string-match "[Gg]it" (format "%s" major-mode))
+                (string-equal (buffer-name) "*dashboard*")
                 (string-equal (buffer-name) "COMMIT_EDITMSG"))
       (ijkl-local-mode))))
 (ijkl-mode)
