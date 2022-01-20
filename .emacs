@@ -251,18 +251,26 @@ will be killed."
      "A major mode derived from web-mode, for editing .vue files with LSP support.")
 (add-to-list 'auto-mode-alist '("\\.vue\\'" . my-vue-mode))
 
-;; ** Outline mode with package outline-minor-faces
- (use-package outline-minor-faces
+;; ** Outline mode with package outline-minor-faces and outshine
+;; Enable sane bindings and actions for outline mode
+(use-package outshine :defer t)
+
+;; Pretty colors for outline-mode
+(use-package outline-minor-faces
      :after outline
      :config (add-hook 'outline-minor-mode-hook
                        'outline-minor-faces-add-font-lock-keywords))
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (make-local-variable 'outline-regexp)
-            (setq outline-regexp "^;; \\*+")
-            (make-local-variable 'outline-heading-end-regexp)
-            (setq outline-heading-end-regexp "\n")
-            (outline-minor-mode 1)))
+
+;; Outline mode using ;; * as pattern
+(defun my-elisp-outline ()
+  "Outline mode for elisp comments"
+  (make-local-variable 'outline-regexp)
+  (setq outline-regexp "^;; \\*+")
+  (make-local-variable 'outline-heading-end-regexp)
+  (setq outline-heading-end-regexp "\n")
+  (outshine-mode))
+
+(add-hook 'emacs-lisp-mode-hook 'my-elisp-outline)
 
 ;; ** yaml-mode : Support gitlab-ci.yml
 (use-package yaml-mode :mode "\\.yml\\'")
@@ -452,22 +460,6 @@ This mark-ring will record all mark positions globally, multiple times per buffe
       (jump-to-marker target))))
 
 ;; * Modal edition mode using ijkl for movement
-;; ** key-alias()
-;;(format "Redirects function call from '%s' to '%s' (initially `%s')" from to (key-binding to))
-
-(defun key-alias2(keymap from to &optional inside-keymap)
-  "Binds the key-binding FROM to the function called by typing TO.
-
-If inside-keymap is not nil, the TO binding will be set to nil inside the KEYMAP, so that
-the call to TO will be an alias to the default keymaps"
-  (unless inside-keymap
-    (define-key keymap to nil))
-  (define-key keymap from
-    (lambda (&optional args)
-      "Test"
-      (interactive "P")
-      (call-interactively (key-binding to)))))
-
 ;; ** ijkl minor mode definition
 (define-minor-mode ijkl-local-mode
   "Minor mode to be able to move using ijkl"
@@ -594,7 +586,7 @@ the call to TO will be an alias to the default keymaps"
   ("p" outline-previous-visible-heading "prev")
   ("a" outline-show-all "show all")
   ("s" outline-show-subtree "show all subtree")
-  ("TAB" outline-show-children "show direct children")
+  ("TAB" outline-toggle-children "toggle hide/show children")
   ("q" outline-hide-sublevels "hide-all")
   ("h" outline-hide-subtree "hide subtree"))
 
