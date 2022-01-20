@@ -264,12 +264,14 @@ will be killed."
 ;; Outline mode using ;; * as pattern
 (defun my-elisp-outline ()
   "Outline mode for elisp comments"
+  (interactive)
   (make-local-variable 'outline-regexp)
   (setq outline-regexp "^;; \\*+")
+  (setq comment-start ";") ; Required by outshine mode
+  (setq comment-add 1) ; Required by outshine mode
   (make-local-variable 'outline-heading-end-regexp)
   (setq outline-heading-end-regexp "\n")
   (outshine-mode))
-
 (add-hook 'emacs-lisp-mode-hook 'my-elisp-outline)
 
 ;; ** yaml-mode : Support gitlab-ci.yml
