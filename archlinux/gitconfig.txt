@@ -1,0 +1,17 @@
+[user]
+	name = Charles Gonnaud
+	email = uyo@hotmail.fr
+[push]
+	default = simple
+[merge]
+    tool = meld
+[mergetool "meld"]
+    cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
+[diff]
+    tool = meld
+[difftool]
+    prompt = false
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
+[pull]
+	ff = only
