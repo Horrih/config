@@ -1,0 +1,32 @@
+    1  ln -sf /usr/share/zoneinfo/Europe/Paris  /etc/localtime
+    2  hwclock --systohc
+    3  emacs /etc/locale.gen 
+    4  locale-gen
+    5  echo LANG=en_US.UTF-8 >> /etc/locale.conf
+    6  echo fr-latin1" >> /etc/vconsole.conf
+    7  echo fr-latin1 >> /etc/vconsole.conf
+    8  echo "archcharles" >> /etc/hostname
+    9  emacs -nw /etc/hosts
+   10  passwd
+   11  pacman -S gnome
+   12  pacman -S gnome-shell eog gdm gedit gnome-backgrounds gnome-calendar gnome-characters gnome-clocks gnome-color-manager gnome-control-center gnome-disk-utility gnome-font-viewer gnome-keyring gnome-menus gnome-photos gnome-screenshot gnome-settings-daemon gnome-system-monitor gnome-terminal nautilus grub grub-btrfs efibootmgr base-devel linux-headers network-manager network-manager-applet dialog os-prober mtools dosfstools git docker sudo
+   13  pacman -S gnome-shell eog gdm gedit gnome-backgrounds gnome-calendar gnome-characters gnome-clocks gnome-color-manager gnome-control-center gnome-disk-utility gnome-font-viewer gnome-keyring gnome-menus gnome-photos gnome-screenshot gnome-settings-daemon gnome-system-monitor gnome-terminal nautilus grub grub-btrfs efibootmgr base-devel linux-headers networkmanager network-manager-applet dialog os-prober mtools dosfstools git docker sudo
+   14  pacman -S xdg-utils xdg-user-dirs cups bluez bluez-utils
+   15  pacman -S vim
+   16  emacs /etc/mkinitcpio.conf 
+   17  mkinitcpio -p  linux-zen
+   18  mkinitcpio -p  linux-lts
+   19  grub-install --target=x86_64-efi --efi-directory /uefi/ --bootloader-id=Arch
+   20  grub-mkconfig -o /uefi/grub.grub.cfg
+   21  user-add -mG wheel docker charles
+   22  useradd -mG wheel docker charles
+   23  useradd -mG "wheel docker" charles
+   24  useradd -mG wheel charles
+   25  usermod  -G docker charles
+   26  passwd charles
+   27  EDITOR=emacs visudo
+   28  systemctl enable NetworkManager
+   29  systemctl enable bluetooth
+   30  systemctl enable cups
+   31  history | wc -l
+   32  history > /home/charles/install.txt

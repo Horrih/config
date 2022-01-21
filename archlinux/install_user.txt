@@ -1,0 +1,165 @@
+    1  ip a
+    2  gd;
+    3  systemctl start gdm
+    4  systemctl start gdm
+    5  sudo emacs -nw
+    6  sudo usermod -aG wheel charles
+    7  su - -c "usermod -aG wheel charles"
+    8  sudo ls
+    9  su 6
+   10  su -
+   11  sudo su -
+   12  cat /etc/vconsole.conf 
+   13  sudo emacs -nw /etc/vconsole.conf 
+   14  loadkeys fr-latin1
+   15  sudo loadkeys fr-latin1
+   16  sudo emacs -nw /uefi/
+   17  strings /uefi/EFI/Arch/grubx64.efi 
+   18  sudo su -
+   19  strings /uefi/EFI/Arch/grubx64.efi 
+   20  strings /uefi/EFI/Arch/grubx64.efi  | tail -1
+   21  sudo rm /uefi/grub.grub.cfg 
+   22  sudo rm /uefi/grub/grub.cfg 
+   23  sudo grub-install --efi-directory=/uefi/ --bootloader-id=Arch --boot-directory=/uefi/ --debug
+   24  cat install.txt  | grep grub
+   25  sudo grub-mkconfig -o /uefi/grub/grub.cfg
+   26  sudo systemctl enable gdm
+   27  sudo systemctl enable networkmanager
+   28  sudo systemctl enable NetworkManager
+   29  ip a
+   30  reboot
+   31  localectl set-keymap fr-latin1
+   32  localectl set-keymap fr
+   33  localectl
+   34  sudo pacman -S firefox thunderbird spotify
+   35  sudo pacman -S firefox thunderbird 
+   36  sudo pacman -S git
+   37  mkdir dev
+   38  cd dev/
+   39  mkdir Github
+   40  mv Github/ github
+   41  cd github/
+   42  ls
+   43  git clone https://github.com/Horrih/Config config
+   44  cd ..
+   45  cd ..
+   46  mkdir .emacs.d
+   47  ln -s ~/dev/github/config/.emacs .emacs.d/init.el
+   48  ln -s ~/dev/github/config/.tmux.conf .
+   49  cat ~/dev/github/config/archlinux/bashrc.sh 
+   50  sudo emacs -nw ~/dev/github/config/archlinux/bashrc.sh 
+   51  e
+   52  emacs -nw ~/.bashrc
+   53  sudo pacman -S gnome-tweaks
+   54  bash
+   55  fg
+   56  e ~/.bashrc
+   57  emacs -nw ~/.bashrc
+   58  bah
+   59  bash
+   60  tmux
+   61  cp dev/github/config/archlinux/gitconfig.txt .gitconfig
+   62  ls
+   63  mv install* dev/github/config/archlinux/
+   64  ls
+   65  mv wallpaper.jpg Pictures/
+   66  bash
+   67  lsblk
+   68  lsblk /dev/sda3
+   69  blkid /dev/sda3
+   70  sudo lsblk
+   71  sudo e /etc/grub.d/40_custom 
+   72  sudo grub-mkconfig -o /uefi/grub/grub.cfg
+   73  less /uefi/grub/grub.cfg
+   74  tail /uefi/grub/grub.cfg
+   75  tail /uefi/grub/grub.cfg -30
+   76  tail /uefi/grub/grub.cfg -n30
+   77  fg
+   78  sudo e /etc/grub.d/40_custom 
+   79  tail /uefi/grub/grub.cfg -n30
+   80  sudo grub-mkconfig -o /uefi/grub/grub.cfg
+   81  sudo reboot
+   82  ls /uefi/grub/
+   83  ls /uefi/grub/grub.cfg 
+   84  les /uefi/grub/grub.cfg 
+   85  less /uefi/grub/grub.cfg 
+   86  blkid
+   87  blkid /dev/sda3
+   88  fdisk -l
+   89  sudo blkid
+   90  ls
+   91  ls /uefi/
+   92  ls /uefi/EFI/
+   93  ls /uefi/EFI/Microsoft/
+   94  ls /uefi/EFI/Boot/
+   95  ls /uefi/EFI/Arch/
+   96  ls /uefi/EFI/Microsoft/
+   97  ls /uefi/EFI/Microsoft/Boot/
+   98  ls /uefi/EFI/Microsoft/Recovery/
+   99  fg
+  100  sudo e /etc/grub.d/40_custom 
+  101  sudo pacman -S gnome-themes-extra
+  102  sudo e /etc/grub.d/40_custom 
+  103  history | less
+  104  history | less
+  105  sudo grub-mkconfig -o /uefi/grub/grub.cfg
+  106  sudo reboot
+  107  sudo e /etc/grub.d/40_custom 
+  108  sudo grub-mkconfig -o /uefi/grub/grub.cfg
+  109  sudo grub-mkconfig -o /uefi/grub/grub.cfg && tail -30 /uefi/grub/grub.cfg 
+  110  sudo reboot
+  111  sudo e /etc/grub.d/40_custom 
+  112  sudo grub-probe -t fs_uuid /dev/sda1
+  113  sudo grub-probe -t fs_uuid -d /dev/sda1
+  114  fgfg
+  115  fg
+  116  sudo grub-mkconfig -o /uefi/grub/grub.cfg && tail -30 /uefi/grub/grub.cfg 
+  117  sudo reboot
+  118  ls
+  119  cd dev/
+  120  git clone https://aur.archlinux.org/yay-git.git yay
+  121  cd yay/
+  122  magepkg -si
+  123  makepkg -si
+  124  cd ../..
+  125  yay
+  126  yay chaotic
+  127  pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
+  128  sudo pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
+  129  pacman-key --lsign-key FBA220DFC880C036
+  130  sudo pacman-key --lsign-key FBA220DFC880C036
+  131  sudo pacman -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+  132  sudo e /etc/pacman.conf 
+  133  yay beautiline
+  134  yay beautyline
+  135  gtk-update-icon-cache
+  136  yay spotify
+  137  pacman -Syu
+  138  sudo pacman -Syu
+  139  yay spotify
+  140  yay chrome-gnome-shell
+  141  e
+  142  cd dev/
+  143  ls
+  144  rm -rf yay
+  145  yay --help
+  146  git clone https://github.com/shvchk/poly-dark
+  147  cd poly-dark/
+  148  ls
+  149  e install.sh 
+  150  ./install.sh 
+  151  yay wget
+  152  sudo e /etc/pacman.conf 
+  153  yay wget
+  154  yay netcat
+  155  ./install.sh 
+  156  sudo reboot
+  157  sudo e /etc/grub.d/
+  158  ls /etc/grub.d/
+  159  sudo grub-mkconfig -o /uefi/grub/grub.cfg && tail -30 /uefi/grub/grub.cfg 
+  160  sudo reboot
+  161  sudo e /etc/default/grub
+  162  sudo grub-mkconfig -o /uefi/grub/grub.cfg 
+  163  sudo reboot
+  164  history
+  165  history > dev/github/config/archlinux/install_user.txt

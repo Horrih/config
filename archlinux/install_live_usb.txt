@@ -1,0 +1,16 @@
+  101  mkdir /mnt/home && mount -o noatime,ssd,compress=zstd,space_cache=v2,commit=120,subvol=@home /dev/sda6 /mnt/home
+  102  mkdir /mnt/tmp && mount -o noatime,ssd,compress=zstd,space_cache=v2,commit=120,subvol=@tmp /dev/sda6 /mnt/tmp
+  103  mkdir /mnt/var && mount -o subvol=@var /dev/sda6 /mnt/var
+  104  mkdir /mnt/uefi
+  105  mount /dev/sda1 /mnt/uefi
+  106  lsblk
+  107  pacstrap /mnt base linux-zen linux-lts linux-firmware nano emacs intel-ucode btrfs-progs NetworkManager iwd  
+  108  pacstrap /mnt base linux-zen linux-lts linux-firmware nano emacs intel-ucode btrfs-progs Network-Manager iwd  
+  109  pacstrap /mnt base linux-zen linux-lts linux-firmware nano emacs intel-ucode btrfs-progs networkmanager iwd  
+  110  pacstrap /mnt base linux-zen linux-lts linux-firmware nano emacs intel-ucode btrfs-progs networkmanager iwd  tmux netcat
+  111  genfstab -U /mnt
+  112  ls /mnt/boot
+  113  ls /mnt/uefi
+  114  genfstab -U /mnt > /mnt/etc/fstab
+  115  arch-chroot /mnt
+  116  umount /mnt
