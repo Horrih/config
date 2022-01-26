@@ -253,7 +253,9 @@ will be killed."
 
 ;; ** Outline mode with package outline-minor-faces and outshine
 ;; Enable sane bindings and actions for outline mode
-(use-package outshine :defer t)
+(use-package outshine
+  :defer t
+  :config (define-key outshine-mode-map (kbd "C-M-i") nil))
 
 ;; Pretty colors for outline-mode
 (use-package outline-minor-faces
@@ -515,6 +517,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "C-c") nil) ; Do not override C-x binding
 (define-key ijkl-local-mode-map (kbd "M-x") nil) ; Do not override M-x binding
 (define-key ijkl-local-mode-map (kbd "TAB") nil) ; Do not override tab binding
+(define-key ijkl-local-mode-map (kbd "<backtab>") nil) ; Do not override tab binding
 (define-key ijkl-local-mode-map (kbd "C-z") nil) ; Do not override C-z binding
 (define-key ijkl-local-mode-map (kbd "C-s") nil) ; Do not override C-s binding
 (define-key ijkl-local-mode-map (kbd "C-r") nil) ; Do not override C-r binding
@@ -542,12 +545,18 @@ the call to TO will be an alias to the default keymaps"
 (key-alias  ijkl-local-mode-map (kbd "k") (kbd "C-n"))
 (define-key ijkl-local-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
 (key-alias  ijkl-local-mode-map (kbd "C-M-k") (kbd "M->"))
-(define-key ijkl-local-mode-map (kbd "u") 'delete-backward-char)
-(define-key ijkl-local-mode-map (kbd "C-u") 'backward-kill-word)
-(define-key ijkl-local-mode-map (kbd "M-u") 'delete-start-or-previous-line)
-(define-key ijkl-local-mode-map (kbd "o") 'delete-forward-char)
-(define-key ijkl-local-mode-map (kbd "C-o") 'kill-word)
-(define-key ijkl-local-mode-map (kbd "M-o") 'kill-line)
+(global-set-key                 (kbd "C-M-u"  ) 'delete-start-or-previous-line)
+(key-alias  ijkl-local-mode-map (kbd "u"  ) (kbd "C-M-u"))
+(global-set-key                 (kbd "C-u") 'delete-backward-char)
+(define-key ijkl-local-mode-map (kbd "C-u") nil)
+(global-set-key                 (kbd "M-u") 'backward-kill-word)
+(define-key ijkl-local-mode-map (kbd "M-u") nil)
+(global-set-key                 (kbd "C-o") 'delete-forward-char)
+(define-key ijkl-local-mode-map (kbd "C-o") nil)
+(global-set-key                 (kbd "C-M-o") 'kill-line)
+(key-alias  ijkl-local-mode-map (kbd "o") (kbd "C-M-o"))
+(global-set-key                 (kbd "M-o") 'kill-word)
+(define-key ijkl-local-mode-map (kbd "M-o") nil)
 (define-key ijkl-local-mode-map (kbd "g") 'goto-line)
 (key-alias  ijkl-local-mode-map (kbd "<SPC>") (kbd "C-@"))
 
@@ -557,9 +566,12 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
 (define-key ijkl-local-mode-map (kbd "<f8>"      ) 'recompile) ; Recompile the project with the last compilation command
 (define-key ijkl-local-mode-map (kbd "S-<f8>"    ) 'compile)   ; Compile the project and ask for compilation command
+(define-key ijkl-local-mode-map (kbd "<f20>"     ) 'compile)   ; Compile the project and ask for compilation command
 (define-key ijkl-local-mode-map (kbd "M-[ 3 4 ~" ) 'compile)   ; Compile the project ans ask for compilation command
 (define-key ijkl-local-mode-map (kbd "C-S-<f8>"  ) 'switch-to-compilation-other-window) ; Switches to the compilation buffer
-(define-key ijkl-local-mode-map (kbd "C-<f8>" ) 'kill-compilation) ; Stop current compilation
+(define-key ijkl-local-mode-map (kbd "<f44>"     ) 'switch-to-compilation-other-window) ; Switches to the compilation buffer
+(define-key ijkl-local-mode-map (kbd "C-<f8>"    ) 'kill-compilation) ; Stop current compilation
+(define-key ijkl-local-mode-map (kbd "<f32>"     ) 'kill-compilation) ; Stop current compilation
 (define-key ijkl-local-mode-map (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
 (define-key ijkl-local-mode-map (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
 (define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ;; Refreshes all the current files/buffers
