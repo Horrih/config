@@ -192,6 +192,9 @@ will be killed."
 ;; ** which-key : Displays command shortcuts when typing commands
 (use-package which-key :config (which-key-mode))
 
+;; ** key-chord  : Enables combination of keys like zz
+(use-package key-chord :config (key-chord-mode))
+
 ;; ** helm : User friendly search of commands/variables etc
 ;; We rebind some of emacs commands to use helm instead
 (use-package helm
@@ -464,15 +467,23 @@ This mark-ring will record all mark positions globally, multiple times per buffe
       (jump-to-marker target))))
 
 ;; * Modal edition mode using ijkl for movement
+;; ** my-keys minor mode for global keybindings overriding
+(define-minor-mode my-keys-mode
+  "Minor mode to enable custom keybindings"
+  :lighter ""
+  :global t
+  :keymap '())
+(my-keys-mode)
+
 ;; ** ijkl minor mode definition
 (define-minor-mode ijkl-local-mode
   "Minor mode to be able to move using ijkl"
   :lighter " ijkl"
-  :init-value nil
   :keymap '(([t] . ignore)   ; The actual keymaps are defined later below
             ("z" . ijkl-local-mode))
   (add-to-list 'emulation-mode-map-alists '(ijkl-local-mode . ijkl-local-mode-map))
   )
+(key-chord-define my-keys-mode-map "zz" 'ijkl-local-mode)
 
 ;; ** ijkl global mode definition
 (define-globalized-minor-mode ijkl-mode ijkl-local-mode
@@ -510,7 +521,7 @@ the call to TO will be an alias to the default keymaps"
        (define-key ,keymap ,from ',(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to))))
     ))
 
-;; ** ijkl mode bindings
+;; ** utility bindings
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "C-g") nil) ; Do not override C-g binding
 (define-key ijkl-local-mode-map (kbd "C-x") nil) ; Do not override C-x binding
@@ -531,36 +542,65 @@ the call to TO will be an alias to the default keymaps"
 (key-alias  ijkl-local-mode-map (kbd "b"  ) (kbd "C-x b"))
 (define-key ijkl-local-mode-map (kbd "r"  ) 'recenter-top-bottom)
 (key-alias  ijkl-local-mode-map (kbd "c"  ) (kbd "M-w"))
+(key-chord-define ijkl-local-mode-map "cc" 'kill-region)
 (key-alias  ijkl-local-mode-map (kbd "y"  ) (kbd "C-y"))
 (key-alias  ijkl-local-mode-map (kbd "_"  ) (kbd "C-_"))
-(key-alias  ijkl-local-mode-map (kbd "j"  ) (kbd "C-b"))
-(key-alias  ijkl-local-mode-map (kbd "C-j") (kbd "M-b"))
-(key-alias  ijkl-local-mode-map (kbd "M-j") (kbd "C-a"))
-(key-alias  ijkl-local-mode-map (kbd "l"  ) (kbd "C-f"))
-(key-alias  ijkl-local-mode-map (kbd "C-l") (kbd "M-f"))
-(key-alias  ijkl-local-mode-map (kbd "M-l") (kbd "C-e"))
-(key-alias  ijkl-local-mode-map (kbd "i") (kbd "C-p"))
-(define-key ijkl-local-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
-(key-alias  ijkl-local-mode-map (kbd "C-M-i") (kbd "M-<"))
-(key-alias  ijkl-local-mode-map (kbd "k") (kbd "C-n"))
-(define-key ijkl-local-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
-(key-alias  ijkl-local-mode-map (kbd "C-M-k") (kbd "M->"))
-(global-set-key                 (kbd "C-M-u"  ) 'delete-start-or-previous-line)
-(key-alias  ijkl-local-mode-map (kbd "u"  ) (kbd "C-M-u"))
-(global-set-key                 (kbd "C-u") 'delete-backward-char)
-(define-key ijkl-local-mode-map (kbd "C-u") nil)
-(global-set-key                 (kbd "M-u") 'backward-kill-word)
-(define-key ijkl-local-mode-map (kbd "M-u") nil)
-(global-set-key                 (kbd "C-o") 'delete-forward-char)
-(define-key ijkl-local-mode-map (kbd "C-o") nil)
-(global-set-key                 (kbd "C-M-o") 'kill-line)
-(key-alias  ijkl-local-mode-map (kbd "o") (kbd "C-M-o"))
-(global-set-key                 (kbd "M-o") 'kill-word)
-(define-key ijkl-local-mode-map (kbd "M-o") nil)
+(define-key ijkl-local-mode-map (kbd "p"      ) 'backward-mark) ;; Reimplementation of a mark ring
+(define-key ijkl-local-mode-map (kbd "n"      ) 'forward-mark)  ;; Reimplementation of a mark ring
 (define-key ijkl-local-mode-map (kbd "g") 'goto-line)
 (key-alias  ijkl-local-mode-map (kbd "<SPC>") (kbd "C-@"))
 
+;; ** movement and deletion bindings (accessible in both modes)
+;; *** backwards
+(key-alias  ijkl-local-mode-map (kbd "j"  ) (kbd "C-j"))
+(key-alias     my-keys-mode-map (kbd "C-j") (kbd "C-b"))
+(key-alias     my-keys-mode-map (kbd "M-j") (kbd "M-b"))
+(key-alias     my-keys-mode-map (kbd "C-M-j") (kbd "C-a"))
+(key-alias  ijkl-local-mode-map (kbd "a") (kbd "C-a"))
+(define-key ijkl-local-mode-map (kbd "C-j") nil)
+(define-key ijkl-local-mode-map (kbd "M-j") nil)
+(define-key ijkl-local-mode-map (kbd "C-M-j") nil)
+
+;; *** forwards
+(key-alias     my-keys-mode-map (kbd "C-l") (kbd "C-f"))
+(key-alias  ijkl-local-mode-map (kbd "l"  ) (kbd "C-l"))
+(key-alias     my-keys-mode-map (kbd "M-l") (kbd "M-f"))
+(key-alias     my-keys-mode-map (kbd "C-M-l") (kbd "C-e"))
+(key-alias  ijkl-local-mode-map (kbd "e") (kbd "C-e"))
+(define-key ijkl-local-mode-map (kbd "C-l") nil)
+(define-key ijkl-local-mode-map (kbd "M-l") nil)
+(define-key ijkl-local-mode-map (kbd "C-M-l") nil)
+
+;; *** upwards
+(key-alias  ijkl-local-mode-map (kbd "i") (kbd "C-p"))
+(define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
+(key-alias     my-keys-mode-map (kbd "C-M-i") (kbd "M-<") t)
+(define-key ijkl-local-mode-map (kbd "M-i") nil)
+(define-key ijkl-local-mode-map (kbd "C-M-i") nil)
+
+;; *** downwards
+(key-alias  ijkl-local-mode-map (kbd "k") (kbd "C-n"))
+(define-key    my-keys-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
+(key-alias     my-keys-mode-map (kbd "C-M-k") (kbd "M->") t)
+(define-key ijkl-local-mode-map (kbd "M-k") nil)
+(define-key ijkl-local-mode-map (kbd "C-M-k") nil)
+
+;; *** deletion
+(key-alias  ijkl-local-mode-map (kbd "u"  ) (kbd "C-M-u"))
+(define-key    my-keys-mode-map (kbd "C-u") 'delete-backward-char)
+(define-key ijkl-local-mode-map (kbd "C-u") nil)
+(define-key    my-keys-mode-map (kbd "C-M-u") 'delete-start-or-previous-line)
+(define-key    my-keys-mode-map (kbd "M-u") 'backward-kill-word)
+(define-key ijkl-local-mode-map (kbd "M-u") nil)
+(define-key    my-keys-mode-map (kbd "C-o") 'delete-forward-char)
+(define-key ijkl-local-mode-map (kbd "C-o") nil)
+(define-key    my-keys-mode-map (kbd "C-M-o") 'kill-line)
+(key-alias  ijkl-local-mode-map (kbd "o") (kbd "C-M-o"))
+(define-key    my-keys-mode-map (kbd "M-o") 'kill-word)
+(define-key ijkl-local-mode-map (kbd "M-o") nil)
+
 ;; ** Misc
+(key-chord-define ijkl-local-mode-map "bb" 'switch-to-last-buffer)
 (define-key ijkl-local-mode-map (kbd "G"   ) 'magit-status)
 (define-key ijkl-local-mode-map (kbd "/"   ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
 (define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
@@ -576,20 +616,12 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
 (define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ;; Refreshes all the current files/buffers
 (define-key ijkl-local-mode-map (kbd "<f12>"  ) 'include-c-header) ;; Shortcuts for a #include directive
-(define-key ijkl-local-mode-map (kbd "a"      ) 'backward-mark) ;; Reimplementation of a mark ring
-(define-key ijkl-local-mode-map (kbd "e"      ) 'forward-mark)  ;; Reimplementation of a mark ring
 
 ;; ** Resize the window when split using split screen (C-2 or C-3)
 (define-key ijkl-local-mode-map (kbd "M-S-<right>") 'enlarge-window-horizontally)
 (define-key ijkl-local-mode-map (kbd "M-S-<left>") 'shrink-window-horizontally)
 (define-key ijkl-local-mode-map (kbd "M-S-<down>") 'enlarge-window)
 (define-key ijkl-local-mode-map (kbd "M-S-<up>") 'shrink-window)
-
-;; ** Key chords
-(use-package key-chord :config (key-chord-mode))
-(key-chord-define-global "zz" 'ijkl-local-mode)
-(key-chord-define ijkl-local-mode-map "cc" 'kill-region)
-(key-chord-define ijkl-local-mode-map "bb" 'switch-to-last-buffer)
 
 ;; ** Hydra outline
 (defhydra outline(ijkl-local-mode-map "à")
