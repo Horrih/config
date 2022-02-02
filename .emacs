@@ -226,7 +226,9 @@ will be killed."
   :config (setq ag-highlight-search t))
 
 ;; ** treemacs : Displays the current project on the left as in an IDE
-(use-package treemacs :bind ("C-c t" . treemacs))
+(use-package treemacs
+  :bind ("C-c t" . treemacs)
+  :config (custom-set-variables '(treemacs-no-delete-other-windows nil)))
 
 ;; ** web-mode : Support various web files, used by my custom modes : my-vue-mode & my-ts-mode
 (use-package web-mode
