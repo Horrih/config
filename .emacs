@@ -72,8 +72,10 @@ There are two things you can do about this warning:
   (setq c-basic-offset    4) ; Base indent size when indented automatically
   (menu-bar-mode -1) ; Hide Menu bar
   (fset 'yes-or-no-p 'y-or-n-p) ; Abreviate Yes/No
-  (c-set-offset (quote cpp-macro) 0 nil) ; Indent C/C++ macros as normal code
+  (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
   (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
+  (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
+  (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
   (setq make-backup-files nil) ; Do not use backup files (filename~)
   (setq create-lockfiles nil) ; Do not use lock files (.#filename)
   (if (file-directory-p "~/.org") ; Use this folder as org mode agenda files location if it exists
