@@ -604,14 +604,6 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "G"   ) 'magit-status)
 (define-key ijkl-local-mode-map (kbd "/"   ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
 (define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
-(define-key ijkl-local-mode-map (kbd "<f8>"      ) 'recompile) ; Recompile the project with the last compilation command
-(define-key ijkl-local-mode-map (kbd "S-<f8>"    ) 'compile)   ; Compile the project and ask for compilation command
-(define-key ijkl-local-mode-map (kbd "<f20>"     ) 'compile)   ; Compile the project and ask for compilation command
-(define-key ijkl-local-mode-map (kbd "M-[ 3 4 ~" ) 'compile)   ; Compile the project ans ask for compilation command
-(define-key ijkl-local-mode-map (kbd "C-S-<f8>"  ) 'switch-to-compilation-other-window) ; Switches to the compilation buffer
-(define-key ijkl-local-mode-map (kbd "<f44>"     ) 'switch-to-compilation-other-window) ; Switches to the compilation buffer
-(define-key ijkl-local-mode-map (kbd "C-<f8>"    ) 'kill-compilation) ; Stop current compilation
-(define-key ijkl-local-mode-map (kbd "<f32>"     ) 'kill-compilation) ; Stop current compilation
 (define-key ijkl-local-mode-map (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
 (define-key ijkl-local-mode-map (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
 (define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ;; Refreshes all the current files/buffers
@@ -624,36 +616,45 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "M-S-<up>") 'shrink-window)
 
 ;; ** Hydra outline
-(defhydra outline(ijkl-local-mode-map "à")
+(defhydra outline(:columns 3)
   "outline"
-  ("t" outline-hide-body "tree")
   ("u" outline-up-heading "up")
-  ("n" outline-next-visible-heading "next")
-  ("p" outline-previous-visible-heading "prev")
-  ("a" outline-show-all "show all")
-  ("s" outline-show-subtree "show all subtree")
   ("TAB" outline-toggle-children "toggle hide/show children")
+  ("a" outline-show-all "show all")
+  ("n" outline-next-visible-heading "next")
   ("q" outline-hide-sublevels "hide-all")
+  ("s" outline-show-subtree "show all subtree")
+  ("p" outline-previous-visible-heading "prev")
   ("h" outline-hide-subtree "hide subtree"))
+(define-key ijkl-local-mode-map "à" 'outline/body)
 
 ;; ** Hydra hide/show
-(defhydra hydra-hide-show (:exit t)
+(defhydra hydra-hide-show (:exit t :columns 2)
   "Hydra for hide-show commands"
   ("t" hs-toggle-hiding "Toggle H/S")
-  ("a" hs-show-all "Show all")
-  ("q" hs-hide-all "Hide all")
   ("l" hs-hide-level "Hide Level")
+  ("q" hs-hide-all "Hide all")
   ("s" hs-show-block "Show block")
+  ("a" hs-show-all "Show all")
   ("h" hs-hide-block "Hide block"))
 (key-chord-define ijkl-local-mode-map "hh" 'hydra-hide-show/body)
 
 ;; ** Hydra find
-(defhydra find(ijkl-local-mode-map "f" :exit t)
-  "find"
+(defhydra find(:exit t :columns 2)
+  "Search related commands"
   ("d" helm-find-files "helm-find-files")
   ("j" lsp-find-definition "LSP jump to def")
-  ("l" lsp-describe-thing-at-point "LSP help")
-  ("j" lsp-find-definition "lsp jump to def")
+  ("h" lsp-describe-thing-at-point "LSP help")
   ("s" projectile-ag "ag")
   ("o" ff-find-other-file "switch header/cpp")
   ("f" projectile-find-file "projectile-find-file"))
+(define-key ijkl-local-mode-map "f" 'find/body)
+
+;; ** Hydra compile
+(defhydra compile(:exit t :columns 1)
+  "Compilation commands"
+  ("ç" recompile "Reuse last compilation command")
+  ("e" compile "Edit the compilation command")
+  ("k" kill-compilation "Kill compilation")
+  ("b" switch-to-compilation-other-window "Switch to compilation in side window"))
+(define-key ijkl-local-mode-map "ç" 'compile/body)
