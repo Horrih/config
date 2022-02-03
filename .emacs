@@ -340,14 +340,13 @@ It will add the following code :
 ;; ** flycheck : Syntax highlighting, used by lsp
 (use-package flycheck :defer t)
 
-;; ** yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands
-(use-package yasnippet :hook (lsp . yasnippet))
+;; ** yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands like completion
+(use-package yasnippet :hook (lsp-mode . yas-minor-mode))
 
 ;; ** lsp-mode : Completion and syntax highlighting backend API, available for most languages
 (use-package lsp-mode
   :hook
   (
-   (python-mode . lsp-deferred)
    (c++-mode    . lsp-deferred)
    (my-vue-mode . lsp-deferred)
    (my-ts-mode  . lsp-deferred)
@@ -356,25 +355,21 @@ It will add the following code :
   :init (setq lsp-keymap-prefix "C-c l")
   :config
   (setq lsp-enable-links nil)
-  (yas-minor-mode)
   (require 'lsp-diagnostics)
-  (lsp-diagnostics-flycheck-enable)
-  (require 'flycheck)
-  (with-eval-after-load "lsp-mode"
-    (when (string-equal major-mode "python-mode")
-      (message "Adding flake8")
-      (flycheck-add-next-checker 'lsp 'python-flake8)))
-  :bind (("C-c j" . lsp-find-definition) ; Jump to a fonction definition
-         ("C-c J" . lsp-find-references) ; Find references to this function
-         ("C-h l" . lsp-describe-thing-at-point))) ; Display the documentation for this function
+  (lsp-diagnostics-flycheck-enable))
 
-;; ** lsp-jedi : Enable JEDI as an LSP backend for python
-(use-package lsp-jedi
-  :defer t
-  :hook (python-mode . (lambda()
-                         (require 'lsp-jedi)
-                         (with-eval-after-load "lsp-mode"
-                           (add-to-list 'lsp-enabled-clients 'jedi)))))
+;; ** lsp-jedi : An LSP backend for python
+(use-package lsp-jedi :defer t)
+
+;; ** python-hook : enable flake8 and jedi
+(add-hook 'python-mode-hook (lambda()
+                              (lsp-deferred)
+                              (with-eval-after-load "lsp-mode"
+                                (message "Adding flake8 and jedi")
+                                (require 'lsp-jedi)
+                                (add-to-list 'lsp-enabled-clients 'jedi)
+                                (require 'flycheck))
+                                (flycheck-add-next-checker 'lsp 'python-flake8)))
 
 ;; ** my-vue-hook : Custom hook for vue SFC to enable various options
 (add-hook 'my-vue-mode-hook (lambda()
