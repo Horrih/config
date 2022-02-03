@@ -551,7 +551,6 @@ the call to TO will be an alias to the default keymaps"
 (key-alias  ijkl-local-mode-map (kbd "_"  ) (kbd "C-_"))
 (define-key ijkl-local-mode-map (kbd "p"      ) 'backward-mark) ;; Reimplementation of a mark ring
 (define-key ijkl-local-mode-map (kbd "n"      ) 'forward-mark)  ;; Reimplementation of a mark ring
-(define-key ijkl-local-mode-map (kbd "g") 'goto-line)
 (key-alias  ijkl-local-mode-map (kbd "<SPC>") (kbd "C-@"))
 
 ;; ** movement and deletion bindings (accessible in both modes)
@@ -647,9 +646,8 @@ the call to TO will be an alias to the default keymaps"
 (defhydra find(:exit t :columns 2)
   "Search related commands"
   ("d" helm-find-files "helm-find-files")
-  ("j" lsp-find-definition "LSP jump to def")
-  ("h" lsp-describe-thing-at-point "LSP help")
   ("s" projectile-ag "ag")
+  ("r" lsp-find-references "LSP find references")
   ("o" ff-find-other-file "switch header/cpp")
   ("f" projectile-find-file "projectile-find-file"))
 (define-key ijkl-local-mode-map "f" 'find/body)
@@ -662,3 +660,12 @@ the call to TO will be an alias to the default keymaps"
   ("k" kill-compilation "Kill compilation")
   ("b" switch-to-compilation-other-window "Switch to compilation in side window"))
 (define-key ijkl-local-mode-map "ç" 'compile/body)
+
+;; ** Hydra go
+(defhydra go(:exit t :columns 1)
+  "Jump to destination in text"
+  ("j" lsp-find-definition "LSP jump to definition")
+  ("g" goto-line "Go to line n°")
+  ("f" forward-sexp  "Go to the closing parenthesis/bracket")
+  ("b" backward-sexp "Go to the opening parenthesis/bracket"))
+(define-key ijkl-local-mode-map "g" 'go/body)
