@@ -185,7 +185,7 @@ will be killed."
 ;; * General usage packages
 ;; ** magit : Git front end (amazing!)
 (use-package magit
-  :bind ("C-x g" . magit-status)
+  :defer t
   :custom-face (magit-filename ((t :foreground "white"))) ; Otherwise untracked files have the same color as title in git status
   :config
   (setq magit-no-confirm t)
@@ -200,10 +200,6 @@ will be killed."
 ;; ** helm : User friendly search of commands/variables etc
 ;; We rebind some of emacs commands to use helm instead
 (use-package helm
-  :bind (("M-x"   . helm-M-x) ; Rebind traditional methods to helm methods
-         ("C-x f" . helm-find-files)
-         ("C-x b" . helm-mini))
-  :demand
   :config
   (helm-mode)
 
@@ -599,7 +595,6 @@ the call to TO will be an alias to the default keymaps"
 
 ;; ** Misc
 (key-chord-define ijkl-local-mode-map "bb" 'switch-to-last-buffer)
-(define-key ijkl-local-mode-map (kbd "G"   ) 'magit-status)
 (define-key ijkl-local-mode-map (kbd "/"   ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
 (define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
 (define-key ijkl-local-mode-map (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
@@ -642,6 +637,7 @@ the call to TO will be an alias to the default keymaps"
   "Search related commands"
   ("d" helm-find-files "helm-find-files")
   ("s" projectile-ag "ag")
+  ("e" lsp-treemacs-errors-list "LSP errors")
   ("r" lsp-find-references "LSP find references")
   ("o" ff-find-other-file "switch header/cpp")
   ("f" projectile-find-file "projectile-find-file"))
