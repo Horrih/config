@@ -35,12 +35,23 @@ There are two things you can do about this warning:
 (require 'use-package-ensure)
 (setq use-package-always-ensure t) ; Install the package if not available yet
 
+;; ** diminish : Hide the mode line string for modes (called the lighter)
+(use-package diminish)
+
 ;; ** esup : Launch the esup command to measure startup time of each emacs plugin
 (use-package esup
   :commands esup
   :config (setq esup-depth 0))
 
 ;; * Various customizations options
+;; ** my-keys minor mode for global keybindings overriding
+(define-minor-mode my-keys-mode
+  "Minor mode to enable custom keybindings"
+  :lighter ""
+  :global t
+  :keymap '())
+(my-keys-mode)
+
 ;; ** Main color theme : vscode-dark-plus-theme
 (use-package vscode-dark-plus-theme :config (load-theme 'vscode-dark-plus t))
 
@@ -192,7 +203,9 @@ will be killed."
   (setq magit-visit-ref-behavior '(checkout-any focus-on-ref)))
 
 ;; ** which-key : Displays command shortcuts when typing commands
-(use-package which-key :config (which-key-mode))
+(use-package which-key
+  :config (which-key-mode)
+  :diminish)
 
 ;; ** key-chord  : Enables combination of keys like zz
 (use-package key-chord :config (key-chord-mode))
@@ -200,21 +213,25 @@ will be killed."
 ;; ** helm : User friendly search of commands/variables etc
 ;; We rebind some of emacs commands to use helm instead
 (use-package helm
+  :diminish
+  :demand t
+  :bind (:map my-keys-mode-map
+         ("M-x"   . helm-M-x) ; Rebind traditional methods to helm methods
+         ("C-x f" . helm-find-files)
+         ("C-x b" . helm-mini)
+         ;; We switch tab and ctrl-z actions to be more "natural"
+         :map helm-map
+         ("TAB"   . #'helm-execute-persistent-action)
+         ("<tab>" . #'helm-execute-persistent-action)
+         ("C-z"   . #'helm-select-action)
+         ("C-j"   . nil))
   :config
   (helm-mode)
-
-  ; We switch tab and ctrl-z actions to be more "natural"
-  (define-key helm-map (kbd "TAB") #'helm-execute-persistent-action)
-  (define-key helm-map (kbd "<tab>") #'helm-execute-persistent-action)
-  (define-key helm-map (kbd "C-z") #'helm-select-action)
-  (define-key helm-map (kbd "C-j") nil)
   (setq helm-buffer-max-length 40))
 
 ;; * Development packages and options
 ;; ** Projectile : Search files or strings in the current project
-(use-package projectile
-  :bind (("C-c f" . projectile-find-file)
-         ("C-c s" . projectile-ag)))
+(use-package projectile :defer t)
 
 ;; ** ag : Front end for the CLI utility ag, Used by projectile-ag
 (use-package ag
@@ -223,7 +240,7 @@ will be killed."
 
 ;; ** treemacs : Displays the current project on the left as in an IDE
 (use-package treemacs
-  :bind ("C-c t" . treemacs)
+  :defer t
   :config (custom-set-variables '(treemacs-no-delete-other-windows nil)))
 
 ;; ** web-mode : Support various web files, used by my custom modes : my-vue-mode & my-ts-mode
@@ -258,15 +275,15 @@ will be killed."
 ;; Enable sane bindings and actions for outline mode
 (use-package outshine
   :defer t
+  :diminish
   :config (define-key outshine-mode-map (kbd "C-M-i") nil))
+(add-hook 'outline-minor-mode-hook (lambda()(diminish 'outline-minor-mode)))
 
 ;; Pretty colors for outline-mode
 (use-package outline-minor-faces
-     :after outline
-     :config (add-hook 'outline-minor-mode-hook
-                       'outline-minor-faces-add-font-lock-keywords))
+  :hook (outline-minor-mode . outline-minor-faces-add-font-lock-keywords))
 
-;; Outline mode using ;; * as pattern
+;; Outline mode using ;; * as pattern for elisp for example
 (defun my-elisp-outline ()
   "Outline mode for elisp comments"
   (interactive)
@@ -278,19 +295,14 @@ will be killed."
   (setq outline-heading-end-regexp "\n")
   (outshine-mode))
 (add-hook 'emacs-lisp-mode-hook 'my-elisp-outline)
+(diminish 'eldoc-mode)
 
 ;; ** yaml-mode : Support gitlab-ci.yml
 (use-package yaml-mode :mode "\\.yml\\'")
 
 ;; ** hide-show-mode : Hide/show sections of code : current function, class, or if/else section
-(defun hide-show-mode-hook()
-  (hs-minor-mode)
-  (local-set-key (kbd "C-c h") 'hs-toggle-hiding) ; Hide or show the current area
-  (local-set-key (kbd "C-c H") 'hs-show-all) ; Reveal all hidden areas
-  (local-set-key (kbd "C-c M-h") 'hs-hide-all)) ; Hide all areas
-
-;; Custom hook to enable hide-show-mode on all prog files
-(add-hook 'prog-mode-hook 'hide-show-mode-hook)
+(add-hook 'prog-mode-hook 'hs-minor-mode)
+(add-hook 'hs-minor-mode-hook (lambda() (diminish 'hs-minor-mode)))
 
 ;; ** include-guards(text) : Add include guards to the current file
 (defun include-guards(text)
@@ -325,19 +337,30 @@ It will add the following code :
 ;; ** enable c++ mode for headers
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
+;; ** Disable Abbrev in the mode line
+(diminish 'abbrev-mode)
+
+;; ** C++ mode line customization
+;; Ignore the customization of the mode line C++//l for example becomes C++
+(advice-add 'c-update-modeline :override #'ignore)
+
 ;; * LSP : completion and linting
-;; ** lsp-treemacs : Displays LSP errors using treemacs
 ;; ** lsp-treemacs : treemacs style views for various lsp results
-(use-package lsp-treemacs :bind ("C-c e" . lsp-treemacs-errors-list))
+(use-package lsp-treemacs :defer t)
 
 ;; ** company : Completion frontend, used by lsp
-(use-package company :defer t)
+(use-package company
+  :defer t
+  :diminish)
 
 ;; ** flycheck : Syntax highlighting, used by lsp
 (use-package flycheck :defer t)
 
 ;; ** yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands like completion
-(use-package yasnippet :hook (lsp-mode . yas-minor-mode))
+(use-package yasnippet
+  :hook (lsp-mode . (lambda()
+                      (yas-minor-mode)
+                      (diminish 'yas-minor-mode))))
 
 ;; ** lsp-mode : Completion and syntax highlighting backend API, available for most languages
 (use-package lsp-mode
@@ -462,14 +485,6 @@ This mark-ring will record all mark positions globally, multiple times per buffe
       (jump-to-marker target))))
 
 ;; * Modal edition mode using ijkl for movement
-;; ** my-keys minor mode for global keybindings overriding
-(define-minor-mode my-keys-mode
-  "Minor mode to enable custom keybindings"
-  :lighter ""
-  :global t
-  :keymap '())
-(my-keys-mode)
-
 ;; ** ijkl minor mode definition
 (define-minor-mode ijkl-local-mode
   "Minor mode to be able to move using ijkl"
@@ -479,6 +494,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   (add-to-list 'emulation-mode-map-alists '(ijkl-local-mode . ijkl-local-mode-map))
   )
 (key-chord-define my-keys-mode-map "zz" 'ijkl-local-mode)
+(diminish 'ijkl-local-mode)
 
 ;; ** ijkl global mode definition
 (define-globalized-minor-mode ijkl-mode ijkl-local-mode
@@ -527,6 +543,9 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "C-z") nil) ; Do not override C-z binding
 (define-key ijkl-local-mode-map (kbd "C-s") nil) ; Do not override C-s binding
 (define-key ijkl-local-mode-map (kbd "C-r") nil) ; Do not override C-r binding
+(define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
+(key-chord-define ijkl-local-mode-map "xx" 'helm-M-x) ; Bind xx to M-x
+(key-alias  ijkl-local-mode-map (kbd "!"  ) (kbd "M-!")) ; Launch shell commands with !
 (key-alias  ijkl-local-mode-map (kbd "m"  ) (kbd "C-m"))
 (key-alias  ijkl-local-mode-map (kbd "M-m") (kbd "M-<RET>"))
 (key-alias  ijkl-local-mode-map (kbd "&"  ) (kbd "C-x 1"))
@@ -569,6 +588,7 @@ the call to TO will be an alias to the default keymaps"
 (key-alias  ijkl-local-mode-map (kbd "i") (kbd "C-p"))
 (define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-i") (kbd "M-<") t)
+(key-chord-define ijkl-local-mode-map "aa" 'beginning-of-buffer)
 (define-key ijkl-local-mode-map (kbd "M-i") nil)
 (define-key ijkl-local-mode-map (kbd "C-M-i") nil)
 
@@ -576,6 +596,7 @@ the call to TO will be an alias to the default keymaps"
 (key-alias  ijkl-local-mode-map (kbd "k") (kbd "C-n"))
 (define-key    my-keys-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-k") (kbd "M->") t)
+(key-chord-define ijkl-local-mode-map "ee" 'end-of-buffer)
 (define-key ijkl-local-mode-map (kbd "M-k") nil)
 (define-key ijkl-local-mode-map (kbd "C-M-k") nil)
 
@@ -649,7 +670,7 @@ the call to TO will be an alias to the default keymaps"
   ("ç" recompile "Reuse last compilation command")
   ("e" compile "Edit the compilation command")
   ("k" kill-compilation "Kill compilation")
-  ("b" switch-to-compilation-other-window "Switch to compilation in side window"))
+  ("o" switch-to-compilation-other-window "Switch to compilation in side window"))
 (define-key ijkl-local-mode-map "ç" 'compile/body)
 
 ;; ** Hydra go
