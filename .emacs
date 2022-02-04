@@ -372,6 +372,7 @@ It will add the following code :
    (lsp-mode    . lsp-enable-which-key-integration))
   :commands lsp lsp-deferred
   :init (setq lsp-keymap-prefix "C-c l")
+  :bind (("C-h l" . lsp-describe-thing-at-point))
   :config
   (setq lsp-enable-links nil)
   (require 'lsp-diagnostics)
