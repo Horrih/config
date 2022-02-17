@@ -88,9 +88,7 @@ There are two things you can do about this warning:
   (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
   (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
   (setq make-backup-files nil) ; Do not use backup files (filename~)
-  (setq create-lockfiles nil) ; Do not use lock files (.#filename)
-  (if (file-directory-p "~/.org") ; Use this folder as org mode agenda files location if it exists
-      (setq org-agenda-files '("~/.org"))))
+  (setq create-lockfiles nil)) ; Do not use lock files (.#filename)
 
 ;; ** rename-file-and-buffer(name)
 ;; source: http://steve.yegge.googlepages.com/my-dot-emacs-file
@@ -227,7 +225,20 @@ will be killed."
          ("C-j"   . nil))
   :config
   (helm-mode)
-  (setq helm-buffer-max-length 40))
+  :custom
+  (helm-buffer-max-length 40))
+
+;; ** org-roam : Notes organizing
+(use-package org-roam
+  :defer t
+  :init
+  (setq org-roam-v2-ack t)
+  :config
+  (org-roam-db-autosync-mode)
+  :custom
+  (org-return-follows-link t)
+  (org-roam-directory "~/.org_roam")
+  (org-roam-completion-everywhere t))
 
 ;; * Development packages and options
 ;; ** Projectile : Search files or strings in the current project
@@ -682,3 +693,13 @@ the call to TO will be an alias to the default keymaps"
   ("f" forward-sexp  "Go to the closing parenthesis/bracket")
   ("b" backward-sexp "Go to the opening parenthesis/bracket"))
 (define-key ijkl-local-mode-map "g" 'go/body)
+
+;; ** Hydra org-roam
+(defhydra org-roam(:exit t :columns 2)
+  "Jump to destination in text"
+  ("i" org-roam-node-insert "Insert new org roam file")
+  ("f" org-roam-node-find "Find org roam file")
+  ("t" org-time-stamp "Insert current timestamp")
+  ("d" org-todo "Changes the TODO state of the current line")
+  ("h" org-roam-buffer-toggle  "Org roam info for current file"))
+(define-key ijkl-local-mode-map "," 'org-roam/body)
