@@ -69,7 +69,9 @@ There are two things you can do about this warning:
 
 ;; ** Misc
 (progn
-  (setq ring-bell-function 'ignore)
+  (setq enable-local-eval 't) ; Enable eval blocks in .dir-locals.el
+  (setq enable-local-variables :all) ; Enable by default variables in .dir-locals.el
+  (setq ring-bell-function 'ignore) ; Disable the bell for emacs
   (setq debug-on-error nil) ; Display the stacktrace if error encountered in one of the lisp method
   (column-number-mode 't) ; Display column numbers in the status line
   (global-display-line-numbers-mode 't) ; Display line numbers on the left
@@ -158,13 +160,50 @@ will be killed."
 ;; * Compilation options
 ;; ** Compilation misc
 (setq compilation-always-kill t) ; Do not ask for confirmation when I stop current compilation
-(setq compile-command "make -j8") ; Default compilation command
+(add-hook 'compilation-mode-hook (lambda()(setq show-trailing-whitespace nil)))
 
 ;; ** switch-to-compilation-other-window()
 (defun switch-to-compilation-other-window()
   "Switches to the compilation buffer in another window"
   (interactive)
-  (switch-to-buffer-other-window "*compilation*"))
+  (unless (string-equal "*compilation*" (buffer-name))
+    (switch-to-buffer-other-window "*compilation*")))
+
+(defun switch-to-compilation-other-window-end()
+  "Switches to the compilation buffer in another window and go to buffer end"
+  (interactive)
+  (switch-to-compilation-other-window)
+  (end-of-buffer))
+
+;; ** recompile-switch
+(defun recompile-switch()
+  "Uses the recompile function and switches to the buffer end"
+  (interactive)
+  (recompile)
+  (switch-to-compilation-other-window-end))
+
+;; ** compile-all
+(defcustom compile-all-command nil
+  "If non nil, `compile-all' will use it as command instead of `compile-command'
+This can be useful in conjunction to projectile's .dir-locals variables"
+  :type 'string
+  :risky nil)
+
+(defun compile-all()
+  "Compiles the whole project and switch to buffer end"
+  (interactive)
+  (compile (or compile-all-command "make -j8"))
+  (switch-to-compilation-other-window-end))
+
+;; ** compile-file
+(defun compile-file(file-name)
+  "Compiles the file FILE-NAME using a command to be define `compile-file-command'
+  This function should take a filename as parameter and returning the command as output"
+  (interactive (list (buffer-file-name)))
+  (unless (fboundp 'compile-file-command)
+    (error "compile-file expects the compile-file-command function to be defined"))
+  (compile (compile-file-command file-name))
+  (switch-to-compilation-other-window-end))
 
 ;; ** ansi-color : Handle terminal colors in the compilation buffer
 (use-package ansi-color
@@ -677,10 +716,12 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map "f" 'find/body)
 
 ;; ** Hydra compile
-(defhydra compile(:exit t :columns 1)
+(defhydra compile(:exit t :columns 2)
   "Compilation commands"
-  ("ç" recompile "Reuse last compilation command")
+  ("ç" recompile-switch "Reuse last compilation command")
   ("e" compile "Edit the compilation command")
+  ("a" compile-all "Compile STC")
+  ("f" compile-file "Compile the current file")
   ("k" kill-compilation "Kill compilation")
   ("o" switch-to-compilation-other-window "Switch to compilation in side window"))
 (define-key ijkl-local-mode-map "ç" 'compile/body)
