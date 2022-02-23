@@ -69,6 +69,8 @@ There are two things you can do about this warning:
 
 ;; ** Misc
 (progn
+  (tool-bar-mode nil) ; Disable the toolbar
+  (setq inhibit-startup-screen 't)
   (savehist-mode) ; Save history for commands
   (setq isearch-resume-in-command-history 't) ; Use history for isearch as well
   (global-auto-revert-mode) ; Refresh files automatically when modified from outside emacs
@@ -224,13 +226,16 @@ This can be useful in conjunction to projectile's .dir-locals variables"
          ;; We switch tab and ctrl-z actions to be more "natural"
          :map helm-map
          ("TAB"   . #'helm-execute-persistent-action)
-         ("<tab>" . #'helm-execute-persistent-action)
          ("C-z"   . #'helm-select-action)
          ("C-j"   . nil))
   :config
   (helm-mode)
   :custom
   (helm-buffer-max-length 40))
+
+;; ** Org bullets : Pretty mode for org
+(use-package org-bullets
+  :hook (org-mode . org-bullets-mode))
 
 ;; ** org-roam : Notes organizing
 (use-package org-roam
@@ -562,6 +567,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "C-c") nil) ; Do not override C-x binding
 (define-key ijkl-local-mode-map (kbd "M-x") nil) ; Do not override M-x binding
 (define-key ijkl-local-mode-map (kbd "TAB") nil) ; Do not override tab binding
+(define-key ijkl-local-mode-map (kbd "<tab>") nil) ; Do not override tab binding
 (define-key ijkl-local-mode-map (kbd "<backtab>") nil) ; Do not override tab binding
 (define-key ijkl-local-mode-map (kbd "C-z") nil) ; Do not override C-z binding
 (define-key ijkl-local-mode-map (kbd "C-s") nil) ; Do not override C-s binding
@@ -748,4 +754,3 @@ the call to TO will be an alias to the default keymaps"
 (with-eval-after-load "with-editor"  ; Called for commits
   (key-chord-define with-editor-mode-map "cc" 'with-editor-finish)
   (key-chord-define with-editor-mode-map "qq" 'with-editor-cancel))
-
