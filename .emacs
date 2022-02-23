@@ -567,6 +567,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "C-s") nil) ; Do not override C-s binding
 (define-key ijkl-local-mode-map (kbd "C-r") nil) ; Do not override C-r binding
 (define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
+(define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Evaluate the lisp expression
 (key-chord-define ijkl-local-mode-map "xx" 'helm-M-x) ; Bind xx to M-x
 (key-alias  ijkl-local-mode-map (kbd "!"  ) (kbd "M-!")) ; Launch shell commands with !
 (key-alias  ijkl-local-mode-map (kbd "m"  ) (kbd "C-m"))
@@ -727,12 +728,24 @@ the call to TO will be an alias to the default keymaps"
 
 ;; ** Magit ijkl
 (with-eval-after-load "magit"
-  (key-alias magit-diff-section-base-map (kbd "i") (kbd "C-p"))
-  (dolist (keymap (list magit-diff-section-base-map magit-status-mode-map magit-log-mode-map))
+  (key-chord-define magit-log-select-mode-map "cc" 'magit-log-select-pick)
+  (key-chord-define magit-log-select-mode-map "qq" 'magit-log-select-quit)
+  (dolist (keymap (list magit-diff-section-base-map magit-mode-map))
     (key-chord-define keymap "bb" 'switch-to-last-buffer)
-    (key-alias keymap (kbd "m") (kbd "RET") 't)
-    (key-alias keymap (kbd "b") (kbd "C-x b"))
-    (key-alias keymap (kbd "j") (kbd "C-j"))
-    (key-alias keymap (kbd "l") (kbd "C-l"))
-    (key-alias keymap (kbd "i") (kbd "C-p"))
-    (key-alias keymap (kbd "k") (kbd "C-n"))))
+    (define-key keymap "x" ctl-x-map)
+    (define-key keymap "h" help-map)
+    (define-key keymap "v" 'magit-dispatch)
+    (key-alias keymap "m" (kbd "RET") 't)
+    (key-alias keymap "b" (kbd "C-x b"))
+    (key-alias keymap "j" (kbd "C-j"))
+    (key-alias keymap "l" (kbd "C-l"))
+    (key-alias keymap "i" (kbd "C-p"))
+    (key-alias keymap "k" (kbd "C-n"))))
+(with-eval-after-load "git-rebase"
+  (key-alias git-rebase-mode-map "k" (kbd "C-n"))
+  (key-alias git-rebase-mode-map "l" (kbd "C-f"))
+  (define-key git-rebase-mode-map "d" 'git-rebase-kill-line))
+(with-eval-after-load "with-editor"  ; Called for commits
+  (key-chord-define with-editor-mode-map "cc" 'with-editor-finish)
+  (key-chord-define with-editor-mode-map "qq" 'with-editor-cancel))
+
