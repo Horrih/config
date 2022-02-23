@@ -245,7 +245,9 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :diminish)
 
 ;; ** key-chord  : Enables combination of keys like zz
-(use-package key-chord :config (key-chord-mode))
+(use-package key-chord
+  :custom (key-chord-two-keys-delay 0.03)
+  :config (key-chord-mode))
 
 ;; ** helm : User friendly search of commands/variables etc
 ;; We rebind some of emacs commands to use helm instead
@@ -540,11 +542,11 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 (define-minor-mode ijkl-local-mode
   "Minor mode to be able to move using ijkl"
   :lighter " ijkl"
-  :keymap '(([t] . ignore)   ; The actual keymaps are defined later below
-            ("z" . ijkl-local-mode))
+  :keymap '(([t] . ignore))   ; The actual keymaps are defined later below
   (add-to-list 'emulation-mode-map-alists '(ijkl-local-mode . ijkl-local-mode-map))
   )
-(key-chord-define my-keys-mode-map "zz" 'ijkl-local-mode)
+(key-chord-define ijkl-local-mode-map "sd" 'ijkl-local-mode)
+(key-chord-define my-keys-mode-map "sd" 'ijkl-local-mode)
 (diminish 'ijkl-local-mode)
 
 ;; ** ijkl global mode definition
@@ -744,3 +746,23 @@ the call to TO will be an alias to the default keymaps"
   ("d" org-todo "Changes the TODO state of the current line")
   ("h" org-roam-buffer-toggle  "Org roam info for current file"))
 (define-key ijkl-local-mode-map "," 'org-roam/body)
+
+;; ** Magit hydra
+(defhydra magit(:exit t :columns 1)
+  "Magit commands"
+  ("s" magit-status "Status (Home)")
+  ("f" magit-file-dispatch "File commands")
+  ("v" magit-dispatch "Global Commands"))
+(define-key ijkl-local-mode-map "v" 'magit/body)
+
+;; ** Magit ijkl
+(with-eval-after-load "magit"
+  (key-alias magit-diff-section-base-map (kbd "i") (kbd "C-p"))
+  (dolist (keymap (list magit-diff-section-base-map magit-status-mode-map magit-log-mode-map))
+    (key-chord-define keymap "bb" 'switch-to-last-buffer)
+    (key-alias keymap (kbd "m") (kbd "RET") 't)
+    (key-alias keymap (kbd "b") (kbd "C-x b"))
+    (key-alias keymap (kbd "j") (kbd "C-j"))
+    (key-alias keymap (kbd "l") (kbd "C-l"))
+    (key-alias keymap (kbd "i") (kbd "C-p"))
+    (key-alias keymap (kbd "k") (kbd "C-n"))))
