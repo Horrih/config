@@ -69,6 +69,9 @@ There are two things you can do about this warning:
 
 ;; ** Misc
 (progn
+  (savehist-mode) ; Save history for commands
+  (setq isearch-resume-in-command-history 't) ; Use history for isearch as well
+  (global-auto-revert-mode) ; Refresh files automatically when modified from outside emacs
   (setq enable-local-eval 't) ; Enable eval blocks in .dir-locals.el
   (setq enable-local-variables :all) ; Enable by default variables in .dir-locals.el
   (setq ring-bell-function 'ignore) ; Disable the bell for emacs
@@ -81,10 +84,10 @@ There are two things you can do about this warning:
   (show-paren-mode 1) ; Highlight the matching parenthesis
   (setq-default show-trailing-whitespace t) ; Show in red the spaces forgotten at the end of lines
   (setq-default indent-tabs-mode nil) ; Use spaces for indent
-  (setq default-tab-width 4) ; Number of spaces inserted by tab
-  (setq c-basic-offset    4) ; Base indent size when indented automatically
   (menu-bar-mode -1) ; Hide Menu bar
   (fset 'yes-or-no-p 'y-or-n-p) ; Abreviate Yes/No
+  (setq default-tab-width 4) ; Number of spaces inserted by tab
+  (setq c-basic-offset    4) ; Base indent size when indented automatically
   (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
   (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
   (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
@@ -93,57 +96,17 @@ There are two things you can do about this warning:
   (setq create-lockfiles nil)) ; Do not use lock files (.#filename)
 
 ;; ** rename-file-and-buffer(name)
-;; source: http://steve.yegge.googlepages.com/my-dot-emacs-file
 (defun rename-file-and-buffer (new-name)
   "Renames both current buffer and file it's visiting to NEW-NAME."
   (interactive "sNew name: ")
-  (let ((name (buffer-name))
-        (filename (buffer-file-name)))
-    (if (not filename)
-        (message "Buffer '%s' is not visiting a file!" name)
-      (if (get-buffer new-name)
-          (message "A buffer named '%s' already exists!" new-name)
-        (progn
-          (rename-file filename new-name 1)
-          (rename-buffer new-name)
-          (set-visited-file-name new-name)
-          (set-buffer-modified-p nil))))))
-
-;; ** revert-buffer-no-confirm()
-(defun revert-buffer-no-confirm(&optional force-reverting)
-    "Interactive call to revert-buffer. Ignoring the auto-save
- file and not requesting for confirmation. When the current buffer
- is modified, the command refuses to revert it, unless you specify
- the optional argument: force-reverting to true."
-    (interactive "P")
-    (if (or force-reverting (not (buffer-modified-p)))
-        (revert-buffer :ignore-auto :noconfirm)
-      (error "The buffer has been modified")))
-
-;; ** revert-all-file-buffers
-;;Refresh all buffers when all have been modified (e.g. git branch change from CLI)
-(defun revert-all-file-buffers ()
-  "Refresh all open file buffers without confirmation.
-Buffers in modified (not yet saved) state in emacs will not be reverted. They
-will be reverted though if they were modified outside emacs.
-Buffers visiting files which do not exist any more or are no longer readable
-will be killed."
-  (interactive)
-  (dolist (buf (buffer-list))
-    (let ((filename (buffer-file-name buf)))
-      ;; Revert only buffers containing files, which are not modified;
-      ;; do not try to revert non-file buffers like *Messages*.
-      (when (and filename
-                 (not (buffer-modified-p buf)))
-        (if (file-readable-p filename)
-            ;; If the file exists and is readable, revert the buffer.
-            (with-current-buffer buf
-              (revert-buffer :ignore-auto :noconfirm :preserve-modes))
-          ;; Otherwise, kill the buffer.
-          (let (kill-buffer-query-functions) ; No query done when killing buffer
-            (kill-buffer buf)
-            (message "Killed non-existing/unreadable file buffer: %s" filename))))))
-  (message "Finished reverting buffers containing unmodified files."))
+  (unless (buffer-file-name)
+    (error "Buffer '%s' is not visiting a file!" name))
+  (when (get-buffer new-name)
+    (error "A buffer named '%s' already exists!" new-name))
+  (rename-file (buffer-file-name) new-name 't)
+  (rename-buffer new-name)
+  (set-visited-file-name new-name)
+  (set-buffer-modified-p nil))
 
 ;; ** switch-to-last-buffer
 (defun switch-to-last-buffer()
@@ -546,7 +509,14 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   (add-to-list 'emulation-mode-map-alists '(ijkl-local-mode . ijkl-local-mode-map))
   )
 (key-chord-define ijkl-local-mode-map "sd" 'ijkl-local-mode)
-(key-chord-define my-keys-mode-map "sd" 'ijkl-local-mode)
+
+(defun ijkl-local-mode-and-save()
+  "Enables ijkl-local-mode and saves the current file if applicable"
+  (interactive)
+  (ijkl-local-mode)
+  (when (and (buffer-modified-p) buffer-file-name)
+    (save-buffer)))
+(key-chord-define my-keys-mode-map "sd" 'ijkl-local-mode-and-save)
 (diminish 'ijkl-local-mode)
 
 ;; ** ijkl global mode definition
