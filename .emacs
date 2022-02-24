@@ -1,11 +1,11 @@
-;; * Enable lexical binding -*- lexical-binding: t -*-
+;;; Enable lexical binding -*- lexical-binding: t -*-
 ;;Lexical binding enables using variables defined with let in lambda functions called later
-;; * Package management
-;; ** Optimize garbage collection : improves the startup time
+;;; Package management
+;;;; Optimize garbage collection : improves the startup time
 (setq gc-cons-threshold 64000000)
 (add-hook 'after-init-hook #'(lambda ()(setq gc-cons-threshold 800000)))
 
-;; ** Enable MELPA : Add the main user repository of packages
+;;;; Enable MELPA : Add the main user repository of packages
 ;; cf Getting Started https://melpa.org/
 ;; ELPA, the default repository, has much less available
 (require 'package)
@@ -27,7 +27,7 @@ There are two things you can do about this warning:
     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
 (package-initialize)
 
-;; ** use-package : Use package will be used as a package loader in this file
+;;;; use-package : Use package will be used as a package loader in this file
 ;; Install use-package if not installed yet
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
@@ -35,16 +35,16 @@ There are two things you can do about this warning:
 (require 'use-package-ensure)
 (setq use-package-always-ensure t) ; Install the package if not available yet
 
-;; ** diminish : Hide the mode line string for modes (called the lighter)
+;;;; diminish : Hide the mode line string for modes (called the lighter)
 (use-package diminish)
 
-;; ** esup : Launch the esup command to measure startup time of each emacs plugin
+;;;; esup : Launch the esup command to measure startup time of each emacs plugin
 (use-package esup
   :commands esup
   :config (setq esup-depth 0))
 
-;; * Various customizations options
-;; ** my-keys minor mode for global keybindings overriding
+;;; Various customizations options
+;;;; my-keys minor mode for global keybindings overriding
 (define-minor-mode my-keys-mode
   "Minor mode to enable custom keybindings"
   :lighter ""
@@ -52,16 +52,17 @@ There are two things you can do about this warning:
   :keymap '())
 (my-keys-mode)
 
-;; ** Main color theme : vscode-dark-plus-theme
+;;;; Main color theme : vscode-dark-plus-theme
 (use-package vscode-dark-plus-theme
-  :custom-face
-  (doom-modeline-info ((t :foreground "color-46")))
-  (doom-modeline-project-dir ((t :foreground "color-214")))
-  (doom-modeline-urgent ((t :foreground "color-124")))
   :config (load-theme 'vscode-dark-plus t))
 
-;; ** Mode line theme : doom mode line
+;;;; Mode line theme : doom mode line
 (use-package doom-modeline
+  :custom-face
+  (doom-modeline-info ((t :foreground "color-46"))) ; Git icon
+  (doom-modeline-project-dir ((t :foreground "color-214"))) ; Project dir
+  (doom-modeline-urgent ((t :foreground "color-124"))) ; Errors shown by flycheck
+  (doom-modeline-warning ((t :foreground "white"))) ; Lock icon
   :custom
   (doom-modeline-unicode-fallback t)
   :init
@@ -71,7 +72,7 @@ There are two things you can do about this warning:
 (use-package all-the-icons
   :if (display-graphic-p))
 
-;; ** Welcome dashboard
+;;;; Welcome dashboard
 (use-package dashboard
     :ensure t
     :diminish dashboard-mode
@@ -83,7 +84,7 @@ There are two things you can do about this warning:
     (dashboard-setup-startup-hook))
 (add-hook 'dashboard-mode-hook (lambda()(setq show-trailing-whitespace nil)))
 
-;; ** Misc
+;;;; Misc
 (progn
   (tool-bar-mode 0) ; Disable the toolbar in GUI mode
   (scroll-bar-mode 0) ; Disable the scroll bar in GUI mode
@@ -114,7 +115,7 @@ There are two things you can do about this warning:
   (setq make-backup-files nil) ; Do not use backup files (filename~)
   (setq create-lockfiles nil)) ; Do not use lock files (.#filename)
 
-;; ** rename-file-and-buffer(name)
+;;;; rename-file-and-buffer(name)
 (defun rename-file-and-buffer (new-name)
   "Renames both current buffer and file it's visiting to NEW-NAME."
   (interactive "sNew name: ")
@@ -127,24 +128,24 @@ There are two things you can do about this warning:
   (set-visited-file-name new-name)
   (set-buffer-modified-p nil))
 
-;; ** switch-to-last-buffer
+;;;; switch-to-last-buffer
 (defun switch-to-last-buffer()
   "Use `switch-to-buffer' to visit the last buffer"
   (interactive)
   (switch-to-buffer nil))
 
-;; ** delete-start-or-previous-line
+;;;; delete-start-or-previous-line
 (defun delete-start-or-previous-line()
   "Use `kill-line' to delete either the start of the line, or the previous line if empty"
   (interactive)
   (kill-line (if (= (line-beginning-position) (point)) -1 0)))
 
-;; * Compilation options
-;; ** Compilation misc
+;;; Compilation options
+;;;; Compilation misc
 (setq compilation-always-kill t) ; Do not ask for confirmation when I stop current compilation
 (add-hook 'compilation-mode-hook (lambda()(setq show-trailing-whitespace nil)))
 
-;; ** switch-to-compilation-other-window()
+;;;; switch-to-compilation-other-window()
 (defun switch-to-compilation-other-window()
   "Switches to the compilation buffer in another window"
   (interactive)
@@ -157,14 +158,14 @@ There are two things you can do about this warning:
   (switch-to-compilation-other-window)
   (end-of-buffer))
 
-;; ** recompile-switch
+;;;; recompile-switch
 (defun recompile-switch()
   "Uses the recompile function and switches to the buffer end"
   (interactive)
   (recompile)
   (switch-to-compilation-other-window-end))
 
-;; ** compile-all
+;;;; compile-all
 (defcustom compile-all-command nil
   "If non nil, `compile-all' will use it as command instead of `compile-command'
 This can be useful in conjunction to projectile's .dir-locals variables"
@@ -177,7 +178,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (compile (or compile-all-command "make -j8"))
   (switch-to-compilation-other-window-end))
 
-;; ** compile-file
+;;;; compile-file
 (defun compile-file(file-name)
   "Compiles the file FILE-NAME using a command to be define `compile-file-command'
   This function should take a filename as parameter and returning the command as output"
@@ -187,7 +188,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (compile (compile-file-command file-name))
   (switch-to-compilation-other-window-end))
 
-;; ** ansi-color : Handle terminal colors in the compilation buffer
+;;;; ansi-color : Handle terminal colors in the compilation buffer
 (use-package ansi-color
   :config
   (defun colorize-compile()
@@ -195,7 +196,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
   :hook (compilation-filter . colorize-compile))
 
-;; ** regexps : Set compilation regex for errors
+;;;; regexps : Set compilation regex for errors
 (let ((enabled-regexps ())
       (custom-error-list '(
         ;; Insert your custom regexps here
@@ -212,8 +213,8 @@ This can be useful in conjunction to projectile's .dir-locals variables"
     (dolist (err custom-error-list)
       (add-to-list 'compilation-error-regexp-alist-alist err)))))
 
-;; * General usage packages
-;; ** magit : Git front end (amazing!)
+;;; General usage packages
+;;;; magit : Git front end (amazing!)
 (use-package magit
   :defer t
   :custom-face (magit-filename ((t :foreground "white"))) ; Otherwise untracked files have the same color as title in git status
@@ -221,17 +222,17 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (setq magit-no-confirm t)
   (setq magit-visit-ref-behavior '(checkout-any focus-on-ref)))
 
-;; ** which-key : Displays command shortcuts when typing commands
+;;;; which-key : Displays command shortcuts when typing commands
 (use-package which-key
   :config (which-key-mode)
   :diminish)
 
-;; ** key-chord  : Enables combination of keys like zz
+;;;; key-chord  : Enables combination of keys like zz
 (use-package key-chord
   :custom (key-chord-two-keys-delay 0.03)
   :config (key-chord-mode))
 
-;; ** helm : User friendly search of commands/variables etc
+;;;; helm : User friendly search of commands/variables etc
 ;; We rebind some of emacs commands to use helm instead
 (use-package helm
   :diminish
@@ -250,11 +251,11 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :custom
   (helm-buffer-max-length 40))
 
-;; ** Org bullets : Pretty mode for org
+;;;; Org bullets : Pretty mode for org
 (use-package org-bullets
   :hook (org-mode . org-bullets-mode))
 
-;; ** org-roam : Notes organizing
+;;;; org-roam : Notes organizing
 (use-package org-roam
   :defer t
   :init
@@ -266,28 +267,28 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (org-roam-directory "~/.org_roam")
   (org-roam-completion-everywhere t))
 
-;; * Development packages and options
-;; ** Projectile : Search files or strings in the current project
+;;; Development packages and options
+;;;; Projectile : Search files or strings in the current project
 (use-package projectile :defer t)
 
-;; ** ag : Front end for the CLI utility ag, Used by projectile-ag
+;;;; ag : Front end for the CLI utility ag, Used by projectile-ag
 (use-package ag
   :defer t
   :config (setq ag-highlight-search t))
 
-;; ** treemacs : Displays the current project on the left as in an IDE
+;;;; treemacs : Displays the current project on the left as in an IDE
 (use-package treemacs
   :defer t
   :config (custom-set-variables '(treemacs-no-delete-other-windows nil)))
 
-;; ** web-mode : Support various web files, used by my custom modes : my-vue-mode & my-ts-mode
+;;;; web-mode : Support various web files, used by my custom modes : my-vue-mode & my-ts-mode
 (use-package web-mode
   :mode ("\\.css\\'" "\\.html\\'")
   :config
   (setq web-mode-script-padding 0) ; For vue.js SFC : no initial padding in the script section
   (setq web-mode-markup-indent-offset 2)) ; For html : use an indent of size 2 (default is 4)
 
-;; ** prettier-js : Formatting on save, used by my-ts-mode for .js and .ts files
+;;;; prettier-js : Formatting on save, used by my-ts-mode for .js and .ts files
 (use-package prettier-js
   :hook (my-ts-mode . prettier-js-mode)
   :config
@@ -297,51 +298,40 @@ This can be useful in conjunction to projectile's .dir-locals variables"
                            "--trailing-comma" "all"
                            "--print-width" "100")))
 
-;; ** my typescript mode : Custom mode for js/ts files, derived from web-mode  to enable LSP on these files
+;;;; my typescript mode : Custom mode for js/ts files, derived from web-mode  to enable LSP on these files
 (define-derived-mode my-ts-mode web-mode "TypeScript(web)"
      "A major mode derived from web-mode, for editing .ts files with LSP support.")
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . my-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.js\\'" . my-ts-mode))
 
-;; ** my vue mode : Custom mode for .vue files, derived from web-mode, to enable LSP Vetur (VLS) options
+;;;; my vue mode : Custom mode for .vue files, derived from web-mode, to enable LSP Vetur (VLS) options
 (define-derived-mode my-vue-mode web-mode "Vue(web)"
      "A major mode derived from web-mode, for editing .vue files with LSP support.")
 (add-to-list 'auto-mode-alist '("\\.vue\\'" . my-vue-mode))
 
-;; ** Outline mode with package outline-minor-faces and outshine
-;; Enable sane bindings and actions for outline mode
+;;;; Outline mode with package outline-minor-faces and outshine
+;;;;; Enable sane bindings and actions for outline mode
 (use-package outshine
   :defer t
   :diminish
   :config (define-key outshine-mode-map (kbd "C-M-i") nil))
 (add-hook 'outline-minor-mode-hook (lambda()(diminish 'outline-minor-mode)))
 
-;; Pretty colors for outline-mode
+;;;;; Pretty colors for outline-mode
 (use-package outline-minor-faces
   :hook (outline-minor-mode . outline-minor-faces-add-font-lock-keywords))
 
-;; Outline mode using ;; * as pattern for elisp for example
-(defun my-elisp-outline ()
-  "Outline mode for elisp comments"
-  (interactive)
-  ;; (make-local-variable 'outline-regexp)
-  ;; (setq outline-regexp "^;; \\*+")
-  ;; (setq comment-start ";") ; Required by outshine mode
-  ;; (setq comment-add 1) ; Required by outshine mode
-  ;; (make-local-variable 'outline-heading-end-regexp)
-  ;; (setq outline-heading-end-regexp "\n")
-  (outshine-mode))
-(add-hook 'emacs-lisp-mode-hook 'my-elisp-outline)
+(add-hook 'emacs-lisp-mode-hook 'outshine-mode)
 (diminish 'eldoc-mode)
 
-;; ** yaml-mode : Support gitlab-ci.yml
+;;;; yaml-mode : Support gitlab-ci.yml
 (use-package yaml-mode :mode "\\.yml\\'")
 
-;; ** hide-show-mode : Hide/show sections of code : current function, class, or if/else section
+;;;; hide-show-mode : Hide/show sections of code : current function, class, or if/else section
 (add-hook 'prog-mode-hook 'hs-minor-mode)
 (add-hook 'hs-minor-mode-hook (lambda() (diminish 'hs-minor-mode)))
 
-;; ** include-guards(text) : Add include guards to the current file
+;;;; include-guards(text) : Add include guards to the current file
 (defun include-guards(text)
   "Adds include guards in the current file, useful for C/C++ devs
 
@@ -364,42 +354,42 @@ It will add the following code :
     (insert (format "#endif // %s" text))
     ))
 
-;; ** include-c-header-val() : Inserts a #include directive for C/C++
+;;;; include-c-header-val() : Inserts a #include directive for C/C++
 (defun include-c-header(val)
   "Adds a #include \"VAL.h\" at point and saves the file"
   (interactive "MHeader file name: ")
   (insert (format "#include \"%s.h\"\n" val))
   (save-buffer))
 
-;; ** enable c++ mode for headers
+;;;; enable c++ mode for headers
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
-;; ** Disable Abbrev in the mode line
+;;;; Disable Abbrev in the mode line
 (diminish 'abbrev-mode)
 
-;; ** C++ mode line customization
+;;;; C++ mode line customization
 ;; Ignore the customization of the mode line C++//l for example becomes C++
 (advice-add 'c-update-modeline :override #'ignore)
 
-;; * LSP : completion and linting
-;; ** lsp-treemacs : treemacs style views for various lsp results
+;;; LSP : completion and linting
+;;;; lsp-treemacs : treemacs style views for various lsp results
 (use-package lsp-treemacs :defer t)
 
-;; ** company : Completion frontend, used by lsp
+;;;; company : Completion frontend, used by lsp
 (use-package company
   :defer t
   :diminish)
 
-;; ** flycheck : Syntax highlighting, used by lsp
+;;;; flycheck : Syntax highlighting, used by lsp
 (use-package flycheck :defer t)
 
-;; ** yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands like completion
+;;;; yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands like completion
 (use-package yasnippet
   :hook (lsp-mode . (lambda()
                       (yas-minor-mode)
                       (diminish 'yas-minor-mode))))
 
-;; ** lsp-mode : Completion and syntax highlighting backend API, available for most languages
+;;;; lsp-mode : Completion and syntax highlighting backend API, available for most languages
 (use-package lsp-mode
   :hook
   (
@@ -415,10 +405,10 @@ It will add the following code :
   (setq lsp-enable-links nil)
   (require 'lsp-diagnostics)
   (lsp-diagnostics-flycheck-enable))
-;; ** lsp-jedi : An LSP backend for python
+;;;; lsp-jedi : An LSP backend for python
 (use-package lsp-jedi :defer t)
 
-;; ** python-hook : enable flake8 and jedi
+;;;; python-hook : enable flake8 and jedi
 (add-hook 'python-mode-hook (lambda()
                               (lsp-deferred)
                               (with-eval-after-load "lsp-mode"
@@ -428,7 +418,7 @@ It will add the following code :
                                 (require 'flycheck))
                                 (flycheck-add-next-checker 'lsp 'python-flake8)))
 
-;; ** my-vue-hook : Custom hook for vue SFC to enable various options
+;;;; my-vue-hook : Custom hook for vue SFC to enable various options
 (add-hook 'my-vue-mode-hook (lambda()
                               (local-set-key (kbd "C-x C-s") (lambda() ; Call format buffer on save
                                                                (interactive "*")
@@ -450,8 +440,8 @@ It will add the following code :
                               ))
 
 
-;; * Reimplementation of a mark ring
-;; ** Define the global variables used
+;;; Reimplementation of a mark ring
+;;;; Define the global variables used
 (defvar global-mark-previous ()
   "List containing previous mark positions, combining the ideas of `mark-ring'  and `global-mark-ring'.
 This mark-ring will record all mark positions globally, multiple times per buffer")
@@ -462,7 +452,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 (defvar bidirectional-mark-ring-max 40
   "Maximum size of `global-mark-previous'.  Start discarding off end if gets this big.")
 
-;; ** Override pushmark
+;;;; Override pushmark
 (defun bidirectional-push-mark-advice(&optional location nomsg activate)
   (interactive)
   (when (mark t)
@@ -475,7 +465,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 
 (advice-add 'push-mark :after #'bidirectional-push-mark-advice)
 
-;; ** mark manipulation utilities
+;;;; mark manipulation utilities
 (defun marker-is-point-p (marker)
   "Tests if MARKER is current point"
   (and (eq (marker-buffer marker) (current-buffer))
@@ -493,7 +483,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
       (goto-char position))
     (switch-to-buffer buffer)))
 
-;; ** bakckward-mark() : main back function
+;;;; bakckward-mark() : main back function
 (defun backward-mark()
   "Records the current position at mark and jump to previous mark"
   (interactive)
@@ -508,7 +498,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
       (pop global-mark-previous)
       (jump-to-marker (car global-mark-previous)))))
 
-;; ** forward-mark() : main next function
+;;;; forward-mark() : main next function
 (defun forward-mark()
   "Records the current position at mark and jump to previous mark"
   (interactive)
@@ -522,8 +512,8 @@ This mark-ring will record all mark positions globally, multiple times per buffe
       (pop global-mark-next)
       (jump-to-marker target))))
 
-;; * Modal edition mode using ijkl for movement
-;; ** ijkl minor mode definition
+;;; Modal edition mode using ijkl for movement
+;;;; ijkl minor mode definition
 (define-minor-mode ijkl-local-mode
   "Minor mode to be able to move using ijkl"
   :lighter " ijkl"
@@ -541,7 +531,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 (key-chord-define my-keys-mode-map "sd" 'ijkl-local-mode-and-save)
 (diminish 'ijkl-local-mode)
 
-;; ** ijkl global mode definition
+;;;; ijkl global mode definition
 (define-globalized-minor-mode ijkl-mode ijkl-local-mode
   (lambda()
     "Only enable the ijkl-local-mode on traditional buffers"
@@ -552,7 +542,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
       (ijkl-local-mode))))
 (ijkl-mode)
 
-;; ** Change color of the mode line according to the mode (command, edit, unsaved)
+;;;; Change color of the mode line according to the mode (command, edit, unsaved)
 (let ((default-color (face-background 'mode-line)))
   (add-hook 'post-command-hook
             (lambda ()
@@ -560,8 +550,8 @@ This mark-ring will record all mark positions globally, multiple times per buffe
                                    (cond ((not ijkl-local-mode) "red")
                                          (t default-color))))))
 
-;; * Main keybindings
-;; ** Helper macro key-alias
+;;; Main keybindings
+;;;; Helper macro key-alias
 (defmacro key-alias(keymap from to &optional inside-keymap)
   "Binds the key-binding FROM to the function called by typing TO.
 
@@ -577,7 +567,7 @@ the call to TO will be an alias to the default keymaps"
        (define-key ,keymap ,from ',(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to))))
     ))
 
-;; ** utility bindings
+;;;; utility bindings
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "C-g") nil) ; Do not override C-g binding
 (define-key ijkl-local-mode-map (kbd "C-x") nil) ; Do not override C-x binding
@@ -610,8 +600,8 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "n"      ) 'forward-mark)  ;; Reimplementation of a mark ring
 (key-alias  ijkl-local-mode-map (kbd "<SPC>") (kbd "C-@"))
 
-;; ** movement and deletion bindings (accessible in both modes)
-;; *** backwards
+;;;; movement and deletion bindings (accessible in both modes)
+;;;;; backwards
 (key-alias  ijkl-local-mode-map (kbd "j"  ) (kbd "C-j"))
 (key-alias     my-keys-mode-map (kbd "C-j") (kbd "C-b"))
 (key-alias     my-keys-mode-map (kbd "M-j") (kbd "M-b"))
@@ -621,7 +611,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "M-j") nil)
 (define-key ijkl-local-mode-map (kbd "C-M-j") nil)
 
-;; *** forwards
+;;;;; forwards
 (key-alias     my-keys-mode-map (kbd "C-l") (kbd "C-f"))
 (key-alias  ijkl-local-mode-map (kbd "l"  ) (kbd "C-l"))
 (key-alias     my-keys-mode-map (kbd "M-l") (kbd "M-f"))
@@ -631,7 +621,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "M-l") nil)
 (define-key ijkl-local-mode-map (kbd "C-M-l") nil)
 
-;; *** upwards
+;;;;; upwards
 (key-alias  ijkl-local-mode-map (kbd "i") (kbd "C-p"))
 (define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-i") (kbd "M-<") t)
@@ -639,7 +629,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "M-i") nil)
 (define-key ijkl-local-mode-map (kbd "C-M-i") nil)
 
-;; *** downwards
+;;;;; downwards
 (key-alias  ijkl-local-mode-map (kbd "k") (kbd "C-n"))
 (define-key    my-keys-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-k") (kbd "M->") t)
@@ -647,7 +637,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "M-k") nil)
 (define-key ijkl-local-mode-map (kbd "C-M-k") nil)
 
-;; *** deletion
+;;;;; deletion
 (key-alias  ijkl-local-mode-map (kbd "u"  ) (kbd "C-M-u"))
 (define-key    my-keys-mode-map (kbd "C-u") 'delete-backward-char)
 (define-key ijkl-local-mode-map (kbd "C-u") nil)
@@ -661,7 +651,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key    my-keys-mode-map (kbd "M-o") 'kill-word)
 (define-key ijkl-local-mode-map (kbd "M-o") nil)
 
-;; ** Misc
+;;;; Misc
 (key-chord-define ijkl-local-mode-map "bb" 'switch-to-last-buffer)
 (define-key ijkl-local-mode-map (kbd "/"   ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
 (define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
@@ -670,13 +660,13 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ;; Refreshes all the current files/buffers
 (define-key ijkl-local-mode-map (kbd "<f12>"  ) 'include-c-header) ;; Shortcuts for a #include directive
 
-;; ** Resize the window when split using split screen (C-2 or C-3)
+;;;; Resize the window when split using split screen (C-2 or C-3)
 (define-key ijkl-local-mode-map (kbd "M-S-<right>") 'enlarge-window-horizontally)
 (define-key ijkl-local-mode-map (kbd "M-S-<left>") 'shrink-window-horizontally)
 (define-key ijkl-local-mode-map (kbd "M-S-<down>") 'enlarge-window)
 (define-key ijkl-local-mode-map (kbd "M-S-<up>") 'shrink-window)
 
-;; ** Hydra outline
+;;;; Hydra outline
 (defhydra outline(:columns 3)
   "outline"
   ("u" outline-up-heading "up")
@@ -689,7 +679,7 @@ the call to TO will be an alias to the default keymaps"
   ("h" outline-hide-subtree "hide subtree"))
 (define-key ijkl-local-mode-map "à" 'outline/body)
 
-;; ** Hydra hide/show
+;;;; Hydra hide/show
 (defhydra hydra-hide-show (:exit t :columns 2)
   "Hydra for hide-show commands"
   ("t" hs-toggle-hiding "Toggle H/S")
@@ -700,7 +690,7 @@ the call to TO will be an alias to the default keymaps"
   ("h" hs-hide-block "Hide block"))
 (key-chord-define ijkl-local-mode-map "hh" 'hydra-hide-show/body)
 
-;; ** Hydra find
+;;;; Hydra find
 (defhydra find(:exit t :columns 2)
   "Search related commands"
   ("d" helm-find-files "helm-find-files")
@@ -711,7 +701,7 @@ the call to TO will be an alias to the default keymaps"
   ("f" projectile-find-file "projectile-find-file"))
 (define-key ijkl-local-mode-map "f" 'find/body)
 
-;; ** Hydra compile
+;;;; Hydra compile
 (defhydra compile(:exit t :columns 2)
   "Compilation commands"
   ("ç" recompile-switch "Reuse last compilation command")
@@ -722,7 +712,7 @@ the call to TO will be an alias to the default keymaps"
   ("o" switch-to-compilation-other-window "Switch to compilation in side window"))
 (define-key ijkl-local-mode-map "ç" 'compile/body)
 
-;; ** Hydra go
+;;;; Hydra go
 (defhydra go(:exit t :columns 1)
   "Jump to destination in text"
   ("b" bookmark-jump "Bookmark jump")
@@ -732,7 +722,7 @@ the call to TO will be an alias to the default keymaps"
   ("n" backward-sexp "Go to the opening parenthesis/bracket"))
 (define-key ijkl-local-mode-map "g" 'go/body)
 
-;; ** Hydra org-roam
+;;;; Hydra org-roam
 (defhydra org-roam(:exit t :columns 2)
   "Jump to destination in text"
   ("i" org-roam-node-insert "Insert new org roam file")
@@ -742,7 +732,7 @@ the call to TO will be an alias to the default keymaps"
   ("h" org-roam-buffer-toggle  "Org roam info for current file"))
 (define-key ijkl-local-mode-map "," 'org-roam/body)
 
-;; ** Magit hydra
+;;;; Magit hydra
 (defhydra magit(:exit t :columns 1)
   "Magit commands"
   ("s" magit-status "Status (Home)")
@@ -750,7 +740,7 @@ the call to TO will be an alias to the default keymaps"
   ("v" magit-dispatch "Global Commands"))
 (define-key ijkl-local-mode-map "v" 'magit/body)
 
-;; ** Magit ijkl
+;;;; Magit ijkl
 (with-eval-after-load "magit"
   (key-chord-define magit-log-select-mode-map "cc" 'magit-log-select-pick)
   (key-chord-define magit-log-select-mode-map "qq" 'magit-log-select-quit)
