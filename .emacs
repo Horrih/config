@@ -59,10 +59,8 @@ There are two things you can do about this warning:
 ;;;; Mode line theme : doom mode line
 (use-package doom-modeline
   :custom-face
-  (doom-modeline-info ((t :foreground "color-46"))) ; Git icon
-  (doom-modeline-project-dir ((t :foreground "color-214"))) ; Project dir
-  (doom-modeline-urgent ((t :foreground "color-124"))) ; Errors shown by flycheck
-  (doom-modeline-warning ((t :foreground "white"))) ; Lock icon
+  (mode-line ((t :background "black")))
+  (mode-line-inactive ((t :background "#333333"))) ; Dark grey
   :custom
   (doom-modeline-unicode-fallback t)
   :init
@@ -306,7 +304,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; my vue mode : Custom mode for .vue files, derived from web-mode, to enable LSP Vetur (VLS) options
 (define-derived-mode my-vue-mode web-mode "Vue(web)"
-     "A major mode derived from web-mode, for editing .vue files with LSP support.")
+  "A major mode derived from web-mode, for editing .vue files with LSP support.")
 (add-to-list 'auto-mode-alist '("\\.vue\\'" . my-vue-mode))
 
 ;;;; Outline mode with package outline-minor-faces and outshine
