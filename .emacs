@@ -53,7 +53,23 @@ There are two things you can do about this warning:
 (my-keys-mode)
 
 ;; ** Main color theme : vscode-dark-plus-theme
-(use-package vscode-dark-plus-theme :config (load-theme 'vscode-dark-plus t))
+(use-package vscode-dark-plus-theme
+  :custom-face
+  (doom-modeline-info ((t :foreground "color-46")))
+  (doom-modeline-project-dir ((t :foreground "color-214")))
+  (doom-modeline-urgent ((t :foreground "color-124")))
+  :config (load-theme 'vscode-dark-plus t))
+
+;; ** Mode line theme : doom mode line
+(use-package doom-modeline
+  :custom
+  (doom-modeline-unicode-fallback t)
+  :init
+  (doom-modeline-mode))
+
+;;;  All the icons
+(use-package all-the-icons
+  :if (display-graphic-p))
 
 ;; ** Welcome dashboard
 (use-package dashboard
@@ -69,8 +85,9 @@ There are two things you can do about this warning:
 
 ;; ** Misc
 (progn
-  (tool-bar-mode nil) ; Disable the toolbar
-  (setq inhibit-startup-screen 't)
+  (tool-bar-mode 0) ; Disable the toolbar in GUI mode
+  (scroll-bar-mode 0) ; Disable the scroll bar in GUI mode
+  (setq inhibit-startup-screen 't) ; Hide the startup screen
   (savehist-mode) ; Save history for commands
   (setq isearch-resume-in-command-history 't) ; Use history for isearch as well
   (global-auto-revert-mode) ; Refresh files automatically when modified from outside emacs
@@ -307,12 +324,12 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (defun my-elisp-outline ()
   "Outline mode for elisp comments"
   (interactive)
-  (make-local-variable 'outline-regexp)
-  (setq outline-regexp "^;; \\*+")
-  (setq comment-start ";") ; Required by outshine mode
-  (setq comment-add 1) ; Required by outshine mode
-  (make-local-variable 'outline-heading-end-regexp)
-  (setq outline-heading-end-regexp "\n")
+  ;; (make-local-variable 'outline-regexp)
+  ;; (setq outline-regexp "^;; \\*+")
+  ;; (setq comment-start ";") ; Required by outshine mode
+  ;; (setq comment-add 1) ; Required by outshine mode
+  ;; (make-local-variable 'outline-heading-end-regexp)
+  ;; (setq outline-heading-end-regexp "\n")
   (outshine-mode))
 (add-hook 'emacs-lisp-mode-hook 'my-elisp-outline)
 (diminish 'eldoc-mode)
@@ -394,10 +411,10 @@ It will add the following code :
   :init (setq lsp-keymap-prefix "C-c l")
   :bind (("C-h l" . lsp-describe-thing-at-point))
   :config
+  (setq lsp-headerline-arrow ">") ; Material design icon not working on windows
   (setq lsp-enable-links nil)
   (require 'lsp-diagnostics)
   (lsp-diagnostics-flycheck-enable))
-
 ;; ** lsp-jedi : An LSP backend for python
 (use-package lsp-jedi :defer t)
 
@@ -708,10 +725,11 @@ the call to TO will be an alias to the default keymaps"
 ;; ** Hydra go
 (defhydra go(:exit t :columns 1)
   "Jump to destination in text"
+  ("b" bookmark-jump "Bookmark jump")
   ("j" lsp-find-definition "LSP jump to definition")
   ("g" goto-line "Go to line n°")
-  ("f" forward-sexp  "Go to the closing parenthesis/bracket")
-  ("b" backward-sexp "Go to the opening parenthesis/bracket"))
+  ("p" forward-sexp  "Go to the closing parenthesis/bracket")
+  ("n" backward-sexp "Go to the opening parenthesis/bracket"))
 (define-key ijkl-local-mode-map "g" 'go/body)
 
 ;; ** Hydra org-roam
