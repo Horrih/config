@@ -66,7 +66,7 @@ There are two things you can do about this warning:
   :init
   (doom-modeline-mode))
 
-;;;  All the icons
+;;;; All the icons
 (use-package all-the-icons
   :if (display-graphic-p))
 
@@ -105,7 +105,7 @@ There are two things you can do about this warning:
   (menu-bar-mode -1) ; Hide Menu bar
   (fset 'yes-or-no-p 'y-or-n-p) ; Abreviate Yes/No
   (setq default-tab-width 4) ; Number of spaces inserted by tab
-  (setq c-basic-offset    4) ; Base indent size when indented automatically
+  (setq-default c-basic-offset  4) ; Base indent size when indented automatically
   (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
   (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
   (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
@@ -137,6 +137,12 @@ There are two things you can do about this warning:
   "Use `kill-line' to delete either the start of the line, or the previous line if empty"
   (interactive)
   (kill-line (if (= (line-beginning-position) (point)) -1 0)))
+
+;;;; match-buffer-extension
+(defun match-buffer-extension(&rest extensions)
+  "Returns 't if the current buffer has an extension in EXTENSIONS"
+  (if (member (file-name-extension (buffer-name)) extensions)
+      't))
 
 ;;; Compilation options
 ;;;; Compilation misc
@@ -281,31 +287,24 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; web-mode : Support various web files, used by my custom modes : my-vue-mode & my-ts-mode
 (use-package web-mode
-  :mode ("\\.css\\'" "\\.html\\'")
-  :config
-  (setq web-mode-script-padding 0) ; For vue.js SFC : no initial padding in the script section
-  (setq web-mode-markup-indent-offset 2)) ; For html : use an indent of size 2 (default is 4)
+  :mode
+  ("\\.css\\'" "\\.html\\'" "\\.ts'" "\\.js'" "\\.vue\\'")
+  :hook
+  (web-mode . (lambda () (setq-local lsp-auto-format (match-buffer-extension "ts" "js" "vue"))))
+  :custom
+  (web-mode-script-padding 0) ; For vue.js SFC : no initial padding in the script section
+  (web-mode-markup-indent-offset 2)) ; For html : use an indent of size 2 (default is 4)
 
 ;;;; prettier-js : Formatting on save, used by my-ts-mode for .js and .ts files
 (use-package prettier-js
-  :hook (my-ts-mode . prettier-js-mode)
-  :config
-  (setq prettier-js-args '("--semi" "false"
-                           "--single-quote" "false"
-                           "--tab-width" "4"
-                           "--trailing-comma" "all"
-                           "--print-width" "100")))
-
-;;;; my typescript mode : Custom mode for js/ts files, derived from web-mode  to enable LSP on these files
-(define-derived-mode my-ts-mode web-mode "TypeScript(web)"
-     "A major mode derived from web-mode, for editing .ts files with LSP support.")
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . my-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.js\\'" . my-ts-mode))
-
-;;;; my vue mode : Custom mode for .vue files, derived from web-mode, to enable LSP Vetur (VLS) options
-(define-derived-mode my-vue-mode web-mode "Vue(web)"
-  "A major mode derived from web-mode, for editing .vue files with LSP support.")
-(add-to-list 'auto-mode-alist '("\\.vue\\'" . my-vue-mode))
+  :defer t
+  :custom
+  (prettier-js-show-errors nil)
+  (prettier-js-args '("--semi" "false"
+                      "--single-quote" "false"
+                      "--tab-width" "4"
+                      "--trailing-comma" "all"
+                      "--print-width" "150")))
 
 ;;;; Outline mode with package outline-minor-faces and outshine
 ;;;;; Enable sane bindings and actions for outline mode
@@ -394,49 +393,52 @@ It will add the following code :
    (c++-mode    . lsp-deferred)
    (my-vue-mode . lsp-deferred)
    (my-ts-mode  . lsp-deferred)
+   (python-mode . lsp-deferred)
    (lsp-mode    . lsp-enable-which-key-integration))
   :commands lsp lsp-deferred
   :init (setq lsp-keymap-prefix "C-c l")
   :bind (("C-h l" . lsp-describe-thing-at-point))
+  :custom
+  ;; Formatting options for vue.js (.vue files)
+  (lsp-vetur-format-default-formatter-html "js-beautify-html")
+  (lsp-vetur-format-default-formatter-options
+   '((js-beautify-html
+      (wrap_attributes . "preserve")
+      (indent_size . 2)
+      (wrap_attributes_indent_size . 2))
+     (prettier
+      (singleQuote . :json-false)
+      (printWidth . 100)
+      (tabWidth . 4)
+      (trailingComma . "all")
+      (vueIndentScriptAndStyle . :json-false)
+      (semi . :json-false))))
+  (lsp-enable-links nil) ; Make links non clickable
+
   :config
   (setq lsp-headerline-arrow ">") ; Material design icon not working on windows
-  (setq lsp-enable-links nil)
   (require 'lsp-diagnostics)
-  (lsp-diagnostics-flycheck-enable))
+  (lsp-diagnostics-flycheck-enable) ; Enable flycheck instead of the builtin flymake
+
+  ;; Custom checkers and client for python
+  (when (derived-mode-p 'python-mode)
+    (require 'lsp-jedi) ; Using jedi instead of pyls
+    (flycheck-add-next-checker 'lsp 'python-flake8)))
+
+;;;; lsp-format-and-save : format on save if lsp-auto-format is not nil
+(defcustom lsp-auto-format nil
+  "If not nil, lsp-format-and-save will format the buffer before saving"
+   :type 'boolean)
+
+(defun lsp-format-and-save()
+  "Saves the current buffer and formats it if lsp-format-on-save is not nil"
+  (interactive)
+  (when (and (not buffer-read-only) lsp-auto-format)
+    (lsp-format-buffer))
+  (save-buffer))
+
 ;;;; lsp-jedi : An LSP backend for python
 (use-package lsp-jedi :defer t)
-
-;;;; python-hook : enable flake8 and jedi
-(add-hook 'python-mode-hook (lambda()
-                              (lsp-deferred)
-                              (with-eval-after-load "lsp-mode"
-                                (message "Adding flake8 and jedi")
-                                (require 'lsp-jedi)
-                                (add-to-list 'lsp-enabled-clients 'jedi)
-                                (require 'flycheck))
-                                (flycheck-add-next-checker 'lsp 'python-flake8)))
-
-;;;; my-vue-hook : Custom hook for vue SFC to enable various options
-(add-hook 'my-vue-mode-hook (lambda()
-                              (local-set-key (kbd "C-x C-s") (lambda() ; Call format buffer on save
-                                                               (interactive "*")
-                                                               (lsp-format-buffer)
-                                                               (save-buffer)))
-                              (setq lsp-vetur-format-default-formatter-html "js-beautify-html")
-                              (setq lsp-vetur-format-default-formatter-options
-                                '((js-beautify-html
-                                   (wrap_attributes . "preserve")
-                                   (indent_size . 2)
-                                   (wrap_attributes_indent_size . 2))
-                                  (prettier
-                                   (singleQuote . :json-false)
-                                   (printWidth . 100)
-                                   (tabWidth . 4)
-                                   (trailingComma . "all")
-                                   (vueIndentScriptAndStyle . :json-false)
-                                   (semi . :json-false))))
-                              ))
-
 
 ;;; Reimplementation of a mark ring
 ;;;; Define the global variables used
@@ -527,6 +529,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   (when (and (buffer-modified-p) buffer-file-name)
     (save-buffer)))
 (key-chord-define my-keys-mode-map "sd" 'ijkl-local-mode-and-save)
+(key-chord-define my-keys-mode-map "qs" 'ijkl-local-mode)
 (diminish 'ijkl-local-mode)
 
 ;;;; ijkl global mode definition
@@ -535,7 +538,6 @@ This mark-ring will record all mark positions globally, multiple times per buffe
     "Only enable the ijkl-local-mode on traditional buffers"
     (unless (or (minibufferp)
                 (string-match "[Gg]it" (format "%s" major-mode))
-                (string-equal (buffer-name) "*dashboard*")
                 (string-equal (buffer-name) "COMMIT_EDITMSG"))
       (ijkl-local-mode))))
 (ijkl-mode)
@@ -587,7 +589,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "é"  ) (kbd "C-x 2"))
 (key-alias  ijkl-local-mode-map (kbd "\"" ) (kbd "C-x 3"))
 (key-alias  ijkl-local-mode-map (kbd "'"  ) (kbd "C-x o"))
-(key-alias  ijkl-local-mode-map (kbd "w"  ) (kbd "C-x C-s"))
+(define-key ijkl-local-mode-map (kbd "w"  ) 'lsp-format-and-save)
 (key-alias  ijkl-local-mode-map (kbd "b"  ) (kbd "C-x b"))
 (define-key ijkl-local-mode-map (kbd "r"  ) 'recenter-top-bottom)
 (key-alias  ijkl-local-mode-map (kbd "c"  ) (kbd "M-w"))
