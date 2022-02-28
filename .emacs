@@ -280,6 +280,11 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :defer t
   :config (setq ag-highlight-search t))
 
+
+;;;; rainbow-delimiters : Parenthesis color based on depth
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
 ;;;; treemacs : Displays the current project on the left as in an IDE
 (use-package treemacs
   :defer t
