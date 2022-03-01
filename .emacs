@@ -242,18 +242,29 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :diminish
   :demand t
   :bind (:map my-keys-mode-map
-         ("M-x"   . helm-M-x) ; Rebind traditional methods to helm methods
-         ("C-x f" . helm-find-files)
-         ("C-x b" . helm-mini)
+         ("M-x" . helm-M-x) ; Rebind traditional methods to helm methods
+         :map help-map
+         ("a" . helm-apropos)
+         :map ctl-x-map
+         ("f" . helm-find-files)
+         ("b" . helm-mini)
          ;; We switch tab and ctrl-z actions to be more "natural"
          :map helm-map
          ("TAB"   . #'helm-execute-persistent-action)
-         ("C-z"   . #'helm-select-action)
-         ("C-j"   . nil))
+         ("C-z"   . #'helm-select-action))
   :config
   (helm-mode)
   :custom
   (helm-buffer-max-length 40))
+
+;;;; Helpful : nice looking and more complete help buffers
+(use-package helpful
+  :bind (:map help-map
+              ("p" . helpful-at-point)
+              ("s" . helpful-symbol)
+              ("v" . helpful-variable)
+              ("f" . helpful-callable)
+              ("k" . helpful-key)))
 
 ;;;; Org bullets : Pretty mode for org
 (use-package org-bullets
@@ -600,6 +611,7 @@ the call to TO will be an alias to the default keymaps"
 (key-alias  ijkl-local-mode-map (kbd "c"  ) (kbd "M-w"))
 (key-chord-define ijkl-local-mode-map "cc" 'kill-region)
 (key-alias  ijkl-local-mode-map (kbd "y"  ) (kbd "C-y"))
+(key-chord-define ijkl-local-mode-map "yy" 'helm-show-kill-ring)
 (key-alias  ijkl-local-mode-map (kbd "_"  ) (kbd "C-_"))
 (define-key ijkl-local-mode-map (kbd "p"      ) 'backward-mark) ;; Reimplementation of a mark ring
 (define-key ijkl-local-mode-map (kbd "n"      ) 'forward-mark)  ;; Reimplementation of a mark ring
@@ -695,15 +707,26 @@ the call to TO will be an alias to the default keymaps"
   ("h" hs-hide-block "Hide block"))
 (key-chord-define ijkl-local-mode-map "hh" 'hydra-hide-show/body)
 
+;;;; Hydra search text
+(defhydra search(:exit t :columns 2)
+  "Text search related commands"
+  ("o" helm-occur "Occurences in file")
+  ("s" isearch "Next occurence in file")
+  ("r" query-replace "Next occurence in file")
+  ("a" helm-do-grep-ag "Ag in current directory")
+  ("p" projectile-ag "Ag in current project")
+  ("b" multi-occur-in-matching-buffers "Occur in all buffers"))
+(define-key ijkl-local-mode-map "s" 'search/body)
+
 ;;;; Hydra find
 (defhydra find(:exit t :columns 2)
   "Search related commands"
-  ("d" helm-find-files "helm-find-files")
-  ("s" projectile-ag "ag")
+  ("d" dired-jump "Open current directory in dired")
+  ("f" helm-find-files "helm-find-files")
   ("e" lsp-treemacs-errors-list "LSP errors")
   ("r" lsp-find-references "LSP find references")
   ("o" ff-find-other-file "switch header/cpp")
-  ("f" projectile-find-file "projectile-find-file"))
+  ("p" projectile-find-file "projectile-find-file"))
 (define-key ijkl-local-mode-map "f" 'find/body)
 
 ;;;; Hydra compile
