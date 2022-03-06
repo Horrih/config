@@ -266,6 +266,12 @@ This can be useful in conjunction to projectile's .dir-locals variables"
               ("f" . helpful-callable)
               ("k" . helpful-key)))
 
+;;;; Org mode : Base mode for note taking
+(use-package org
+  :config (require 'org-tempo) ; Useful for using easy templates like <s TAB to insert a source block
+  :hook (org-mode . (lambda()
+                      (auto-fill-mode)))) ; Wrap lines when longer than fill column
+
 ;;;; Org bullets : Pretty mode for org
 (use-package org-bullets
   :hook (org-mode . org-bullets-mode))
@@ -711,7 +717,7 @@ the call to TO will be an alias to the default keymaps"
 (defhydra search(:exit t :columns 2)
   "Text search related commands"
   ("o" helm-occur "Occurences in file")
-  ("s" isearch "Next occurence in file")
+  ("s" isearch-forward "Next occurence in file")
   ("r" query-replace "Next occurence in file")
   ("a" helm-do-grep-ag "Ag in current directory")
   ("p" projectile-ag "Ag in current project")
@@ -751,14 +757,14 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map "g" 'go/body)
 
 ;;;; Hydra org-roam
-(defhydra org-roam(:exit t :columns 2)
+(defhydra org(:exit t :columns 2)
   "Jump to destination in text"
   ("i" org-roam-node-insert "Insert new org roam file")
-  ("f" org-roam-node-find "Find org roam file")
+  ("g" org-roam-node-find "Go to an org roam file")
   ("t" org-time-stamp "Insert current timestamp")
   ("d" org-todo "Changes the TODO state of the current line")
   ("h" org-roam-buffer-toggle  "Org roam info for current file"))
-(define-key ijkl-local-mode-map "," 'org-roam/body)
+(define-key ijkl-local-mode-map "," 'org/body)
 
 ;;;; Magit hydra
 (defhydra magit(:exit t :columns 1)
