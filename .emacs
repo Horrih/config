@@ -67,6 +67,9 @@ There are two things you can do about this warning:
   (doom-modeline-mode))
 
 ;;;; All the icons
+;; TODO on 1st install : use all-the-icons-install-fonts
+;; Caskaydia => https://www.nerdfonts.com/font-downloads
+;; Symbola : https://fontlibrary.org/fr/font/symbola
 (use-package all-the-icons
   :if (display-graphic-p))
 
