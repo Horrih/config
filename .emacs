@@ -88,7 +88,7 @@ There are two things you can do about this warning:
 ;;;; Misc
 (progn
   (tool-bar-mode 0) ; Disable the toolbar in GUI mode
-  (scroll-bar-mode 0) ; Disable the scroll bar in GUI mode
+  (when (display-graphic-p) (scroll-bar-mode 0)) ; Disable the scroll bar in GUI mode
   (setq inhibit-startup-screen 't) ; Hide the startup screen
   (savehist-mode) ; Save history for commands
   (setq isearch-resume-in-command-history 't) ; Use history for isearch as well
@@ -272,6 +272,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; Org mode : Base mode for note taking
 (use-package org
   :config (require 'org-tempo) ; Useful for using easy templates like <s TAB to insert a source block
+  :custom ((org-agenda-files '("~/.org_roam")))
   :hook (org-mode . (lambda()
                       (auto-fill-mode)))) ; Wrap lines when longer than fill column
 
@@ -563,6 +564,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
     "Only enable the ijkl-local-mode on traditional buffers"
     (unless (or (minibufferp)
                 (string-match "[Gg]it" (format "%s" major-mode))
+                (string-match "[Gg]it" (format "%s" major-mode))
                 (string-equal (buffer-name) "COMMIT_EDITMSG"))
       (ijkl-local-mode))))
 (ijkl-mode)
@@ -759,13 +761,26 @@ the call to TO will be an alias to the default keymaps"
   ("n" backward-sexp "Go to the opening parenthesis/bracket"))
 (define-key ijkl-local-mode-map "g" 'go/body)
 
+
+;;;; Org ijkl
+(with-eval-after-load "org"
+  ;; Use ijkl in the date selection buffer
+  (key-alias org-read-date-minibuffer-local-map "m" (kbd "RET") 't)
+  (key-alias org-read-date-minibuffer-local-map "i" (kbd "S-<up>") 't)
+  (key-alias org-read-date-minibuffer-local-map "j" (kbd "S-<left>") 't)
+  (key-alias org-read-date-minibuffer-local-map "k" (kbd "S-<down>") 't)
+  (key-alias org-read-date-minibuffer-local-map "l" (kbd "S-<right>") 't))
+
 ;;;; Hydra org-roam
 (defhydra org(:exit t :columns 2)
   "Jump to destination in text"
+  ("a" org-agenda "Org Agenda")
   ("i" org-roam-node-insert "Insert new org roam file")
+  ("s" org-schedule "Set a scheduled date for the TODO item")
+  ("d" org-deadline "Set a deadline for the TODO item")
   ("g" org-roam-node-find "Go to an org roam file")
-  ("t" org-time-stamp "Insert current timestamp")
-  ("d" org-todo "Changes the TODO state of the current line")
+  ("n" org-time-stamp "Insert now timestamp")
+  ("t" org-todo "Changes the TODO state of the current line")
   ("h" org-roam-buffer-toggle  "Org roam info for current file"))
 (define-key ijkl-local-mode-map "," 'org/body)
 
