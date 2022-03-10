@@ -316,7 +316,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; web-mode : Support various web files, used by my custom modes : my-vue-mode & my-ts-mode
 (use-package web-mode
   :mode
-  ("\\.css\\'" "\\.html\\'" "\\.ts'" "\\.js'" "\\.vue\\'")
+  ("\\.css\\'" "\\.html\\'" "\\.ts\\'" "\\.js\\'" "\\.vue\\'")
   :hook
   (web-mode . (lambda () (setq-local lsp-auto-format (match-buffer-extension "ts" "js" "vue"))))
   :custom
