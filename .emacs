@@ -271,8 +271,10 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; Org mode : Base mode for note taking
 (use-package org
-  :config (require 'org-tempo) ; Useful for using easy templates like <s TAB to insert a source block
-  :custom ((org-agenda-files '("~/.org_roam")))
+  :config
+  (require 'org-tempo) ; Useful for using easy templates like <s TAB to insert a source block
+  :custom ((org-agenda-files '("~/.org_roam")) ; For autopopulating todos from notes
+           (org-capture-bookmark nil)) ; To disable adding a bookmark on each org capture
   :hook (org-mode . (lambda()
                       (auto-fill-mode)))) ; Wrap lines when longer than fill column
 
