@@ -32,16 +32,23 @@ There are two things you can do about this warning:
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-(require 'use-package-ensure)
-(setq use-package-always-ensure t) ; Install the package if not available yet
+
+;; Install the package if not available yet
+(use-package use-package
+  :custom
+  (use-package-always-ensure 't) ; Download missing packages by default
+  (use-package-always-defer 't) ; Lazy load by default, use :demand otherwise
+)
 
 ;;;; diminish : Hide the mode line string for modes (called the lighter)
-(use-package diminish)
+(use-package diminish
+  :demand
+  :config
+  (diminish 'eldoc-mode)
+  (diminish 'abbrev-mode))
 
 ;;;; esup : Launch the esup command to measure startup time of each emacs plugin
-(use-package esup
-  :commands esup
-  :config (setq esup-depth 0))
+(use-package esup :custom (esup-depth 0))
 
 ;;; Various customizations options
 ;;;; my-keys minor mode for global keybindings overriding
@@ -54,10 +61,12 @@ There are two things you can do about this warning:
 
 ;;;; Main color theme : vscode-dark-plus-theme
 (use-package vscode-dark-plus-theme
+  :demand
   :config (load-theme 'vscode-dark-plus t))
 
 ;;;; Mode line theme : doom mode line
 (use-package doom-modeline
+  :demand
   :custom-face
   (mode-line ((t :background "black")))
   (mode-line-inactive ((t :background "#333333"))) ; Dark grey
@@ -75,15 +84,14 @@ There are two things you can do about this warning:
 
 ;;;; Welcome dashboard
 (use-package dashboard
-    :ensure t
-    :diminish dashboard-mode
-    :config
-    (setq dashboard-items '((projects . 5)
-                            (bookmarks . 10)
-                            (recents  . 10)
-                            ))
-    (dashboard-setup-startup-hook))
-(add-hook 'dashboard-mode-hook (lambda()(setq show-trailing-whitespace nil)))
+  :demand
+  :hook (dashboard-mode . (lambda()(setq show-trailing-whitespace nil)))
+  :diminish dashboard-mode
+  :custom (dashboard-items '((projects . 5)
+                             (bookmarks . 10)
+                             (recents  . 10)))
+  :config
+  (dashboard-setup-startup-hook))
 
 ;;;; Misc
 (progn
@@ -223,7 +231,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;; General usage packages
 ;;;; magit : Git front end (amazing!)
 (use-package magit
-  :defer t
   :custom-face (magit-filename ((t :foreground "white"))) ; Otherwise untracked files have the same color as title in git status
   :config
   (setq magit-no-confirm t)
@@ -231,19 +238,24 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; which-key : Displays command shortcuts when typing commands
 (use-package which-key
+  :demand
   :config (which-key-mode)
   :diminish)
 
 ;;;; key-chord  : Enables combination of keys like zz
 (use-package key-chord
+  :demand
   :custom (key-chord-two-keys-delay 0.03)
   :config (key-chord-mode))
+
+;;;; hydra : Keybindings combinations
+(use-package hydra)
 
 ;;;; helm : User friendly search of commands/variables etc
 ;; We rebind some of emacs commands to use helm instead
 (use-package helm
   :diminish
-  :demand t
+  :demand ; We want to enable helm completion for all commands, not just helm's. Can't lazy load sadly
   :bind (:map my-keys-mode-map
          ("M-x" . helm-M-x) ; Rebind traditional methods to helm methods
          :map help-map
@@ -272,11 +284,14 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; Org mode : Base mode for note taking
 (use-package org
   :config
-  (require 'org-tempo) ; Useful for using easy templates like <s TAB to insert a source block
   :custom ((org-agenda-files '("~/.org_roam")) ; For autopopulating todos from notes
            (org-capture-bookmark nil)) ; To disable adding a bookmark on each org capture
   :hook (org-mode . (lambda()
                       (auto-fill-mode)))) ; Wrap lines when longer than fill column
+
+(use-package org-tempo  ; Useful for using easy templates like <s TAB to insert a source block
+  :ensure nil
+  :after org)
 
 ;;;; Org bullets : Pretty mode for org
 (use-package org-bullets
@@ -284,7 +299,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; org-roam : Notes organizing
 (use-package org-roam
-  :defer t
   :init
   (setq org-roam-v2-ack t)
   :config
@@ -296,13 +310,11 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;; Development packages and options
 ;;;; Projectile : Search files or strings in the current project
-(use-package projectile :defer t)
+(use-package projectile)
 
 ;;;; ag : Front end for the CLI utility ag, Used by projectile-ag
 (use-package ag
-  :defer t
-  :config (setq ag-highlight-search t))
-
+  :custom (ag-highlight-search t))
 
 ;;;; rainbow-delimiters : Parenthesis color based on depth
 (use-package rainbow-delimiters
@@ -310,8 +322,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; treemacs : Displays the current project on the left as in an IDE
 (use-package treemacs
-  :defer t
-  :config (custom-set-variables '(treemacs-no-delete-other-windows nil)))
+  :custom (treemacs-no-delete-other-windows nil))
 
 ;;;; web-mode : Support various web files, used by my custom modes : my-vue-mode & my-ts-mode
 (use-package web-mode
@@ -325,7 +336,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; prettier-js : Formatting on save, used by my-ts-mode for .js and .ts files
 (use-package prettier-js
-  :defer t
   :custom
   (prettier-js-show-errors nil)
   (prettier-js-args '("--semi" "false"
@@ -337,24 +347,28 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; Outline mode with package outline-minor-faces and outshine
 ;;;;; Enable sane bindings and actions for outline mode
 (use-package outshine
-  :defer t
   :diminish
+  :hook (emacs-lisp-mode . outshine-mode)
   :config (define-key outshine-mode-map (kbd "C-M-i") nil))
-(add-hook 'outline-minor-mode-hook (lambda()(diminish 'outline-minor-mode)))
+
+(use-package outline
+  :ensure nil ; emacs built-in
+  :hook (outline-minor-mode . (lambda()(diminish 'outline-minor-mode))))
 
 ;;;;; Pretty colors for outline-mode
 (use-package outline-minor-faces
   :hook (outline-minor-mode . outline-minor-faces-add-font-lock-keywords))
 
-(add-hook 'emacs-lisp-mode-hook 'outshine-mode)
-(diminish 'eldoc-mode)
-
 ;;;; yaml-mode : Support gitlab-ci.yml
-(use-package yaml-mode :mode "\\.yml\\'")
+(use-package yaml-mode
+  :mode "\\.yml\\'")
 
 ;;;; hide-show-mode : Hide/show sections of code : current function, class, or if/else section
-(add-hook 'prog-mode-hook 'hs-minor-mode)
-(add-hook 'hs-minor-mode-hook (lambda() (diminish 'hs-minor-mode)))
+(use-package hideshow
+  :ensure nil ; Built-in emacs
+  :hook (prog-mode . (lambda()
+                       (hs-minor-mode)
+                       (diminish hs-minor-mode))))
 
 ;;;; include-guards(text) : Add include guards to the current file
 (defun include-guards(text)
@@ -389,24 +403,20 @@ It will add the following code :
 ;;;; enable c++ mode for headers
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
-;;;; Disable Abbrev in the mode line
-(diminish 'abbrev-mode)
-
 ;;;; C++ mode line customization
 ;; Ignore the customization of the mode line C++//l for example becomes C++
 (advice-add 'c-update-modeline :override #'ignore)
 
-;;; LSP : completion and linting
+;;; LSP + DAP : completion, linting, debugging
 ;;;; lsp-treemacs : treemacs style views for various lsp results
-(use-package lsp-treemacs :defer t)
+(use-package lsp-treemacs )
 
 ;;;; company : Completion frontend, used by lsp
 (use-package company
-  :defer t
   :diminish)
 
 ;;;; flycheck : Syntax highlighting, used by lsp
-(use-package flycheck :defer t)
+(use-package flycheck)
 
 ;;;; yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands like completion
 (use-package yasnippet
@@ -485,7 +495,7 @@ It will add the following code :
   (save-buffer))
 
 ;;;; lsp-jedi : An LSP backend for python
-(use-package lsp-jedi :defer t)
+(use-package lsp-jedi)
 
 ;;; Reimplementation of a mark ring
 ;;;; Define the global variables used
@@ -618,6 +628,7 @@ the call to TO will be an alias to the default keymaps"
 ;;;; utility bindings
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "C-g") nil) ; Do not override C-g binding
+(define-key ijkl-local-mode-map (kbd "C-g") nil) ; Do not override C-g binding
 (define-key ijkl-local-mode-map (kbd "C-x") nil) ; Do not override C-x binding
 (define-key ijkl-local-mode-map (kbd "C-c") nil) ; Do not override C-x binding
 (define-key ijkl-local-mode-map (kbd "M-x") nil) ; Do not override M-x binding
@@ -627,6 +638,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "C-z") nil) ; Do not override C-z binding
 (define-key ijkl-local-mode-map (kbd "C-s") nil) ; Do not override C-s binding
 (define-key ijkl-local-mode-map (kbd "C-r") nil) ; Do not override C-r binding
+(define-key ijkl-local-mode-map (kbd "<f11>") nil) ; Do not override f11 (fullscreen)
 (define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
 (define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Evaluate the lisp expression
 (key-chord-define ijkl-local-mode-map "xx" 'helm-M-x) ; Bind xx to M-x
@@ -836,3 +848,7 @@ the call to TO will be an alias to the default keymaps"
 (with-eval-after-load "with-editor"  ; Called for commits
   (key-chord-define with-editor-mode-map "cc" 'with-editor-finish)
   (key-chord-define with-editor-mode-map "qq" 'with-editor-cancel))
+
+;;; Custom section : modified when experimenting with the customize menu.
+;; I prefer to include these modifications in the relevant use-pakage sections
+;; So this section should not get committed
