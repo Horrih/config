@@ -414,6 +414,25 @@ It will add the following code :
                       (yas-minor-mode)
                       (diminish 'yas-minor-mode))))
 
+;;;; dap-mode : Debug adapter protocol for emacs
+;; Package to download
+(use-package dap-mode)
+
+;; Comes with dap-mode
+(use-package dap-cpptools
+  :ensure nil
+  :hook (c++-mode . dap-cpptools-setup))
+
+;; UI settings for dap-mode (comes with the dap-mode package)
+(use-package dap-ui
+  :ensure nil
+  :config
+  (unless (display-graphic-p)
+    (set-face-background 'dap-ui-marker-face "color-166") ; An orange background for the line to execute
+    (set-face-attribute 'dap-ui-marker-face nil :inherit nil) ; Do not inherit other styles
+    (set-face-background 'dap-ui-pending-breakpoint-face "blue") ; Blue background for breakpoints line
+    (set-face-attribute 'dap-ui-verified-breakpoint-face nil :inherit 'dap-ui-pending-breakpoint-face)))
+
 ;;;; lsp-mode : Completion and syntax highlighting backend API, available for most languages
 (use-package lsp-mode
   :hook
@@ -687,8 +706,9 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
 (define-key ijkl-local-mode-map (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
 (define-key ijkl-local-mode-map (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
-(define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ;; Refreshes all the current files/buffers
-(define-key ijkl-local-mode-map (kbd "<f12>"  ) 'include-c-header) ;; Shortcuts for a #include directive
+(define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ; Refreshes all the current files/buffers
+(define-key ijkl-local-mode-map (kbd "<f12>"  ) 'include-c-header) ; Shortcuts for a #include directive
+(define-key ijkl-local-mode-map "d" 'dap-hydra) ; Bind dap-mode bindings
 
 ;;;; Resize the window when split using split screen (C-2 or C-3)
 (define-key ijkl-local-mode-map (kbd "M-S-<right>") 'enlarge-window-horizontally)
