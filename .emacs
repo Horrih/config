@@ -286,13 +286,22 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package org
   :config
   :custom ((org-agenda-files '("~/.org_roam")) ; For autopopulating todos from notes
+           (org-agenda-span 'month) ; To have a monthly view by default
            (org-capture-bookmark nil)) ; To disable adding a bookmark on each org capture
   :hook (org-mode . (lambda()
+                      (require 'recentf)
+                      (add-to-list 'recentf-exclude ".*org$") ; Ignore org files from recentf due to agenda loading everything
                       (auto-fill-mode)))) ; Wrap lines when longer than fill column
 
 (use-package org-tempo  ; Useful for using easy templates like <s TAB to insert a source block
   :ensure nil
   :after org)
+
+;;;; Org org-agenda-other-window-no-switch()
+(defun org-agenda-other-window-no-switch()
+  "Opens the org agenda (monthly view) in a side window without leaving the current window"
+  (interactive)
+  (save-selected-window (org-agenda-list)))
 
 ;;;; Org bullets : Pretty mode for org
 (use-package org-bullets
@@ -590,6 +599,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
     (unless (or (minibufferp)
                 (string-match "[Gg]it" (format "%s" major-mode))
                 (string-match "[Gg]it" (format "%s" major-mode))
+                (string-match "Org Agenda" (buffer-name))
                 (string-equal (buffer-name) "COMMIT_EDITMSG"))
       (ijkl-local-mode))))
 (ijkl-mode)
@@ -803,7 +813,7 @@ the call to TO will be an alias to the default keymaps"
 ;;;; Hydra org-roam
 (defhydra org(:exit t :columns 2)
   "Jump to destination in text"
-  ("a" org-agenda "Org Agenda")
+  ("a" org-agenda-list "Org Agenda")
   ("i" org-roam-node-insert "Insert new org roam file")
   ("s" org-schedule "Set a scheduled date for the TODO item")
   ("d" org-deadline "Set a deadline for the TODO item")
