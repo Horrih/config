@@ -48,7 +48,8 @@ There are two things you can do about this warning:
   (diminish 'abbrev-mode))
 
 ;;;; esup : Launch the esup command to measure startup time of each emacs plugin
-(use-package esup :custom (esup-depth 0))
+(use-package esup
+  :custom (esup-depth 0)) ; Sometimes fixes the bug https://github.com/jschaf/esup/issues/54
 
 ;;; Various customizations options
 ;;;; my-keys minor mode for global keybindings overriding
@@ -324,12 +325,13 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package treemacs
   :custom (treemacs-no-delete-other-windows nil))
 
-;;;; web-mode : Support various web files, used by my custom modes : my-vue-mode & my-ts-mode
+;;;; web-mode : Support various web files
 (use-package web-mode
-  :mode
-  ("\\.css\\'" "\\.html\\'" "\\.ts\\'" "\\.js\\'" "\\.vue\\'")
+  :mode ("\\.css\\'" "\\.html\\'" "\\.ts\\'" "\\.js\\'" "\\.vue\\'")
   :hook
-  (web-mode . (lambda () (setq-local lsp-auto-format (match-buffer-extension "ts" "js" "vue"))))
+  (web-mode . (lambda () (when (match-buffer-extension "ts" "js" "vue")
+                           (lsp-deferred)
+                           (setq-local lsp-auto-format 't))))
   :custom
   (web-mode-script-padding 0) ; For vue.js SFC : no initial padding in the script section
   (web-mode-markup-indent-offset 2)) ; For html : use an indent of size 2 (default is 4)
@@ -400,23 +402,21 @@ It will add the following code :
   (insert (format "#include \"%s.h\"\n" val))
   (save-buffer))
 
-;;;; enable c++ mode for headers
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+;;;; c++ mode
+(use-package c++-mode
+  :ensure nil  ; Part of emacs
+  :mode ("\\.h\\'" "\\.cpp\\'" "\\.hpp\\'" "\\.hxx\\'" "\\.cxx\\'")
+  :hook (c++-mode . lsp-deferred)
+  :config
+  (advice-add 'c-update-modeline :override #'ignore)) ;; Don't use a modeline suffix (i.e C++//l)
 
-;;;; C++ mode line customization
-;; Ignore the customization of the mode line C++//l for example becomes C++
-(advice-add 'c-update-modeline :override #'ignore)
 
 ;;; LSP + DAP : completion, linting, debugging
 ;;;; lsp-treemacs : treemacs style views for various lsp results
-(use-package lsp-treemacs )
+(use-package lsp-treemacs)
 
 ;;;; company : Completion frontend, used by lsp
-(use-package company
-  :diminish)
-
-;;;; flycheck : Syntax highlighting, used by lsp
-(use-package flycheck)
+(use-package company :diminish)
 
 ;;;; yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands like completion
 (use-package yasnippet
@@ -425,13 +425,8 @@ It will add the following code :
                       (diminish 'yas-minor-mode))))
 
 ;;;; dap-mode : Debug adapter protocol for emacs
-;; Package to download
+;; Install mono on linux then run dap-cpptools-setup
 (use-package dap-mode)
-
-;; Comes with dap-mode
-(use-package dap-cpptools
-  :ensure nil
-  :hook (c++-mode . dap-cpptools-setup))
 
 ;; UI settings for dap-mode (comes with the dap-mode package)
 (use-package dap-ui
@@ -443,20 +438,25 @@ It will add the following code :
     (set-face-background 'dap-ui-pending-breakpoint-face "blue") ; Blue background for breakpoints line
     (set-face-attribute 'dap-ui-verified-breakpoint-face nil :inherit 'dap-ui-pending-breakpoint-face)))
 
+
+;;;; flycheck : Syntax highlighting, used by lsp
+(use-package flycheck
+  ;; Add a flake8 for python. Needs to be done after lsp-diagnostics has been loaded
+  :hook (lsp-diagnostics-mode . (lambda()(flycheck-add-next-checker 'lsp 'python-flake8))))
+
 ;;;; lsp-mode : Completion and syntax highlighting backend API, available for most languages
+;; The following packages need to be installed according to the language
+;; Python : pip install pyright flake8
+;; c++ : pacman -S clang bear (or jq)
+;; vue.js, javascript, typescript : sudo npm install -g vls typescript-language-server
 (use-package lsp-mode
   :hook
-  (
-   (c++-mode    . lsp-deferred)
-   (my-vue-mode . lsp-deferred)
-   (my-ts-mode  . lsp-deferred)
-   (python-mode . lsp-deferred)
-   (lsp-mode    . lsp-enable-which-key-integration))
-  :commands lsp lsp-deferred
+  (lsp-mode    . lsp-enable-which-key-integration)
   :init (setq lsp-keymap-prefix "C-c l")
   :bind (("C-h l" . lsp-describe-thing-at-point))
   :custom
   ;; Formatting options for vue.js (.vue files)
+  (lsp-enable-links nil) ; Make links non clickable
   (lsp-vetur-format-default-formatter-html "js-beautify-html")
   (lsp-vetur-format-default-formatter-options
    '((js-beautify-html
@@ -470,17 +470,8 @@ It will add the following code :
       (trailingComma . "all")
       (vueIndentScriptAndStyle . :json-false)
       (semi . :json-false))))
-  (lsp-enable-links nil) ; Make links non clickable
-
   :config
-  (setq lsp-headerline-arrow ">") ; Material design icon not working on windows
-  (require 'lsp-diagnostics)
-  (lsp-diagnostics-flycheck-enable) ; Enable flycheck instead of the builtin flymake
-
-  ;; Custom checkers and client for python
-  (when (derived-mode-p 'python-mode)
-    (require 'lsp-jedi) ; Using jedi instead of pyls
-    (flycheck-add-next-checker 'lsp 'python-flake8)))
+  (setq lsp-headerline-arrow ">")) ; Material design icon not working on windows
 
 ;;;; lsp-format-and-save : format on save if lsp-auto-format is not nil
 (defcustom lsp-auto-format nil
@@ -494,8 +485,11 @@ It will add the following code :
     (lsp-format-buffer))
   (save-buffer))
 
-;;;; lsp-jedi : An LSP backend for python
-(use-package lsp-jedi)
+;;;; lsp-pyright : An LSP backend for python
+(use-package lsp-pyright
+  :hook (python-mode . (lambda()
+                         (require 'lsp-pyright)
+                         (lsp-deferred))))
 
 ;;; Reimplementation of a mark ring
 ;;;; Define the global variables used
@@ -768,7 +762,8 @@ the call to TO will be an alias to the default keymaps"
   "Search related commands"
   ("d" dired-jump "Open current directory in dired")
   ("f" helm-find-files "helm-find-files")
-  ("e" lsp-treemacs-errors-list "LSP errors")
+  ("e" flycheck-list-errors "Errors current file (flycheck + LSP)")
+  ("t" lsp-treemacs-errors-list "Errors current project (LSP treemacs)")
   ("r" lsp-find-references "LSP find references")
   ("o" ff-find-other-file "switch header/cpp")
   ("p" projectile-find-file "projectile-find-file"))
