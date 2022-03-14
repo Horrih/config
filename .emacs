@@ -435,7 +435,8 @@ It will add the following code :
 
 ;;;; dap-mode : Debug adapter protocol for emacs
 ;; Install mono on linux then run dap-cpptools-setup
-(use-package dap-mode)
+(use-package dap-mode
+  :hook (c++-mode . (lambda() (require 'dap-cpptools))))
 
 ;; UI settings for dap-mode (comes with the dap-mode package)
 (use-package dap-ui
