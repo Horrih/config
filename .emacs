@@ -284,18 +284,14 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; Org mode : Base mode for note taking
 (use-package org
-  :config
   :custom ((org-agenda-files '("~/.org_roam")) ; For autopopulating todos from notes
            (org-agenda-span 'month) ; To have a monthly view by default
            (org-capture-bookmark nil)) ; To disable adding a bookmark on each org capture
   :hook (org-mode . (lambda()
+                      (require 'org-tempo) ; For templates like <sTAB to insert a code block
                       (require 'recentf)
                       (add-to-list 'recentf-exclude ".*org$") ; Ignore org files from recentf due to agenda loading everything
                       (auto-fill-mode)))) ; Wrap lines when longer than fill column
-
-(use-package org-tempo  ; Useful for using easy templates like <s TAB to insert a source block
-  :ensure nil
-  :after org)
 
 ;;;; Org org-agenda-other-window-no-switch()
 (defun org-agenda-other-window-no-switch()
@@ -434,9 +430,15 @@ It will add the following code :
                       (diminish 'yas-minor-mode))))
 
 ;;;; dap-mode : Debug adapter protocol for emacs
-;; Install mono on linux then run dap-cpptools-setup
+;; For c++ Install mono on linux then run dap-cpptools-setup for c++
+;; For dap-firefox : download and unzip the package in ~/.emacs.d/.extension/vscode/
+;; and modify the path to the executable js file which has been renamed to adapter.bundle.js
+;; For any language, require then the appropriate packages, and use a launch.json at your lsp root
 (use-package dap-mode
-  :hook (c++-mode . (lambda() (require 'dap-cpptools))))
+  :hook
+  (c++-mode . (lambda()(require 'dap-cpptools)))
+  (python-mode . (lambda()(require 'dap-python)))
+  (web-mode . (lambda()(require 'dap-firefox))))
 
 ;; UI settings for dap-mode (comes with the dap-mode package)
 (use-package dap-ui
@@ -600,7 +602,6 @@ This mark-ring will record all mark positions globally, multiple times per buffe
     (unless (or (minibufferp)
                 (string-match "[Gg]it" (format "%s" major-mode))
                 (string-match "[Gg]it" (format "%s" major-mode))
-                (string-match "Org Agenda" (buffer-name))
                 (string-equal (buffer-name) "COMMIT_EDITMSG"))
       (ijkl-local-mode))))
 (ijkl-mode)
@@ -725,7 +726,7 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
 (define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ; Refreshes all the current files/buffers
 (define-key ijkl-local-mode-map (kbd "<f12>"  ) 'include-c-header) ; Shortcuts for a #include directive
-(define-key ijkl-local-mode-map "d" 'dap-hydra) ; Bind dap-mode bindings
+(key-chord-define ijkl-local-mode-map "dd" 'dap-hydra) ; Bind dap-mode bindings
 
 ;;;; Resize the window when split using split screen (C-2 or C-3)
 (define-key ijkl-local-mode-map (kbd "M-S-<right>") 'enlarge-window-horizontally)
