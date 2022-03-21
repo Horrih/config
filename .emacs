@@ -631,9 +631,15 @@ the call to TO will be an alias to the default keymaps"
        (define-key ,keymap ,from ',(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to))))
     ))
 
-;;;; utility bindings
-(define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
-(define-key ijkl-local-mode-map (kbd "C-g") nil) ; Do not override C-g binding
+;;;; Don't override some bindings
+(define-key ijkl-local-mode-map (kbd "<left>" ) nil) ; Do not override left  arrow
+(define-key ijkl-local-mode-map (kbd "<right>") nil) ; Do not override right arrow
+(define-key ijkl-local-mode-map (kbd "<up>"   ) nil) ; Do not override up    arrow
+(define-key ijkl-local-mode-map (kbd "<down>" ) nil) ; Do not override down  arrow
+(define-key ijkl-local-mode-map (kbd "M-<right>") nil) ; Do not override left arrow
+(define-key ijkl-local-mode-map (kbd "M-<left>" ) nil) ; Do not override right arrow
+(define-key ijkl-local-mode-map (kbd "M-<up>"   ) nil) ; Do not override up arrow
+(define-key ijkl-local-mode-map (kbd "M-<down>" ) nil) ; Do not override downright arrow
 (define-key ijkl-local-mode-map (kbd "C-g") nil) ; Do not override C-g binding
 (define-key ijkl-local-mode-map (kbd "C-x") nil) ; Do not override C-x binding
 (define-key ijkl-local-mode-map (kbd "C-c") nil) ; Do not override C-x binding
@@ -645,6 +651,9 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map (kbd "C-s") nil) ; Do not override C-s binding
 (define-key ijkl-local-mode-map (kbd "C-r") nil) ; Do not override C-r binding
 (define-key ijkl-local-mode-map (kbd "<f11>") nil) ; Do not override f11 (fullscreen)
+
+;;;; utility bindings
+(define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
 (define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Evaluate the lisp expression
 (key-chord-define ijkl-local-mode-map "xx" 'helm-M-x) ; Bind xx to M-x
@@ -793,12 +802,13 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map "ç" 'compile/body)
 
 ;;;; Hydra go
-(defhydra go(:exit t :columns 1)
+(defhydra go(:exit t :columns 2)
   "Jump to destination in text"
   ("b" bookmark-jump "Bookmark jump")
   ("j" lsp-find-definition "LSP jump to definition")
   ("g" goto-line "Go to line n°")
   ("p" forward-sexp  "Go to the closing parenthesis/bracket")
+  ("," org-roam-node-find "Go to an org roam file")
   ("n" backward-sexp "Go to the opening parenthesis/bracket"))
 (define-key ijkl-local-mode-map "g" 'go/body)
 
