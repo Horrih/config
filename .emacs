@@ -284,8 +284,12 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; Org mode : Base mode for note taking
 (use-package org
+  :custom-face
+  (org-warning ((t (:underline nil)))) ; Do not underline org-warnings, red is enough
   :custom ((org-agenda-files '("~/.org_roam")) ; For autopopulating todos from notes
            (org-agenda-span 'month) ; To have a monthly view by default
+           (org-agenda-start-on-weekday 1) ; Agenda starts on monday in agenda
+           (calendar-week-start-day 1) ; Date picker starts on monday
            (org-capture-bookmark nil)) ; To disable adding a bookmark on each org capture
   :hook (org-mode . (lambda()
                       (require 'org-tempo) ; For templates like <sTAB to insert a code block
