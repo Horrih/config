@@ -318,6 +318,15 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (org-roam-directory "~/.org_roam")
   (org-roam-completion-everywhere t))
 
+(defun org-roam-pull-commit-push()
+  "Git commit and push all the modified files in `org-roam-directory'"
+  (interactive)
+  (let ((default-directory org-roam-directory))
+    (shell-command "git add -u")
+    (shell-command "git commit -m 'Automated commit from org-roam-commit-and-push'" )
+    (shell-command "git pull --rebase" )
+    (shell-command "git push" )))
+
 ;;; Development packages and options
 ;;;; Projectile : Search files or strings in the current project
 (use-package projectile)
@@ -838,7 +847,7 @@ the call to TO will be an alias to the default keymaps"
   (key-alias org-read-date-minibuffer-local-map "l" (kbd "S-<right>") 't))
 
 ;;;; Hydra org-roam
-(defhydra org(:exit t :columns 2)
+(defhydra org(:exit t :columns 3)
   "Jump to destination in text"
   ("a" org-agenda-list "Org Agenda")
   ("i" org-roam-node-insert "Insert new org roam file")
@@ -847,6 +856,7 @@ the call to TO will be an alias to the default keymaps"
   ("g" org-roam-node-find "Go to an org roam file")
   ("n" org-time-stamp "Insert now timestamp")
   ("t" org-todo "Changes the TODO state of the current line")
+  ("P" org-roam-pull-commit-push "Org roam sync")
   ("h" org-roam-buffer-toggle  "Org roam info for current file"))
 (define-key ijkl-local-mode-map "," 'org/body)
 
