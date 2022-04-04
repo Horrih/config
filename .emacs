@@ -659,6 +659,10 @@ the call to TO will be an alias to the default keymaps"
 ;;;; utility bindings
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
+(define-key ijkl-local-mode-map (kbd "<up>") nil) ;Do not override arrow keys
+(define-key ijkl-local-mode-map (kbd "<down>") nil)
+(define-key ijkl-local-mode-map (kbd "<right>") nil)
+(define-key ijkl-local-mode-map (kbd "<left>") nil)
 (define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Evaluate the lisp expression
 (key-chord-define ijkl-local-mode-map "xx" 'helm-M-x) ; Bind xx to M-x
 (key-alias  ijkl-local-mode-map (kbd "!"  ) (kbd "M-!")) ; Launch shell commands with !
@@ -703,6 +707,10 @@ the call to TO will be an alias to the default keymaps"
 
 ;;;;; upwards
 (key-alias  ijkl-local-mode-map (kbd "i") (kbd "C-p"))
+;; C-i is bound to TAB in terminals. You need to remap C-i to C-p at your GUI app level
+;; For example powertoys on windows, xterm remapping on linux
+;; xterm*VT100.Translations: #override ~Alt Ctrl <Key> I:  string(0x10)
+(when (display-graphic-p) (key-alias ijkl-local-mode-map (kbd "C-i") (kbd "C-p")))
 (define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-i") (kbd "M-<") t)
 (key-chord-define ijkl-local-mode-map "aa" 'beginning-of-buffer)
@@ -711,6 +719,7 @@ the call to TO will be an alias to the default keymaps"
 
 ;;;;; downwards
 (key-alias  ijkl-local-mode-map (kbd "k") (kbd "C-n"))
+(key-alias  ijkl-local-mode-map (kbd "C-k") (kbd "C-n"))
 (define-key    my-keys-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-k") (kbd "M->") t)
 (key-chord-define ijkl-local-mode-map "ee" 'end-of-buffer)
@@ -806,11 +815,13 @@ the call to TO will be an alias to the default keymaps"
 (define-key ijkl-local-mode-map "ç" 'compile/body)
 
 ;;;; Hydra go
-(defhydra go(:exit t :columns 2)
+(defhydra go(:exit t :columns 3)
   "Jump to destination in text"
+  ("g" goto-line "Go to line n°")
   ("b" bookmark-jump "Bookmark jump")
   ("j" lsp-find-definition "LSP jump to definition")
-  ("g" goto-line "Go to line n°")
+  ("e" flycheck-next-error "Next error (Flycheck)")
+  ("E" flycheck-previous-error "Previous error (Flycheck)")
   ("p" forward-sexp  "Go to the closing parenthesis/bracket")
   ("," org-roam-node-find "Go to an org roam file")
   ("n" backward-sexp "Go to the opening parenthesis/bracket"))
