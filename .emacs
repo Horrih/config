@@ -206,13 +206,10 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (compile (compile-file-command file-name))
   (switch-to-compilation-other-window-end))
 
-;;;; ansi-color : Handle terminal colors in the compilation buffer
+;;;; ansi-color : Translate TTY escape sequences into colors
 (use-package ansi-color
-  :config
-  (defun colorize-compile()
-    (when (eq major-mode 'compilation-mode)
-      (ansi-color-apply-on-region compilation-filter-start (point-max))))
-  :hook (compilation-filter . colorize-compile))
+  :ensure nil ; Emacs built-in
+  :hook (compilation-filter . ansi-color-compilation-filter)) ; Handle terminal colors in the compilation buffer
 
 ;;;; regexps : Set compilation regex for errors
 (let ((enabled-regexps ())
