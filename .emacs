@@ -106,16 +106,18 @@ There are two things you can do about this warning:
   (setq enable-local-variables :all) ; Enable by default variables in .dir-locals.el
   (setq ring-bell-function 'ignore) ; Disable the bell for emacs
   (setq debug-on-error nil) ; Display the stacktrace if error encountered in one of the lisp method
+  (setq completions-detailed 't) ; Detailed description for the built in describe symbol etc
   (column-number-mode 't) ; Display column numbers in the status line
   (global-display-line-numbers-mode 't) ; Display line numbers on the left
   (line-number-mode 't) ; Display line number
   (size-indication-mode 't) ; Display size indication
   (delete-selection-mode 1) ; If text is selected, we expect that typing will replace the selection
   (show-paren-mode 1) ; Highlight the matching parenthesis
-  (setq-default show-trailing-whitespace t) ; Show in red the spaces forgotten at the end of lines
+  (setq-default show-trailing-whitespace 't) ; Show in red the spaces forgotten at the end of lines
   (setq-default indent-tabs-mode nil) ; Use spaces for indent
+  (setq next-error-message-highlight 't) ; When jumping between errors, occurs, etc, highlight the current line
   (menu-bar-mode -1) ; Hide Menu bar
-  (fset 'yes-or-no-p 'y-or-n-p) ; Abreviate Yes/No
+  (setq use-short-answers 't) ; Abreviate Yes/No to y or n
   (setq default-tab-width 4) ; Number of spaces inserted by tab
   (setq-default c-basic-offset  4) ; Base indent size when indented automatically
   (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
@@ -282,6 +284,11 @@ This can be useful in conjunction to projectile's .dir-locals variables"
               ("f" . helpful-callable)
               ("k" . helpful-key)))
 
+;;;; Dired : built-in navigation of folders
+(use-package dired
+  :ensure nil  ; emacs built-in
+  :custom(dired-kill-when-opening-new-dired-buffer 't)) ; Auto close previous folder buffer
+
 ;;;; Org mode : Base mode for note taking
 (use-package org
   :custom-face
@@ -328,10 +335,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
     (shell-command "git push" )))
 
 ;;; Development packages and options
-;;;; Projectile : Search files or strings in the current project
-(use-package projectile)
-
-;;;; ag : Front end for the CLI utility ag, Used by projectile-ag
+;;;; ag : Front end for the CLI utility ag
 (use-package ag
   :custom (ag-highlight-search t))
 
@@ -366,16 +370,16 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; Outline mode with package outline-minor-faces and outshine
 ;;;;; Enable sane bindings and actions for outline mode
-(use-package outshine
-  :diminish
-  :hook (emacs-lisp-mode . outshine-mode)
-  :config (define-key outshine-mode-map (kbd "C-M-i") nil))
-
 (use-package outline
   :ensure nil ; emacs built-in
-  :hook (outline-minor-mode . (lambda()(diminish 'outline-minor-mode))))
+  :hook
+  (emacs-lisp-mode . outline-minor-mode)
+  (outline-minor-mode . (lambda()(diminish 'outline-minor-mode)))
+  :custom
+  (outline-minor-mode-cycle 't)) ; Tab and S-Tab cycle between different visibility settings
 
-;;;;; Pretty colors for outline-mode
+;;;;; Pretty colors for headings
+;; We don't use (outline-minor-mode-highlight 'override) because it applies to some non headings as well
 (use-package outline-minor-faces
   :hook (outline-minor-mode . outline-minor-faces-add-font-lock-keywords))
 
@@ -772,7 +776,7 @@ the call to TO will be an alias to the default keymaps"
   ("TAB" outline-toggle-children "toggle hide/show children")
   ("a" outline-show-all "show all")
   ("n" outline-next-visible-heading "next")
-  ("q" outline-hide-sublevels "hide-all")
+  ("l" outline-hide-sublevels "hide level")
   ("s" outline-show-subtree "show all subtree")
   ("p" outline-previous-visible-heading "prev")
   ("h" outline-hide-subtree "hide subtree"))
@@ -794,9 +798,10 @@ the call to TO will be an alias to the default keymaps"
   "Text search related commands"
   ("o" helm-occur "Occurences in file")
   ("s" isearch-forward "Next occurence in file")
+  ("d" isearch-forward-symbol-at-point "Next occurence in file of symbol")
   ("r" query-replace "Next occurence in file")
   ("a" helm-do-grep-ag "Ag in current directory")
-  ("p" projectile-ag "Ag in current project")
+  ("p" project-ag "Ag in current project")
   ("b" multi-occur-in-matching-buffers "Occur in all buffers"))
 (define-key ijkl-local-mode-map "s" 'search/body)
 
@@ -809,7 +814,7 @@ the call to TO will be an alias to the default keymaps"
   ("t" lsp-treemacs-errors-list "Errors current project (LSP treemacs)")
   ("r" lsp-find-references "LSP find references")
   ("o" ff-find-other-file "switch header/cpp")
-  ("p" projectile-find-file "projectile-find-file"))
+  ("p" project-find-file "projectile-find-file"))
 (define-key ijkl-local-mode-map "f" 'find/body)
 
 ;;;; Hydra compile
