@@ -853,7 +853,7 @@ the call to TO will be an alias to the default keymaps"
   ;; Make C-u delete the last character of isearch
   ;; Since there is no isearch-del-word, make M-u delete the last 10 characters
   (define-key isearch-mode-map (kbd "C-u") 'isearch-del-char)
-  (define-key isearch-mode-map (kbd "M-u") (lambda() (interactive) (isearch-del-char 10)))
+  (define-key isearch-mode-map (kbd "M-u") (lambda() (interactive) (isearch-del-char 10))))
 
 ;;;; Hydra org-roam
 (defhydra org(:exit t :columns 3)
