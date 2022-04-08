@@ -795,10 +795,10 @@ the call to TO will be an alias to the default keymaps"
   "Text search related commands"
   ("o" helm-occur "Occurences in file")
   ("s" isearch-forward "Next occurence in file")
-  ("d" isearch-forward-symbol-at-point "Next occurence in file of symbol")
+  ("w" isearch-forward-symbol-at-point "Next occurence in file of word")
   ("r" query-replace "Next occurence in file")
   ("a" helm-do-grep-ag "Ag in current directory")
-  ("p" project-ag "Ag in current project")
+  ("p" ag-project "Ag in current project")
   ("b" multi-occur-in-matching-buffers "Occur in all buffers"))
 (define-key ijkl-local-mode-map "s" 'search/body)
 
@@ -847,6 +847,13 @@ the call to TO will be an alias to the default keymaps"
   (key-alias org-read-date-minibuffer-local-map "j" (kbd "S-<left>") 't)
   (key-alias org-read-date-minibuffer-local-map "k" (kbd "S-<down>") 't)
   (key-alias org-read-date-minibuffer-local-map "l" (kbd "S-<right>") 't))
+
+;;;; isearch ijkl
+(with-eval-after-load "isearch"
+  ;; Make C-u delete the last character of isearch
+  ;; Since there is no isearch-del-word, make M-u delete the last 10 characters
+  (define-key isearch-mode-map (kbd "C-u") 'isearch-del-char)
+  (define-key isearch-mode-map (kbd "M-u") (lambda() (interactive) (isearch-del-char 10)))
 
 ;;;; Hydra org-roam
 (defhydra org(:exit t :columns 3)
