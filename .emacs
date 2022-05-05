@@ -299,6 +299,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
                       (require 'org-tempo) ; For templates like <sTAB to insert a code block
                       (require 'recentf)
                       (add-to-list 'recentf-exclude ".*org$") ; Ignore org files from recentf due to agenda loading everything
+                      (org-indent-mode) ; Auto indent lines according to depth
                       (auto-fill-mode)))) ; Wrap lines when longer than fill column
 
 ;;;; Org org-agenda-other-window-no-switch()
