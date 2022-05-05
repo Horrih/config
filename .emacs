@@ -381,6 +381,10 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package outline-minor-faces
   :hook (outline-minor-mode . outline-minor-faces-add-font-lock-keywords))
 
+;;;; csv-mode : Support for csv files (use csv-align-mode for alignment)
+(use-package csv-mode
+  :mode "\\.csv\\'")
+
 ;;;; yaml-mode : Support gitlab-ci.yml
 (use-package yaml-mode
   :mode "\\.yml\\'")
