@@ -835,6 +835,7 @@ the call to TO will be an alias to the default keymaps"
   "Jump to destination in text"
   ("g" goto-line "Go to line n°")
   ("b" bookmark-jump "Bookmark jump")
+  ("r" jump-to-register "Jump to register (see point-to-register)")
   ("j" lsp-find-definition "LSP jump to definition")
   ("e" flycheck-next-error "Next error (Flycheck)")
   ("E" flycheck-previous-error "Previous error (Flycheck)")
