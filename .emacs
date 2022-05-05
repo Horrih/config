@@ -270,6 +270,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :config
   (helm-mode)
   :custom
+  (helm-M-x-show-short-doc t)
   (helm-buffer-max-length 40))
 
 ;;;; Helpful : nice looking and more complete help buffers
