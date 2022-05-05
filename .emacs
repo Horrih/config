@@ -36,8 +36,8 @@ There are two things you can do about this warning:
 ;; Install the package if not available yet
 (use-package use-package
   :custom
-  (use-package-always-ensure 't) ; Download missing packages by default
-  (use-package-always-defer 't) ; Lazy load by default, use :demand otherwise
+  (use-package-always-ensure t) ; Download missing packages by default
+  (use-package-always-defer t) ; Lazy load by default, use :demand otherwise
 )
 
 ;;;; diminish : Hide the mode line string for modes (called the lighter)
@@ -98,26 +98,26 @@ There are two things you can do about this warning:
 (progn
   (tool-bar-mode 0) ; Disable the toolbar in GUI mode
   (when (display-graphic-p) (scroll-bar-mode 0)) ; Disable the scroll bar in GUI mode
-  (setq inhibit-startup-screen 't) ; Hide the startup screen
+  (setq inhibit-startup-screen t) ; Hide the startup screen
   (savehist-mode) ; Save history for commands
-  (setq isearch-resume-in-command-history 't) ; Use history for isearch as well
+  (setq isearch-resume-in-command-history t) ; Use history for isearch as well
   (global-auto-revert-mode) ; Refresh files automatically when modified from outside emacs
-  (setq enable-local-eval 't) ; Enable eval blocks in .dir-locals.el
+  (setq enable-local-eval t) ; Enable eval blocks in .dir-locals.el
   (setq enable-local-variables :all) ; Enable by default variables in .dir-locals.el
   (setq ring-bell-function 'ignore) ; Disable the bell for emacs
   (setq debug-on-error nil) ; Display the stacktrace if error encountered in one of the lisp method
-  (setq completions-detailed 't) ; Detailed description for the built in describe symbol etc
-  (column-number-mode 't) ; Display column numbers in the status line
-  (global-display-line-numbers-mode 't) ; Display line numbers on the left
-  (line-number-mode 't) ; Display line number
-  (size-indication-mode 't) ; Display size indication
+  (setq completions-detailed t) ; Detailed description for the built in describe symbol etc
+  (column-number-mode t) ; Display column numbers in the status line
+  (global-display-line-numbers-mode t) ; Display line numbers on the left
+  (line-number-mode t) ; Display line number
+  (size-indication-mode t) ; Display size indication
   (delete-selection-mode 1) ; If text is selected, we expect that typing will replace the selection
   (show-paren-mode 1) ; Highlight the matching parenthesis
-  (setq-default show-trailing-whitespace 't) ; Show in red the spaces forgotten at the end of lines
+  (setq-default show-trailing-whitespace t) ; Show in red the spaces forgotten at the end of lines
   (setq-default indent-tabs-mode nil) ; Use spaces for indent
-  (setq next-error-message-highlight 't) ; When jumping between errors, occurs, etc, highlight the current line
+  (setq next-error-message-highlight t) ; When jumping between errors, occurs, etc, highlight the current line
   (menu-bar-mode -1) ; Hide Menu bar
-  (setq use-short-answers 't) ; Abreviate Yes/No to y or n
+  (setq use-short-answers t) ; Abreviate Yes/No to y or n
   (setq default-tab-width 4) ; Number of spaces inserted by tab
   (setq-default c-basic-offset  4) ; Base indent size when indented automatically
   (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
@@ -135,7 +135,7 @@ There are two things you can do about this warning:
     (error "Buffer '%s' is not visiting a file!" name))
   (when (get-buffer new-name)
     (error "A buffer named '%s' already exists!" new-name))
-  (rename-file (buffer-file-name) new-name 't)
+  (rename-file (buffer-file-name) new-name t)
   (rename-buffer new-name)
   (set-visited-file-name new-name)
   (set-buffer-modified-p nil))
@@ -154,9 +154,9 @@ There are two things you can do about this warning:
 
 ;;;; match-buffer-extension
 (defun match-buffer-extension(&rest extensions)
-  "Returns 't if the current buffer has an extension in EXTENSIONS"
+  "Returns t if the current buffer has an extension in EXTENSIONS"
   (if (member (file-name-extension (buffer-name)) extensions)
-      't))
+      t))
 
 ;;; Compilation options
 ;;;; Compilation misc
@@ -285,7 +285,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; Dired : built-in navigation of folders
 (use-package dired
   :ensure nil  ; emacs built-in
-  :custom(dired-kill-when-opening-new-dired-buffer 't)) ; Auto close previous folder buffer
+  :custom(dired-kill-when-opening-new-dired-buffer t)) ; Auto close previous folder buffer
 
 ;;;; Org mode : Base mode for note taking
 (use-package org
@@ -352,7 +352,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :hook
   (web-mode . (lambda () (when (match-buffer-extension "ts" "js" "vue")
                            (lsp-deferred)
-                           (setq-local lsp-auto-format 't))))
+                           (setq-local lsp-auto-format t))))
   :custom
   (web-mode-script-padding 0) ; For vue.js SFC : no initial padding in the script section
   (web-mode-markup-indent-offset 2)) ; For html : use an indent of size 2 (default is 4)
@@ -375,7 +375,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (emacs-lisp-mode . outline-minor-mode)
   (outline-minor-mode . (lambda()(diminish 'outline-minor-mode)))
   :custom
-  (outline-minor-mode-cycle 't)) ; Tab and S-Tab cycle between different visibility settings
+  (outline-minor-mode-cycle t)) ; Tab and S-Tab cycle between different visibility settings
 
 ;;;;; Pretty colors for headings
 ;; We don't use (outline-minor-mode-highlight 'override) because it applies to some non headings as well
@@ -849,11 +849,11 @@ the call to TO will be an alias to the default keymaps"
 ;;;; Org ijkl
 (with-eval-after-load "org"
   ;; Use ijkl in the date selection buffer
-  (key-alias org-read-date-minibuffer-local-map "m" (kbd "RET") 't)
-  (key-alias org-read-date-minibuffer-local-map "i" (kbd "S-<up>") 't)
-  (key-alias org-read-date-minibuffer-local-map "j" (kbd "S-<left>") 't)
-  (key-alias org-read-date-minibuffer-local-map "k" (kbd "S-<down>") 't)
-  (key-alias org-read-date-minibuffer-local-map "l" (kbd "S-<right>") 't))
+  (key-alias org-read-date-minibuffer-local-map "m" (kbd "RET") t)
+  (key-alias org-read-date-minibuffer-local-map "i" (kbd "S-<up>") t)
+  (key-alias org-read-date-minibuffer-local-map "j" (kbd "S-<left>") t)
+  (key-alias org-read-date-minibuffer-local-map "k" (kbd "S-<down>") t)
+  (key-alias org-read-date-minibuffer-local-map "l" (kbd "S-<right>") t))
 
 ;;;; isearch ijkl
 (with-eval-after-load "isearch"
@@ -893,7 +893,7 @@ the call to TO will be an alias to the default keymaps"
     (define-key keymap "x" ctl-x-map)
     (define-key keymap "h" help-map)
     (define-key keymap "v" 'magit-dispatch)
-    (key-alias keymap "m" (kbd "RET") 't)
+    (key-alias keymap "m" (kbd "RET") t)
     (key-alias keymap "b" (kbd "C-x b"))
     (key-alias keymap "j" (kbd "C-j"))
     (key-alias keymap "l" (kbd "C-l"))
