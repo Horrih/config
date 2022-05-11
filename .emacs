@@ -238,9 +238,10 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; magit : Git front end (amazing!)
 (use-package magit
   :custom-face (magit-filename ((t :foreground "white"))) ; Otherwise untracked files have the same color as title in git status
-  :config
-  (setq magit-no-confirm t)
-  (setq magit-visit-ref-behavior '(checkout-any focus-on-ref)))
+  :custom
+  (ediff-split-window-function 'split-window-horizontally) ; Make ediff split side by side
+  (magit-no-confirm t) ; Do not ask for confirmation for actions
+  (magit-visit-ref-behavior '(checkout-any focus-on-ref))) ; Enter on branch names makes you checkout the branch
 
 ;;;; which-key : Displays command shortcuts when typing commands
 (use-package which-key
@@ -643,6 +644,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
     (unless (or (minibufferp)
                 (string-match "[Gg]it" (format "%s" major-mode))
                 (string-match "[Gg]it" (format "%s" major-mode))
+                (string-equal (buffer-name) "*Ediff Control Panel*")
                 (string-equal (buffer-name) "COMMIT_EDITMSG"))
       (ijkl-local-mode))))
 (ijkl-mode)
