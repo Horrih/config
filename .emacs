@@ -285,6 +285,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; Dired : built-in navigation of folders
 (use-package dired
   :ensure nil  ; emacs built-in
+  :bind (:map dired-mode-map ("u" . dired-up-directory))
   :custom(dired-kill-when-opening-new-dired-buffer t)) ; Auto close previous folder buffer
 
 ;;;; Org mode : Base mode for note taking
@@ -600,8 +601,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 (define-minor-mode ijkl-local-mode
   "Minor mode to be able to move using ijkl"
   :lighter " ijkl"
-  :keymap '(([remap self-insert-command]  ignore))
-;;  :keymap '(([t] . ignore))   ; The actual keymaps are defined later below
+  :keymap '(([remap self-insert-command]  ignore)) ; The actual keymaps are defined later below
   (add-to-list 'emulation-mode-map-alists '(ijkl-local-mode . ijkl-local-mode-map))
   )
 (define-key ijkl-local-mode-map "d" 'ijkl-local-mode)
@@ -637,22 +637,46 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 
 ;;; Main keybindings
 ;;;; Helper macro key-alias
-(defmacro key-alias(keymap from to &optional inside-keymap)
+(defun mode-is-one-of-p(modes)
+  "Returns t if the current modes (minor or major) matches one in the input modes list"
+  (let (res)
+    (dolist (input-mode modes res)
+      (dolist (mode (cons major-mode minor-mode-list))
+        (when (string-equal input-mode mode)
+          (setq res t))))))
+
+(defmacro key-alias(keymap from to &optional inside-keymap exceptions)
   "Binds the key-binding FROM to the function called by typing TO.
 
-If inside-keymap is not nil, the TO binding will be set to nil inside the KEYMAP, so that
-the call to TO will be an alias to the default keymaps"
+If INSIDE-KEYMAP is not nil, the TO binding will be set to nil inside the KEYMAP, so that
+the call to TO will be an alias to the default keymaps
+
+The forwarding will only occur if the current major mode is not in EXCEPTIONS list"
   `(progn
      (unless ,inside-keymap
        (define-key ,keymap ,to nil))
      (defun ,(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to)))(&optional args)
        ,(format "Forwards the interactive call from %s to %s (bound by default to `%s')" from to (key-binding (eval to)))
        (interactive "P")
-       (call-interactively (key-binding ,(eval to))))
-       (define-key ,keymap ,from ',(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to))))
+       ;; By default, fetch the binding bound to `to'
+       (let ((to-call (key-binding ,to))
+             (old-binding (key-binding ,from)))
+
+         ;; If exception : then the appropriate command must be fetched in other keymaps
+         ;; This is done here by temporarily setting the `from' binding to nil in the input keymap
+         (when (mode-is-one-of-p ,exceptions)
+           (define-key ,keymap ,from nil) ; Disable the keybinding temporarily
+           (setq to-call (key-binding ,from)) ; Get the command bound in other keymaps
+           (define-key ,keymap ,from old-binding)) ; Restore the original keybinding
+
+         ;; Call the appropriate function
+         (call-interactively to-call)))
+     (define-key ,keymap ,from ',(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to))))
     ))
 
 ;;;; utility bindings
+(define-key ijkl-local-mode-map (kbd "TAB") nil)    ; Do not override tab binding
+(define-key ijkl-local-mode-map (kbd "<tab>") nil)  ; Do not override tab binding
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
 (define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Evaluate the lisp expression
@@ -672,8 +696,8 @@ the call to TO will be an alias to the default keymaps"
 (key-alias  ijkl-local-mode-map (kbd "y"  ) (kbd "C-y"))
 (key-chord-define ijkl-local-mode-map "yy" 'helm-show-kill-ring)
 (key-alias  ijkl-local-mode-map (kbd "_"  ) (kbd "C-_"))
-(define-key ijkl-local-mode-map (kbd "p"      ) 'backward-mark) ;; Reimplementation of a mark ring
-(define-key ijkl-local-mode-map (kbd "n"      ) 'forward-mark)  ;; Reimplementation of a mark ring
+(define-key ijkl-local-mode-map (kbd "p"  ) 'backward-mark) ;; Reimplementation of a mark ring
+(define-key ijkl-local-mode-map (kbd "n"  ) 'forward-mark)  ;; Reimplementation of a mark ring
 (key-alias  ijkl-local-mode-map (kbd "<SPC>") (kbd "C-@"))
 
 ;;;; movement and deletion bindings (accessible in both modes)
@@ -709,7 +733,7 @@ the call to TO will be an alias to the default keymaps"
 (key-chord-define ijkl-local-mode-map "ee" 'end-of-buffer)
 
 ;;;;; deletion
-(key-alias  ijkl-local-mode-map (kbd "u"  ) (kbd "C-M-u"))
+(key-alias  ijkl-local-mode-map (kbd "u"  ) (kbd "C-M-u") nil '("dired-mode" "Info-mode"))
 (define-key    my-keys-mode-map (kbd "C-u") 'delete-backward-char)
 (define-key    my-keys-mode-map (kbd "C-M-u") 'delete-start-or-previous-line)
 (define-key    my-keys-mode-map (kbd "M-u") 'backward-kill-word)
