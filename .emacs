@@ -279,6 +279,9 @@ This can be useful in conjunction to projectile's .dir-locals variables"
          :map ctl-x-map
          ("b" . consult-buffer)))
 
+;;;; Expand Region : expand or contract selection
+(use-package expand-region)
+
 ;;;; Helpful : nice looking and more complete help buffers
 (use-package helpful
   :bind (:map help-map
@@ -702,9 +705,11 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (key-alias  ijkl-local-mode-map (kbd "y"  ) (kbd "C-y"))
 (key-chord-define ijkl-local-mode-map "yy" 'consult-yank-pop)
 (key-alias  ijkl-local-mode-map (kbd "_"  ) (kbd "C-_"))
-(define-key ijkl-local-mode-map (kbd "p"  ) 'backward-mark) ;; Reimplementation of a mark ring
-(define-key ijkl-local-mode-map (kbd "n"  ) 'forward-mark)  ;; Reimplementation of a mark ring
+(define-key ijkl-local-mode-map (kbd "p"  ) 'backward-mark) ; Reimplementation of a mark ring
+(define-key ijkl-local-mode-map (kbd "n"  ) 'forward-mark)  ; Reimplementation of a mark ring
 (key-alias  ijkl-local-mode-map (kbd "<SPC>") (kbd "C-@"))
+(define-key ijkl-local-mode-map (kbd "I") 'er/expand-region)   ; Expand the selection progressively
+(define-key ijkl-local-mode-map (kbd "K") 'er/contract-region) ; Reduce the selection progressively
 
 ;;;; movement and deletion bindings (accessible in both modes)
 ;;;;; backwards
