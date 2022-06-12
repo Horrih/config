@@ -600,10 +600,11 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 (define-minor-mode ijkl-local-mode
   "Minor mode to be able to move using ijkl"
   :lighter " ijkl"
-  :keymap '(([t] . ignore))   ; The actual keymaps are defined later below
+  :keymap '(([remap self-insert-command]  ignore))
+;;  :keymap '(([t] . ignore))   ; The actual keymaps are defined later below
   (add-to-list 'emulation-mode-map-alists '(ijkl-local-mode . ijkl-local-mode-map))
   )
-(key-chord-define ijkl-local-mode-map "sd" 'ijkl-local-mode)
+(define-key ijkl-local-mode-map "d" 'ijkl-local-mode)
 
 (defun ijkl-local-mode-and-save()
   "Enables ijkl-local-mode and saves the current file if applicable"
@@ -651,34 +652,9 @@ the call to TO will be an alias to the default keymaps"
        (define-key ,keymap ,from ',(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to))))
     ))
 
-;;;; Don't override some bindings
-(define-key ijkl-local-mode-map (kbd "<left>" ) nil) ; Do not override left  arrow
-(define-key ijkl-local-mode-map (kbd "<right>") nil) ; Do not override right arrow
-(define-key ijkl-local-mode-map (kbd "<up>"   ) nil) ; Do not override up    arrow
-(define-key ijkl-local-mode-map (kbd "<down>" ) nil) ; Do not override down  arrow
-(define-key ijkl-local-mode-map (kbd "M-<right>") nil) ; Do not override left arrow
-(define-key ijkl-local-mode-map (kbd "M-<left>" ) nil) ; Do not override right arrow
-(define-key ijkl-local-mode-map (kbd "M-<up>"   ) nil) ; Do not override up arrow
-(define-key ijkl-local-mode-map (kbd "M-<down>" ) nil) ; Do not override downright arrow
-(define-key ijkl-local-mode-map (kbd "C-g") nil) ; Do not override C-g binding
-(define-key ijkl-local-mode-map (kbd "C-x") nil) ; Do not override C-x binding
-(define-key ijkl-local-mode-map (kbd "C-c") nil) ; Do not override C-x binding
-(define-key ijkl-local-mode-map (kbd "M-x") nil) ; Do not override M-x binding
-(define-key ijkl-local-mode-map (kbd "TAB") nil) ; Do not override tab binding
-(define-key ijkl-local-mode-map (kbd "<tab>") nil) ; Do not override tab binding
-(define-key ijkl-local-mode-map (kbd "<backtab>") nil) ; Do not override tab binding
-(define-key ijkl-local-mode-map (kbd "C-z") nil) ; Do not override C-z binding
-(define-key ijkl-local-mode-map (kbd "C-s") nil) ; Do not override C-s binding
-(define-key ijkl-local-mode-map (kbd "C-r") nil) ; Do not override C-r binding
-(define-key ijkl-local-mode-map (kbd "<f11>") nil) ; Do not override f11 (fullscreen)
-
 ;;;; utility bindings
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
-(define-key ijkl-local-mode-map (kbd "<up>") nil) ;Do not override arrow keys
-(define-key ijkl-local-mode-map (kbd "<down>") nil)
-(define-key ijkl-local-mode-map (kbd "<right>") nil)
-(define-key ijkl-local-mode-map (kbd "<left>") nil)
 (define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Evaluate the lisp expression
 (key-chord-define ijkl-local-mode-map "xx" 'helm-M-x) ; Bind xx to M-x
 (key-alias  ijkl-local-mode-map (kbd "!"  ) (kbd "M-!")) ; Launch shell commands with !
@@ -707,9 +683,6 @@ the call to TO will be an alias to the default keymaps"
 (key-alias     my-keys-mode-map (kbd "M-j") (kbd "M-b"))
 (key-alias     my-keys-mode-map (kbd "C-M-j") (kbd "C-a"))
 (key-alias  ijkl-local-mode-map (kbd "a") (kbd "C-a"))
-(define-key ijkl-local-mode-map (kbd "C-j") nil)
-(define-key ijkl-local-mode-map (kbd "M-j") nil)
-(define-key ijkl-local-mode-map (kbd "C-M-j") nil)
 
 ;;;;; forwards
 (key-alias     my-keys-mode-map (kbd "C-l") (kbd "C-f"))
@@ -717,9 +690,6 @@ the call to TO will be an alias to the default keymaps"
 (key-alias     my-keys-mode-map (kbd "M-l") (kbd "M-f"))
 (key-alias     my-keys-mode-map (kbd "C-M-l") (kbd "C-e"))
 (key-alias  ijkl-local-mode-map (kbd "e") (kbd "C-e"))
-(define-key ijkl-local-mode-map (kbd "C-l") nil)
-(define-key ijkl-local-mode-map (kbd "M-l") nil)
-(define-key ijkl-local-mode-map (kbd "C-M-l") nil)
 
 ;;;;; upwards
 (key-alias  ijkl-local-mode-map (kbd "i") (kbd "C-p"))
@@ -730,8 +700,6 @@ the call to TO will be an alias to the default keymaps"
 (define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-i") (kbd "M-<") t)
 (key-chord-define ijkl-local-mode-map "aa" 'beginning-of-buffer)
-(define-key ijkl-local-mode-map (kbd "M-i") nil)
-(define-key ijkl-local-mode-map (kbd "C-M-i") nil)
 
 ;;;;; downwards
 (key-alias  ijkl-local-mode-map (kbd "k") (kbd "C-n"))
@@ -739,22 +707,16 @@ the call to TO will be an alias to the default keymaps"
 (define-key    my-keys-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-k") (kbd "M->") t)
 (key-chord-define ijkl-local-mode-map "ee" 'end-of-buffer)
-(define-key ijkl-local-mode-map (kbd "M-k") nil)
-(define-key ijkl-local-mode-map (kbd "C-M-k") nil)
 
 ;;;;; deletion
 (key-alias  ijkl-local-mode-map (kbd "u"  ) (kbd "C-M-u"))
 (define-key    my-keys-mode-map (kbd "C-u") 'delete-backward-char)
-(define-key ijkl-local-mode-map (kbd "C-u") nil)
 (define-key    my-keys-mode-map (kbd "C-M-u") 'delete-start-or-previous-line)
 (define-key    my-keys-mode-map (kbd "M-u") 'backward-kill-word)
-(define-key ijkl-local-mode-map (kbd "M-u") nil)
 (define-key    my-keys-mode-map (kbd "C-o") 'delete-forward-char)
-(define-key ijkl-local-mode-map (kbd "C-o") nil)
 (define-key    my-keys-mode-map (kbd "C-M-o") 'kill-line)
 (key-alias  ijkl-local-mode-map (kbd "o") (kbd "C-M-o"))
 (define-key    my-keys-mode-map (kbd "M-o") 'kill-word)
-(define-key ijkl-local-mode-map (kbd "M-o") nil)
 
 ;;;; Misc
 (key-chord-define ijkl-local-mode-map "bb" 'switch-to-last-buffer)
@@ -908,5 +870,3 @@ the call to TO will be an alias to the default keymaps"
   (key-chord-define with-editor-mode-map "qq" 'with-editor-cancel))
 
 ;;; Custom section : modified when experimenting with the customize menu.
-;; I prefer to include these modifications in the relevant use-pakage sections
-;; So this section should not get committed
