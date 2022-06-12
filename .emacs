@@ -251,27 +251,33 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; hydra : Keybindings combinations
 (use-package hydra)
 
-;;;; helm : User friendly search of commands/variables etc
-;; We rebind some of emacs commands to use helm instead
-(use-package helm
-  :diminish
-  :demand ; We want to enable helm completion for all commands, not just helm's. Can't lazy load sadly
-  :bind (:map my-keys-mode-map
-         ("M-x" . helm-M-x) ; Rebind traditional methods to helm methods
-         :map help-map
-         ("a" . helm-apropos)
-         :map ctl-x-map
-         ("f" . helm-find-files)
-         ("b" . helm-mini)
-         ;; We switch tab and ctrl-z actions to be more "natural"
-         :map helm-map
-         ("TAB"   . #'helm-execute-persistent-action)
-         ("C-z"   . #'helm-select-action))
-  :config
-  (helm-mode)
+;;;; Vertico : Completion for commands in a vertical way
+(use-package vertico
+  :init (vertico-mode)
+  :custom-face
+  (vertico-current ((t (:background "#264f78")))) ; Current selected item shown as blue
+  :custom (vertico-cycle t))
+
+;;;; Marginalia : Display additional completion data (doc strings, file permissions...)
+(use-package marginalia :init (marginalia-mode))
+
+;;;; Orderless : Matching of several patterns without order in completion
+(use-package orderless
+  :custom-face
+  (orderless-match-face-0 ((t (:weight bold :foreground "gold1")))) ; Display the first matching part as yellow gold
   :custom
-  (helm-M-x-show-short-doc t)
-  (helm-buffer-max-length 40))
+  ((completion-styles '(orderless basic))
+   (completion-category-defaults nil)
+   (completion-category-overrides '((file (styles partial-completion))))))
+
+;;;; Consult : a collection of commands that improve emacs defaults
+(use-package consult
+  :bind (:map my-keys-mode-map
+         ("M-y" . consult-yank-pop)
+         :map help-map
+         ("a" . consult-apropos)
+         :map ctl-x-map
+         ("b" . consult-buffer)))
 
 ;;;; Helpful : nice looking and more complete help buffers
 (use-package helpful
@@ -680,7 +686,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
 (define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Evaluate the lisp expression
-(key-chord-define ijkl-local-mode-map "xx" 'helm-M-x) ; Bind xx to M-x
+(key-chord-define ijkl-local-mode-map "xx" 'execute-extended-command) ; Bind xx to M-x
 (key-alias  ijkl-local-mode-map (kbd "!"  ) (kbd "M-!")) ; Launch shell commands with !
 (key-alias  ijkl-local-mode-map (kbd "m"  ) (kbd "C-m"))
 (key-alias  ijkl-local-mode-map (kbd "M-m") (kbd "M-<RET>"))
@@ -694,7 +700,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (key-alias  ijkl-local-mode-map (kbd "c"  ) (kbd "M-w"))
 (key-chord-define ijkl-local-mode-map "cc" 'kill-region)
 (key-alias  ijkl-local-mode-map (kbd "y"  ) (kbd "C-y"))
-(key-chord-define ijkl-local-mode-map "yy" 'helm-show-kill-ring)
+(key-chord-define ijkl-local-mode-map "yy" 'consult-yank-pop)
 (key-alias  ijkl-local-mode-map (kbd "_"  ) (kbd "C-_"))
 (define-key ijkl-local-mode-map (kbd "p"  ) 'backward-mark) ;; Reimplementation of a mark ring
 (define-key ijkl-local-mode-map (kbd "n"  ) 'forward-mark)  ;; Reimplementation of a mark ring
@@ -785,12 +791,12 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 ;;;; Hydra search text
 (defhydra search(:exit t :columns 2)
   "Text search related commands"
-  ("o" helm-occur "Occurences in file")
+  ("o" consult-line "Occurences in file")
   ("s" isearch-forward "Next occurence in file")
   ("w" isearch-forward-symbol-at-point "Next occurence in file of word")
   ("r" query-replace "Next occurence in file")
-  ("a" helm-do-grep-ag "Ag in current directory")
-  ("p" ag-project "Ag in current project")
+  ("a" consult-grep "Grep in current directory")
+  ("p" consult-git-grep "Grep in current project")
   ("b" multi-occur-in-matching-buffers "Occur in all buffers"))
 (define-key ijkl-local-mode-map "s" 'search/body)
 
@@ -798,7 +804,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (defhydra find(:exit t :columns 2)
   "Search related commands"
   ("d" dired-jump "Open current directory in dired")
-  ("f" helm-find-files "helm-find-files")
+  ("f" find-file "Find file by URL")
   ("e" flycheck-list-errors "Errors current file (flycheck + LSP)")
   ("t" lsp-treemacs-errors-list "Errors current project (LSP treemacs)")
   ("r" lsp-find-references "LSP find references")
