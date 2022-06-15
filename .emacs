@@ -262,10 +262,15 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :init (vertico-mode)
   :custom-face
   (vertico-current ((t (:background "#264f78")))) ; Current selected item shown as blue
-  :custom (vertico-cycle t))
+  :custom
+  (vertico-cycle t)
+  (vertico-count 15))
 
 ;;;; Marginalia : Display additional completion data (doc strings, file permissions...)
-(use-package marginalia :init (marginalia-mode))
+(use-package marginalia
+  :init (marginalia-mode)
+  :custom-face
+  (completions-annotations ((t (:inherit 'shadow))))) ; Disable italic since it is translated to underline in terminal
 
 ;;;; Orderless : Matching of several patterns without order in completion
 (use-package orderless
@@ -806,8 +811,8 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("s" isearch-forward "Next occurence in file")
   ("w" isearch-forward-symbol-at-point "Next occurence in file of word")
   ("r" query-replace "Next occurence in file")
-  ("a" consult-grep "Grep in current directory")
-  ("p" consult-git-grep "Grep in current project")
+  ("a" (lambda() (interactive) (consult-grep default-directory)) "Grep in current directory")
+  ("p" projectile-ag "Grep in current project")
   ("b" multi-occur-in-matching-buffers "Occur in all buffers"))
 (define-key ijkl-local-mode-map "s" 'search/body)
 
