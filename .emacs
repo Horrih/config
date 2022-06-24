@@ -225,6 +225,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (let ((enabled-regexps ())
       (custom-error-list '(
         ;; Insert your custom regexps here
+        (link-error "^\\(.*\\):\\([0-9]+\\): undefined reference to.*$" 1 2)
         (jest-error "^.*\(\\(.*\\):\\([0-9]+\\):\\([0-9]+\\)\).*$" 1 2 3)
         (gcc-error "^[ ]*\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*error:\\|  required from here\\).*$" 1 2 3)
         (gcc-warning "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): warning:.*$" 1 2 3 1)
