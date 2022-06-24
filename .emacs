@@ -707,6 +707,8 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
 (define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Evaluate the lisp expression
+(define-key ctl-x-map (kbd "k") 'kill-current-buffer) ; Replace kill buffer with kill current buffer
+(define-key ctl-x-map (kbd "f") 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
 (key-chord-define ijkl-local-mode-map "xx" 'execute-extended-command) ; Bind xx to M-x
 (key-alias  ijkl-local-mode-map (kbd "!"  ) (kbd "M-!")) ; Launch shell commands with !
 (key-alias  ijkl-local-mode-map (kbd "m"  ) (kbd "C-m"))
@@ -779,7 +781,6 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "<f5>"   ) 'revert-buffer-no-confirm) ; Refreshes the current file/buffer without confirmation
 (define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ; Refreshes all the current files/buffers
 (define-key ijkl-local-mode-map (kbd "<f12>"  ) 'include-c-header) ; Shortcuts for a #include directive
-(key-chord-define ijkl-local-mode-map "dd" 'dap-hydra) ; Bind dap-mode bindings
 
 ;;;; Resize the window when split using split screen (C-2 or C-3)
 (define-key ijkl-local-mode-map (kbd "M-S-<right>") 'enlarge-window-horizontally)
@@ -812,14 +813,16 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (key-chord-define ijkl-local-mode-map "hh" 'hydra-hide-show/body)
 
 ;;;; Hydra search text
-(defhydra search(:exit t :columns 2)
+(defhydra search(:exit t :columns 3)
   "Text search related commands"
   ("o" consult-line "Occurences in file")
   ("s" isearch-forward "Next occurence in file")
+  ("S" isearch-backward "Previous occurence in file")
   ("w" isearch-forward-symbol-at-point "Next occurence in file of word")
   ("r" query-replace "Next occurence in file")
   ("a" (lambda() (interactive) (consult-grep default-directory)) "Grep in current directory")
   ("p" projectile-ag "Grep in current project")
+  ("P" projectile-replace "Replace in current project")
   ("b" multi-occur-in-matching-buffers "Occur in all buffers"))
 (define-key ijkl-local-mode-map "s" 'search/body)
 
@@ -847,7 +850,8 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("o" switch-to-compilation-other-window "Switch to compilation in side window")
   ("l" compilation-set-skip-threshold "Cycle skip level(0, 1, 2) for errors navigation")
   ("n" next-error "Go to next error")
-  ("p" previous-error "Go to previous error"))
+  ("p" previous-error "Go to previous error")
+  ("d" dap-hydra "Dap mode commands"))
 (define-key ijkl-local-mode-map "ç" 'compile/body)
 (key-chord-define ijkl-local-mode-map "nn" 'next-error)
 (key-chord-define ijkl-local-mode-map "pp" 'previous-error)
@@ -859,6 +863,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("b" bookmark-jump "Bookmark jump")
   ("r" jump-to-register "Jump to register (see point-to-register)")
   ("j" lsp-find-definition "LSP jump to definition")
+  ("J" lsp-find-declaration "LSP jump to declaration")
   ("g" flycheck-next-error "Next error (Flycheck)")
   ("e" flycheck-next-error "Next error (Flycheck)")
   ("E" flycheck-previous-error "Previous error (Flycheck)")
@@ -915,6 +920,10 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
     (define-key keymap "x" ctl-x-map)
     (define-key keymap "h" help-map)
     (define-key keymap "v" 'magit-dispatch)
+    (key-alias keymap "&" (kbd "C-x 1"))
+    (key-alias keymap "é" (kbd "C-x 2"))
+    (key-alias keymap "\""(kbd "C-x 3"))
+    (key-alias keymap "'" (kbd "C-x o"))
     (key-alias keymap "m" (kbd "RET") t)
     (key-alias keymap "b" (kbd "C-x b"))
     (key-alias keymap "j" (kbd "C-j"))
