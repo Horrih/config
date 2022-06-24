@@ -160,8 +160,12 @@ There are two things you can do about this warning:
 
 ;;; Compilation options
 ;;;; Compilation misc
-(setq compilation-always-kill t) ; Do not ask for confirmation when I stop current compilation
-(add-hook 'compilation-mode-hook (lambda()(setq show-trailing-whitespace nil)))
+(use-package compile
+  :ensure nil ; Emacs built in
+  :hook (compilation-mode . (lambda()(setq show-trailing-whitespace nil)))
+  :custom
+  (compilation-always-kill t) ; Do not ask for confirmation when I stop current compilation
+  (compilation-message-face 'all-the-icons-green))
 
 ;;;; switch-to-compilation-other-window()
 (defun switch-to-compilation-other-window()
