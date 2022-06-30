@@ -722,7 +722,6 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (key-alias  ijkl-local-mode-map (kbd "c"  ) (kbd "M-w"))
 (key-chord-define ijkl-local-mode-map "cc" 'kill-region)
 (key-alias  ijkl-local-mode-map (kbd "y"  ) (kbd "C-y"))
-(key-chord-define ijkl-local-mode-map "yy" 'consult-yank-pop)
 (key-alias  ijkl-local-mode-map (kbd "_"  ) (kbd "C-_"))
 (define-key ijkl-local-mode-map (kbd "p"  ) 'backward-mark) ; Reimplementation of a mark ring
 (define-key ijkl-local-mode-map (kbd "n"  ) 'forward-mark)  ; Reimplementation of a mark ring
