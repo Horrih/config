@@ -131,13 +131,12 @@ There are two things you can do about this warning:
 (defun rename-file-and-buffer (new-name)
   "Renames both current buffer and file it's visiting to NEW-NAME."
   (interactive "sNew name: ")
-  (unless (buffer-file-name)
-    (error "Buffer '%s' is not visiting a file!" name))
   (when (get-buffer new-name)
     (error "A buffer named '%s' already exists!" new-name))
-  (rename-file (buffer-file-name) new-name t)
+  (when (buffer-file-name)
+    (rename-file (buffer-file-name) new-name t)
+    (set-visited-file-name new-name))
   (rename-buffer new-name)
-  (set-visited-file-name new-name)
   (set-buffer-modified-p nil))
 
 ;;;; switch-to-last-buffer
