@@ -298,7 +298,9 @@ This can be useful in conjunction to projectile's .dir-locals variables"
          :map help-map
          ("a" . consult-apropos)
          :map ctl-x-map
-         ("b" . consult-buffer)))
+         ("b" . consult-buffer))
+  :config
+  (recentf-mode))
 
 ;;;; Expand Region : expand or contract selection
 (use-package expand-region)
@@ -748,9 +750,10 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "<tab>") nil)  ; Do not override tab binding
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
 (define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
-(define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Evaluate the lisp expression
-(define-key ctl-x-map (kbd "k") 'kill-current-buffer) ; Replace kill buffer with kill current buffer
+(define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Replace C-x e (kmacro-end-and-call-macro) with eval-last-sexp : Eval lisp expression at point
+(define-key ctl-x-map (kbd "k") 'kill-current-buffer) ; Replace C-x k (kill buffer) with kill-current-buffer
 (define-key ctl-x-map (kbd "f") 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
+(define-key ctl-x-map (kbd "r d") 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
 (key-chord-define ijkl-local-mode-map "xx" 'execute-extended-command) ; Bind xx to M-x
 (key-alias  ijkl-local-mode-map (kbd "!"  ) (kbd "M-!")) ; Launch shell commands with !
 (key-alias  ijkl-local-mode-map (kbd "m"  ) (kbd "C-m"))
