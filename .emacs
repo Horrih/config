@@ -79,12 +79,17 @@ There are two things you can do about this warning:
 ;;;; All the icons
 ;; TODO on 1st install : use all-the-icons-install-fonts
 ;; Caskaydia => https://www.nerdfonts.com/font-downloads
-;; Symbola : https://fontlibrary.org/fr/font/symbola
+;; Symbola => https://fontlibrary.org/fr/font/symbola
 (use-package all-the-icons
   :if (display-graphic-p))
 
-;;;; Welcome dashboard
+;;;; Dired as default buffer
+(when (< (length command-line-args) 2)
+  (add-hook 'after-init-hook 'dired-jump))
+
+;;;; Dashboard as default buffer
 (use-package dashboard
+  :disabled
   :demand
   :hook (dashboard-mode . (lambda()(setq show-trailing-whitespace nil)))
   :diminish dashboard-mode
