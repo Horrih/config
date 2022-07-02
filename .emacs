@@ -317,6 +317,10 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package org
   :custom-face
   (org-warning ((t (:underline nil)))) ; Do not underline org-warnings, red is enough
+  (org-document-title ((t (:weight bold :height 1.3))))
+  (org-level-1        ((t (:height 1.2))))
+  (org-level-2        ((t (:height 1.1))))
+  (org-block          ((t (:inherit 'fixed-pitch))))
   :custom ((org-agenda-files '("~/.org_roam")) ; For autopopulating todos from notes
            (org-agenda-span 'month) ; To have a monthly view by default
            (org-agenda-start-on-weekday 1) ; Agenda starts on monday in agenda
@@ -358,6 +362,39 @@ This can be useful in conjunction to projectile's .dir-locals variables"
     (shell-command "git commit -m 'Automated commit from org-roam-commit-and-push'" )
     (shell-command "git pull --rebase" )
     (shell-command "git push" )))
+
+;;;; visual-fill-column : Center text in the window and wrap around fill-column
+(use-package visual-fill-column
+  :custom ((visual-fill-column-width 130)
+           (visual-fill-column-center-text t)))
+
+;;;; org-present : Using org files for powerpoints
+(setq my/original-default_face 'default)
+(defun my/org-present-start()
+  "To be called when enabling `org-present-mode' : sets up the various presentation options"
+  (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+                                     (header-line (:height 4.5) variable-pitch)
+                                     (org-code (:height 1.55) org-code)
+                                     (org-verbatim (:height 1.55) org-verbatim)
+                                     (org-block (:height 1.25) org-block)
+                                     (org-block-begin-line (:height 0.7) org-block)))
+(setq-local header-line-format " ")
+  (visual-fill-column-mode 1)
+  (visual-line-mode 1)
+  (global-display-line-numbers-mode 0))
+
+(defun my/org-present-end()
+  "To be called when leaving `org-present-mode' : disables the various presentation options"
+(setq-local header-line-format nil)
+  (setq-local face-remapping-alist nil)
+  (visual-fill-column-mode 0)
+  (global-display-line-numbers-mode 1))
+
+(use-package org-present
+  :hook ((org-present-mode      . my/org-present-start)
+         (org-present-mode-quit . my/org-present-end))
+  :bind (:map org-present-mode-keymap
+         ("C-c C-h" . org-present-hide-cursor)))
 
 ;;; Development packages and options
 ;;;; ag : Front end for the CLI utility ag
@@ -510,7 +547,6 @@ It will add the following code :
 (use-package lsp-mode
   :hook
   (lsp-mode    . lsp-enable-which-key-integration)
-  :init (setq lsp-keymap-prefix "C-c l")
   :bind (("C-h l" . lsp-describe-thing-at-point))
   :custom
   ;; Formatting options for vue.js (.vue files)
@@ -701,6 +737,8 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
     ))
 
 ;;;; utility bindings
+(define-key ijkl-local-mode-map (kbd "C-+") 'text-scale-increase) ; Increase text size with Ctrl +
+(define-key ijkl-local-mode-map (kbd "C--") 'text-scale-decrease) ; Decrease text size with Ctrl -
 (define-key ijkl-local-mode-map (kbd "TAB") nil)    ; Do not override tab binding
 (define-key ijkl-local-mode-map (kbd "<tab>") nil)  ; Do not override tab binding
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
