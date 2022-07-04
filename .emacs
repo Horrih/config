@@ -885,6 +885,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("k" kill-compilation "Kill compilation")
   ("o" switch-to-compilation-other-window "Switch to compilation in side window")
   ("l" compilation-set-skip-threshold "Cycle skip level(0, 1, 2) for errors navigation")
+  ("d" dap-hydra "Use dap mode hydra as an interactive debugger")
   ("n" next-error "Go to next error")
   ("p" previous-error "Go to previous error")
   ("d" dap-hydra "Dap mode commands"))
