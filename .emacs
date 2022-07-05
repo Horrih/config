@@ -91,7 +91,7 @@ There are two things you can do about this warning:
 (use-package dashboard
   :disabled
   :demand
-  :hook (dashboard-mode . (lambda()(setq show-trailing-whitespace nil)))
+  :hook (dashboard-mode . (lambda()(setq-local show-trailing-whitespace nil)))
   :diminish dashboard-mode
   :custom (dashboard-items '((projects . 5)
                              (bookmarks . 10)
@@ -270,6 +270,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; Vertico : Completion for commands in a vertical way
 (use-package vertico
   :init (vertico-mode)
+  :hook (completion-list-mode . (lambda()(setq-local show-trailing-whitespace nil)))  ; Disable whitespace check in completion buffers (e.g M-:)
   :custom-face
   (vertico-current ((t (:background "#264f78")))) ; Current selected item shown as blue
   :custom
