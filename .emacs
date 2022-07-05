@@ -405,9 +405,12 @@ This can be useful in conjunction to projectile's .dir-locals variables"
          ("C-c C-h" . org-present-hide-cursor)))
 
 ;;; Development packages and options
-;;;; ag : Front end for the CLI utility ag
+;;;; ag and projectile-ag : Front end for the CLI utility ag
 (use-package ag
   :custom (ag-highlight-search t))
+
+;;;; Projectile : git project functions, like the built in project but better
+(use-package projectile)
 
 ;;;; rainbow-delimiters : Parenthesis color based on depth
 (use-package rainbow-delimiters
