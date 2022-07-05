@@ -248,9 +248,18 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package magit
   :custom-face (magit-filename ((t :foreground "white"))) ; Otherwise untracked files have the same color as title in git status
   :custom
-  (ediff-split-window-function 'split-window-horizontally) ; Make ediff split side by side
   (magit-no-confirm t) ; Do not ask for confirmation for actions
   (magit-visit-ref-behavior '(checkout-any focus-on-ref))) ; Enter on branch names makes you checkout the branch
+
+;;;; ediff : Built in side by side diffs of files
+(use-package ediff
+  :ensure nil ; Built-in
+  :hook (ediff-keymap-setup . (lambda()
+                        (define-key ediff-mode-map "h"  'ediff-status-info)
+                        (define-key ediff-mode-map "i" 'ediff-previous-difference)
+                        (define-key ediff-mode-map "k" 'ediff-next-difference)))
+  :custom
+  (ediff-split-window-function 'split-window-horizontally)) ; Make ediff split side by side
 
 ;;;; which-key : Displays command shortcuts when typing commands
 (use-package which-key
