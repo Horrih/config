@@ -515,7 +515,9 @@ It will add the following code :
 (use-package lsp-treemacs)
 
 ;;;; company : Completion frontend, used by lsp
-(use-package company :diminish)
+(use-package company
+  :diminish
+  :hook (emacs-lisp-mode . company-mode))
 
 ;;;; yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands like completion
 (use-package yasnippet
