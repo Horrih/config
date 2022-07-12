@@ -280,6 +280,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package vertico
   :init (vertico-mode)
   :hook (completion-list-mode . (lambda()(setq-local show-trailing-whitespace nil)))  ; Disable whitespace check in completion buffers (e.g M-:)
+  :bind (("C-k" . vertico-next))
   :custom-face
   (vertico-current ((t (:background "#264f78")))) ; Current selected item shown as blue
   :custom
