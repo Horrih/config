@@ -235,7 +235,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
         (gcc-warning "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): warning:.*$" 1 2 3 1)
         (gcc-info "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): note:.*$" 1 2 3 0)
         (qt-test "^   Loc: \\[\\(.*\\)\(\\([0-9]+\\)\)\\]$" 1 2)
-      )))
+        (python-unittest "^  File \"\\(.*\\)\", line \\([0-9]+\\),.*$" 1 2))))
   (dolist (err custom-error-list)
     (add-to-list 'enabled-regexps (car err)))
   (custom-set-variables `(compilation-error-regexp-alist ',enabled-regexps))
