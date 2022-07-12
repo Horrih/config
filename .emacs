@@ -861,6 +861,21 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("h" outline-hide-subtree "hide subtree"))
 (define-key ijkl-local-mode-map "à" 'outline/body)
 
+;;;; Hydra gdb/gud
+(defhydra hydra-gdb(:columns 4 :color pink :foreign-keys run)
+  "GDB"
+  ("n" gud-next "Step")
+  ("u" gud-up "Up")
+  ("b" gud-break "Breakpoint")
+  ("g" gdb "Launch GDB")
+  ("s" gud-step "Step in")
+  ("d" gud-down "Down")
+  ("r" gud-run "Run")
+  ("q" nil "Quit" :color blue)
+  ("f" gud-finish "Finish")
+  ("p" gud-print "Print")
+  ("c" gud-go "Continue"))
+
 ;;;; Hydra hide/show
 (defhydra hydra-hide-show (:exit t :columns 2)
   "Hydra for hide-show commands"
@@ -910,6 +925,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("o" switch-to-compilation-other-window "Switch to compilation in side window")
   ("l" compilation-set-skip-threshold "Cycle skip level(0, 1, 2) for errors navigation")
   ("d" dap-hydra "Use dap mode hydra as an interactive debugger")
+  ("g" hydra-gdb/body "Use gdb-hydra as an interactive debugger")
   ("n" next-error "Go to next error")
   ("p" previous-error "Go to previous error")
   ("d" dap-hydra "Dap mode commands"))
