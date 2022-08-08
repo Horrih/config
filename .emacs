@@ -162,6 +162,12 @@ There are two things you can do about this warning:
   (if (member (file-name-extension (buffer-name)) extensions)
       t))
 
+;;;; other-window-reverse
+(defun other-window-reverse()
+  "Like `other-window' but in the reverse order"
+  (interactive)
+  (other-window -1))
+
 ;;; Compilation options
 ;;;; Compilation misc
 (use-package compile
@@ -255,7 +261,9 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package ediff
   :ensure nil ; Built-in
   :hook (ediff-keymap-setup . (lambda()
-                        (define-key ediff-mode-map "h"  'ediff-status-info)
+                        (define-key ediff-mode-map "h" 'ediff-status-info)
+                        (define-key ediff-mode-map "'" 'other-window)
+                        (define-key ediff-mode-map "4" 'other-window-reverse)
                         (define-key ediff-mode-map "i" 'ediff-previous-difference)
                         (define-key ediff-mode-map "k" 'ediff-next-difference)))
   :custom
@@ -796,7 +804,8 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (key-alias  ijkl-local-mode-map (kbd "&"  ) (kbd "C-x 1"))
 (define-key ijkl-local-mode-map (kbd "é"  ) (kbd "C-x 2"))
 (key-alias  ijkl-local-mode-map (kbd "\"" ) (kbd "C-x 3"))
-(key-alias  ijkl-local-mode-map (kbd "'"  ) (kbd "C-x o"))
+(define-key ijkl-local-mode-map (kbd "'"  ) 'other-window)
+(define-key ijkl-local-mode-map (kbd "4"  ) 'other-window-reverse)
 (define-key ijkl-local-mode-map (kbd "w"  ) 'lsp-format-and-save)
 (key-alias  ijkl-local-mode-map (kbd "b"  ) (kbd "C-x b"))
 (define-key ijkl-local-mode-map (kbd "r"  ) 'recenter-top-bottom)
@@ -1023,7 +1032,8 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
     (key-alias keymap "&" (kbd "C-x 1"))
     (key-alias keymap "é" (kbd "C-x 2"))
     (key-alias keymap "\""(kbd "C-x 3"))
-    (key-alias keymap "'" (kbd "C-x o"))
+    (define-key keymap "'" 'other-window)
+    (define-key keymap "4" 'other-window-reverse)
     (key-alias keymap "m" (kbd "RET") t)
     (key-alias keymap "b" (kbd "C-x b"))
     (key-alias keymap "j" (kbd "C-j"))
