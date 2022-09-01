@@ -18,11 +18,11 @@
    18  sudo su -
    19  strings /uefi/EFI/Arch/grubx64.efi 
    20  strings /uefi/EFI/Arch/grubx64.efi  | tail -1
-   21  sudo rm /uefi/grub.grub.cfg 
-   22  sudo rm /uefi/grub/grub.cfg 
-   23  sudo grub-install --efi-directory=/uefi/ --bootloader-id=Arch --boot-directory=/uefi/ --debug
-   24  cat install.txt  | grep grub
-   25  sudo grub-mkconfig -o /uefi/grub/grub.cfg
+   21  #sudo rm /uefi/grub.grub.cfg 
+   22  #sudo rm /uefi/grub/grub.cfg 
+   23  #sudo grub-install --efi-directory=/uefi/ --bootloader-id=Arch --boot-directory=/uefi/ --debug
+   24  #cat install.txt  | grep grub
+   25  #sudo grub-mkconfig -o /uefi/grub/grub.cfg
    26  sudo systemctl enable gdm
    27  sudo systemctl enable networkmanager
    28  sudo systemctl enable NetworkManager

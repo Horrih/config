@@ -17,7 +17,7 @@
    17  mkinitcpio -p  linux-zen
    18  mkinitcpio -p  linux-lts
    19  grub-install --target=x86_64-efi --efi-directory /uefi/ --bootloader-id=Arch
-   20  grub-mkconfig -o /uefi/grub.grub.cfg
+   20  grub-mkconfig -o /uefi/grub.cfg
    21  user-add -mG wheel docker charles
    22  useradd -mG wheel docker charles
    23  useradd -mG "wheel docker" charles
