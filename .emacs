@@ -812,9 +812,9 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 ;; For example powertoys on windows, xterm remapping on linux
 ;; xterm*VT100.Translations: #override ~Alt Ctrl <Key> I:  string(0x10)
 (when (display-graphic-p)
+  (define-key input-decode-map "\C-i" [C-i])  ; Disable C-i -> TAB
   ;; Rebind C-i as previous line
-  ;; (key-alias ijkl-local-mode-map (kbd "C-i") (kbd "C-p"))
-  )
+  (key-alias ijkl-local-mode-map (kbd "<C-i>") (kbd "C-p")))
 
 (define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-i") (kbd "M-<") t)
