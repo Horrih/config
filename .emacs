@@ -390,13 +390,13 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (setq my/original-default_face 'default)
 (defun my/org-present-start()
   "To be called when enabling `org-present-mode' : sets up the various presentation options"
-  (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+  (setq-local face-remapping-alist '((default (:height 1.5 :family "Arial") default)
                                      (header-line (:height 4.5) variable-pitch)
                                      (org-code (:height 1.55) org-code)
                                      (org-verbatim (:height 1.55) org-verbatim)
                                      (org-block (:height 1.25) org-block)
                                      (org-block-begin-line (:height 0.7) org-block)))
-(setq-local header-line-format " ")
+  (setq-local header-line-format " ")
   (visual-fill-column-mode 1)
   (visual-line-mode 1)
   (global-display-line-numbers-mode 0))
@@ -811,7 +811,11 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 ;; C-i is bound to TAB in terminals. You need to remap C-i to C-p at your GUI app level
 ;; For example powertoys on windows, xterm remapping on linux
 ;; xterm*VT100.Translations: #override ~Alt Ctrl <Key> I:  string(0x10)
-(when (display-graphic-p) (key-alias ijkl-local-mode-map (kbd "C-i") (kbd "C-p")))
+(when (display-graphic-p)
+  ;; Rebind C-i as previous line
+  ;; (key-alias ijkl-local-mode-map (kbd "C-i") (kbd "C-p"))
+  )
+
 (define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
 (key-alias     my-keys-mode-map (kbd "C-M-i") (kbd "M-<") t)
 (key-chord-define ijkl-local-mode-map "aa" 'beginning-of-buffer)
