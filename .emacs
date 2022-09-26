@@ -808,6 +808,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "4"  ) 'other-window-reverse)
 (define-key ijkl-local-mode-map (kbd "w"  ) 'lsp-format-and-save)
 (key-alias  ijkl-local-mode-map (kbd "b"  ) (kbd "C-x b"))
+(define-key ijkl-local-mode-map (kbd "B"  ) 'consult-buffer-other-window)
 (define-key ijkl-local-mode-map (kbd "r"  ) 'recenter-top-bottom)
 (key-alias  ijkl-local-mode-map (kbd "c"  ) (kbd "M-w"))
 (key-chord-define ijkl-local-mode-map "cc" 'kill-region)
