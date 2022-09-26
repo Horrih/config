@@ -899,15 +899,16 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   "GDB"
   ("n" gud-next "Step")
   ("u" gud-up "Up")
-  ("b" gud-break "Breakpoint")
+  ("b" gud-break "Breakpoint on")
   ("g" gdb "Launch GDB")
   ("s" gud-step "Step in")
   ("d" gud-down "Down")
+  ("B" gud-remove "Breakpoint off")
   ("r" gud-run "Run")
-  ("q" nil "Quit" :color blue)
   ("f" gud-finish "Finish")
   ("p" gud-print "Print")
-  ("c" gud-go "Continue"))
+  ("c" gud-go "Continue")
+  ("q" nil "Quit" :color blue))
 
 ;;;; Hydra hide/show
 (defhydra hydra-hide-show (:exit t :columns 2)
