@@ -725,6 +725,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
     (save-buffer)))
 (key-chord-define my-keys-mode-map "sd" 'ijkl-local-mode-and-save)
 (key-chord-define my-keys-mode-map "qs" 'ijkl-local-mode)
+(define-key my-keys-mode-map (kbd "C-q") 'ijkl-local-mode) ; Fallback if key-chord fails
 (diminish 'ijkl-local-mode)
 
 ;;;; ijkl global mode definition
