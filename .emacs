@@ -757,34 +757,26 @@ This mark-ring will record all mark positions globally, multiple times per buffe
         (when (string-equal input-mode mode)
           (setq res t))))))
 
-(defmacro key-alias(keymap from to &optional inside-keymap exceptions)
+(defmacro key-alias(keymap from to &optional exceptions)
   "Binds the key-binding FROM to the function called by typing TO.
 
-If INSIDE-KEYMAP is not nil, the TO binding will be set to nil inside the KEYMAP, so that
-the call to TO will be an alias to the default keymaps
-
 The forwarding will only occur if the current major mode is not in EXCEPTIONS list"
-  `(progn
-     (unless ,inside-keymap
-       (define-key ,keymap ,to nil))
-     (defun ,(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to)))(&optional args)
-       ,(format "Forwards the interactive call from %s to %s (bound by default to `%s')" from to (key-binding (eval to)))
+  `(define-key ,keymap ,(kbd from)
+     (defun ,(intern (format "%s-alias/%s/%s" keymap from to))(&optional args)
+       ,(format "Forwards the interactive call from %s to %s (bound by default to `%s')" from to (key-binding (kbd to)))
        (interactive "P")
        ;; By default, fetch the binding bound to `to'
-       (let ((to-call (key-binding ,to))
-             (old-binding (key-binding ,from)))
-
+       (let ((to-call (key-binding ,(kbd to)))
+             (old-binding (key-binding ,(kbd from))))
          ;; If exception : then the appropriate command must be fetched in other keymaps
          ;; This is done here by temporarily setting the `from' binding to nil in the input keymap
          (when (mode-is-one-of-p ,exceptions)
-           (define-key ,keymap ,from nil) ; Disable the keybinding temporarily
-           (setq to-call (key-binding ,from)) ; Get the command bound in other keymaps
-           (define-key ,keymap ,from old-binding)) ; Restore the original keybinding
+           (define-key ,keymap ,(kbd from) nil) ; Disable the keybinding temporarily
+           (setq to-call (key-binding ,(kbd from))) ; Get the command bound in other keymaps
+           (define-key ,keymap ,(kbd from) old-binding)) ; Restore the original keybinding
 
          ;; Call the appropriate function
-         (call-interactively to-call)))
-     (define-key ,keymap ,from ',(intern (format "%s-alias/%s/%s" keymap (eval from) (eval to))))
-    ))
+         (call-interactively to-call)))))
 
 ;;;; utility bindings
 (define-key ijkl-local-mode-map (kbd "C-+") 'text-scale-increase) ; Increase text size with Ctrl +
@@ -798,72 +790,72 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ctl-x-map (kbd "f") 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
 (define-key ctl-x-map (kbd "r d") 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
 (key-chord-define ijkl-local-mode-map "xx" 'execute-extended-command) ; Bind xx to M-x
-(key-alias  ijkl-local-mode-map (kbd "!"  ) (kbd "M-!")) ; Launch shell commands with !
-(key-alias  ijkl-local-mode-map (kbd "m"  ) (kbd "C-m"))
-(key-alias  ijkl-local-mode-map (kbd "M-m") (kbd "M-<RET>"))
-(key-alias  ijkl-local-mode-map (kbd "&"  ) (kbd "C-x 1"))
+(key-alias  ijkl-local-mode-map "!" "M-!") ; Launch shell commands with !
+(key-alias  ijkl-local-mode-map "m"   "C-m")
+(key-alias  ijkl-local-mode-map "M-m" "M-<RET>")
+(key-alias  ijkl-local-mode-map "&"   "C-x 1")
 (define-key ijkl-local-mode-map (kbd "é"  ) (kbd "C-x 2"))
-(key-alias  ijkl-local-mode-map (kbd "\"" ) (kbd "C-x 3"))
+(key-alias  ijkl-local-mode-map "\"" "C-x 3")
 (define-key ijkl-local-mode-map (kbd "'"  ) 'other-window)
 (define-key ijkl-local-mode-map (kbd "4"  ) 'other-window-reverse)
 (define-key ijkl-local-mode-map (kbd "w"  ) 'lsp-format-and-save)
-(key-alias  ijkl-local-mode-map (kbd "b"  ) (kbd "C-x b"))
+(key-alias  ijkl-local-mode-map "b" "C-x b")
 (define-key ijkl-local-mode-map (kbd "B"  ) 'consult-buffer-other-window)
 (define-key ijkl-local-mode-map (kbd "r"  ) 'recenter-top-bottom)
-(key-alias  ijkl-local-mode-map (kbd "c"  ) (kbd "M-w"))
+(key-alias  ijkl-local-mode-map "c" "M-w")
 (key-chord-define ijkl-local-mode-map "cc" 'kill-region)
-(key-alias  ijkl-local-mode-map (kbd "y"  ) (kbd "C-y"))
-(key-alias  ijkl-local-mode-map (kbd "_"  ) (kbd "C-_"))
+(key-alias  ijkl-local-mode-map "y" "C-y")
+(key-alias  ijkl-local-mode-map "_" "C-_")
 (define-key ijkl-local-mode-map (kbd "p"  ) 'asmr-backward) ; Reimplementation of a mark ring
 (define-key ijkl-local-mode-map (kbd "n"  ) 'asmr-forward)  ; Reimplementation of a mark ring
-(key-alias  ijkl-local-mode-map (kbd "<SPC>") (kbd "C-@"))
+(key-alias  ijkl-local-mode-map "<SPC>" "C-@")
 (define-key ijkl-local-mode-map (kbd "I") 'er/expand-region)   ; Expand the selection progressively
 (define-key ijkl-local-mode-map (kbd "K") 'er/contract-region) ; Reduce the selection progressively
 
 ;;;; movement and deletion bindings (accessible in both modes)
 ;;;;; backwards
-(key-alias  ijkl-local-mode-map (kbd "j"  ) (kbd "C-j"))
-(key-alias     my-keys-mode-map (kbd "C-j") (kbd "C-b"))
-(key-alias     my-keys-mode-map (kbd "M-j") (kbd "M-b"))
-(key-alias     my-keys-mode-map (kbd "C-M-j") (kbd "C-a"))
-(key-alias  ijkl-local-mode-map (kbd "a") (kbd "C-a"))
+(key-alias  ijkl-local-mode-map "j"   "C-j")
+(key-alias     my-keys-mode-map "C-j" "C-b")
+(key-alias     my-keys-mode-map "M-j" "M-b")
+(key-alias     my-keys-mode-map "C-M-j" "C-a")
+(key-alias  ijkl-local-mode-map "a" "C-a")
 
 ;;;;; forwards
-(key-alias     my-keys-mode-map (kbd "C-l") (kbd "C-f"))
-(key-alias  ijkl-local-mode-map (kbd "l"  ) (kbd "C-l"))
-(key-alias     my-keys-mode-map (kbd "M-l") (kbd "M-f"))
-(key-alias     my-keys-mode-map (kbd "C-M-l") (kbd "C-e"))
-(key-alias  ijkl-local-mode-map (kbd "e") (kbd "C-e"))
+(key-alias     my-keys-mode-map "C-l" "C-f")
+(key-alias  ijkl-local-mode-map "l"   "C-l")
+(key-alias     my-keys-mode-map "M-l" "M-f")
+(key-alias     my-keys-mode-map "C-M-l" "C-e")
+(key-alias  ijkl-local-mode-map "e" "C-e")
 
 ;;;;; upwards
-(key-alias  ijkl-local-mode-map (kbd "i") (kbd "C-p"))
+(key-alias  ijkl-local-mode-map "i" "C-p")
 ;; C-i is bound to TAB in terminals. You need to remap C-i to C-p at your GUI app level
 ;; For example powertoys on windows, xterm remapping on linux
 ;; xterm*VT100.Translations: #override ~Alt Ctrl <Key> I:  string(0x10)
 (when (display-graphic-p)
   (define-key input-decode-map "\C-i" [C-i])  ; Disable C-i -> TAB
   ;; Rebind C-i as previous line
-  (key-alias ijkl-local-mode-map (kbd "<C-i>") (kbd "C-p")))
+  (key-alias ijkl-local-mode-map "<C-i>" "C-p"))
 
 (define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
-(key-alias     my-keys-mode-map (kbd "C-M-i") (kbd "M-<") t)
+(key-alias     my-keys-mode-map "C-M-i" "M-<")
 (key-chord-define ijkl-local-mode-map "aa" 'beginning-of-buffer)
 
 ;;;;; downwards
-(key-alias  ijkl-local-mode-map (kbd "k") (kbd "C-n"))
-(key-alias  ijkl-local-mode-map (kbd "C-k") (kbd "C-n"))
+(key-alias  ijkl-local-mode-map "k" "C-n")
+(key-alias  ijkl-local-mode-map "C-k" "C-n")
 (define-key    my-keys-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
-(key-alias     my-keys-mode-map (kbd "C-M-k") (kbd "M->") t)
+(key-alias     my-keys-mode-map "C-M-k" "M->")
 (key-chord-define ijkl-local-mode-map "ee" 'end-of-buffer)
 
 ;;;;; deletion
-(key-alias  ijkl-local-mode-map (kbd "u"  ) (kbd "C-M-u") nil '("dired-mode" "Info-mode"))
+(key-alias  ijkl-local-mode-map "u" "C-M-u" '("dired-mode" "Info-mode"))
 (define-key    my-keys-mode-map (kbd "C-u") 'delete-backward-char)
 (define-key    my-keys-mode-map (kbd "C-M-u") 'delete-start-or-previous-line)
 (define-key    my-keys-mode-map (kbd "M-u") 'backward-kill-word)
 (define-key    my-keys-mode-map (kbd "C-o") 'delete-forward-char)
 (define-key    my-keys-mode-map (kbd "C-M-o") 'kill-line)
-(key-alias  ijkl-local-mode-map (kbd "o") (kbd "C-M-o"))
+(key-alias  ijkl-local-mode-map "o" "C-M-o")
 (define-key    my-keys-mode-map (kbd "M-o") 'kill-word)
 
 ;;;; Misc
@@ -987,11 +979,11 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 ;;;; Org ijkl
 (with-eval-after-load "org"
   ;; Use ijkl in the date selection buffer
-  (key-alias org-read-date-minibuffer-local-map "m" (kbd "RET") t)
-  (key-alias org-read-date-minibuffer-local-map "i" (kbd "S-<up>") t)
-  (key-alias org-read-date-minibuffer-local-map "j" (kbd "S-<left>") t)
-  (key-alias org-read-date-minibuffer-local-map "k" (kbd "S-<down>") t)
-  (key-alias org-read-date-minibuffer-local-map "l" (kbd "S-<right>") t))
+  (key-alias org-read-date-minibuffer-local-map "m" "RET")
+  (key-alias org-read-date-minibuffer-local-map "i" "S-<up>")
+  (key-alias org-read-date-minibuffer-local-map "j" "S-<left>")
+  (key-alias org-read-date-minibuffer-local-map "k" "S-<down>")
+  (key-alias org-read-date-minibuffer-local-map "l" "S-<right>"))
 
 ;;;; isearch ijkl
 (with-eval-after-load "isearch"
@@ -1031,20 +1023,20 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
     (define-key keymap "x" ctl-x-map)
     (define-key keymap "h" help-map)
     (define-key keymap "v" 'magit-dispatch)
-    (key-alias keymap "&" (kbd "C-x 1"))
-    (key-alias keymap "é" (kbd "C-x 2"))
-    (key-alias keymap "\""(kbd "C-x 3"))
+    (key-alias keymap "&"  "C-x 1")
+    (key-alias keymap "é"  "C-x 2")
+    (key-alias keymap "\"" "C-x 3")
     (define-key keymap "'" 'other-window)
     (define-key keymap "4" 'other-window-reverse)
-    (key-alias keymap "m" (kbd "RET") t)
-    (key-alias keymap "b" (kbd "C-x b"))
-    (key-alias keymap "j" (kbd "C-j"))
-    (key-alias keymap "l" (kbd "C-l"))
-    (key-alias keymap "i" (kbd "C-p"))
-    (key-alias keymap "k" (kbd "C-n"))))
+    (key-alias keymap "m" "RET")
+    (key-alias keymap "b" "C-x b")
+    (key-alias keymap "j" "C-j")
+    (key-alias keymap "l" "C-l")
+    (key-alias keymap "i" "C-p")
+    (key-alias keymap "k" "C-n")))
 (with-eval-after-load "git-rebase"
-  (key-alias git-rebase-mode-map "k" (kbd "C-n"))
-  (key-alias git-rebase-mode-map "l" (kbd "C-f"))
+  (key-alias git-rebase-mode-map "k" "C-n")
+  (key-alias git-rebase-mode-map "l" "C-f")
   (define-key git-rebase-mode-map "d" 'git-rebase-kill-line))
 (with-eval-after-load "with-editor"  ; Called for commits
   (key-chord-define with-editor-mode-map "cc" 'with-editor-finish)
