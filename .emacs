@@ -288,7 +288,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package vertico
   :init (vertico-mode)
   :hook (completion-list-mode . (lambda()(setq-local show-trailing-whitespace nil)))  ; Disable whitespace check in completion buffers (e.g M-:)
-  :bind (("C-k" . vertico-next))
   :custom-face
   (vertico-current ((t (:background "#264f78")))) ; Current selected item shown as blue
   :custom
@@ -830,13 +829,13 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 
 ;;;;; upwards
 (key-alias  ijkl-local-mode-map "i" "C-p")
+(key-alias  my-keys-mode-map "C-k" "C-n")
 ;; C-i is bound to TAB in terminals. You need to remap C-i to C-p at your GUI app level
-;; For example powertoys on windows, xterm remapping on linux
-;; xterm*VT100.Translations: #override ~Alt Ctrl <Key> I:  string(0x10)
+;; For example powertoys on windows, konsole or xterm remapping on linux
 (when (display-graphic-p)
   (define-key input-decode-map "\C-i" [C-i])  ; Disable C-i -> TAB
   ;; Rebind C-i as previous line
-  (key-alias ijkl-local-mode-map "<C-i>" "C-p"))
+  (key-alias my-keys-mode-map "<C-i>" "C-p"))
 
 (define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
 (key-alias     my-keys-mode-map "C-M-i" "M-<")
@@ -844,7 +843,6 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 
 ;;;;; downwards
 (key-alias  ijkl-local-mode-map "k" "C-n")
-(key-alias  ijkl-local-mode-map "C-k" "C-n")
 (define-key    my-keys-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
 (key-alias     my-keys-mode-map "C-M-k" "M->")
 (key-chord-define ijkl-local-mode-map "ee" 'end-of-buffer)
