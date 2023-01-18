@@ -992,6 +992,11 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   (define-key isearch-mode-map (kbd "M-u") (lambda() (interactive) (isearch-del-char 10))))
 
 ;;;; Hydra org-roam
+(defun my/org-now-time-stamp()
+    "Inserts the timestamp of the current time without prompting the user"
+  (interactive)
+  (org-insert-time-stamp (current-time) t))
+
 (defhydra org(:exit t :columns 3)
   "Jump to destination in text"
   ("a" org-agenda-list "Org Agenda")
@@ -999,10 +1004,12 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("s" org-schedule "Set a scheduled date for the TODO item")
   ("d" org-deadline "Set a deadline for the TODO item")
   ("g" org-roam-node-find "Go to an org roam file")
-  ("n" org-time-stamp "Insert now timestamp")
-  ("t" org-todo "Changes the TODO state of the current line")
+  ("n" my/org-now-time-stamp "Insert today's date")
+  ("N" org-time-stamp "Choose date from calendar")
+  ("t" org-todo "Changes the TODO state of the current line" :exit nil)
   ("P" org-roam-pull-commit-push "Org roam sync")
-  ("h" org-roam-buffer-toggle  "Org roam info for current file"))
+  ("h" org-roam-buffer-toggle  "Org roam info for current file")
+  ("q" nil "Quit"))
 (define-key ijkl-local-mode-map "," 'org/body)
 
 ;;;; Magit hydra
