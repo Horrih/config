@@ -348,6 +348,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (org-block          ((t (:inherit 'fixed-pitch))))
   :custom ((org-agenda-files '("~/.emacs.d/org_roam")) ; For autopopulating todos from notes
            (org-agenda-span 'month) ; To have a monthly view by default
+           (org-startup-folded 'content)
            (org-agenda-start-on-weekday 1) ; Agenda starts on monday in agenda
            (calendar-week-start-day 1) ; Date picker starts on monday
            (org-capture-bookmark nil)) ; To disable adding a bookmark on each org capture
