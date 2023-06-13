@@ -480,8 +480,8 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;;; Pretty colors for headings
 ;; We don't use (outline-minor-mode-highlight 'override) because it applies to some non headings as well
-;; (use-package outline-minor-faces
-;;   :hook (outline-minor-mode . outline-minor-faces-add-font-lock-keywords))
+(use-package outline-minor-faces
+   :hook (outline-minor-mode . outline-minor-faces-mode))
 
 ;;;; csv-mode : Support for csv files (use csv-align-mode for alignment)
 (use-package csv-mode
