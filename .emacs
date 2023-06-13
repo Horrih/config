@@ -389,6 +389,15 @@ This can be useful in conjunction to projectile's .dir-locals variables"
     (shell-command "git pull --rebase" )
     (shell-command "git push" )))
 
+;;;; org-download : Download images directly into org
+(use-package org-download
+  :commands (org-download-clipboard)
+  :custom (org-image-actual-width 900)
+  :config
+  ;; Override the default dir to have one dir for each org file
+  (defun org-download--dir-1 ()
+    (or org-download-image-dir (concat (file-name-sans-extension (buffer-file-name)) "-img"))))
+
 ;;;; visual-fill-column : Center text in the window and wrap around fill-column
 (use-package visual-fill-column
   :custom ((visual-fill-column-width 130)
@@ -1004,7 +1013,10 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("i" org-roam-node-insert "Insert new org roam file")
   ("s" org-schedule "Set a scheduled date for the TODO item")
   ("d" org-deadline "Set a deadline for the TODO item")
+  ("l" org-insert-link "Insert a link to another file/website")
   ("g" org-roam-node-find "Go to an org roam file")
+  ("y" org-download-clipboard "Insert an image from the clipboard")
+  ("," org-toggle-inline-images "Insert an image from the clipboard")
   ("n" my/org-now-time-stamp "Insert today's date")
   ("N" org-time-stamp "Choose date from calendar")
   ("t" org-todo "Changes the TODO state of the current line" :exit nil)
