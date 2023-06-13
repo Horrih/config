@@ -802,7 +802,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (key-chord-define ijkl-local-mode-map "xx" 'execute-extended-command) ; Bind xx to M-x
 (key-alias  ijkl-local-mode-map "!" "M-!") ; Launch shell commands with !
 (key-alias  ijkl-local-mode-map "m"   "C-m")
-(key-alias  ijkl-local-mode-map "M-m" "M-<RET>")
+(key-alias  my-keys-mode-map "M-m" "M-<RET>")
 (key-alias  ijkl-local-mode-map "&"   "C-x 1")
 (define-key ijkl-local-mode-map (kbd "é"  ) (kbd "C-x 2"))
 (key-alias  ijkl-local-mode-map "\"" "C-x 3")
