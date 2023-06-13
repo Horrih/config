@@ -346,7 +346,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (org-level-1        ((t (:height 1.2))))
   (org-level-2        ((t (:height 1.1))))
   (org-block          ((t (:inherit 'fixed-pitch))))
-  :custom ((org-agenda-files '("~/.org_roam")) ; For autopopulating todos from notes
+  :custom ((org-agenda-files '("~/.emacs.d/org_roam")) ; For autopopulating todos from notes
            (org-agenda-span 'month) ; To have a monthly view by default
            (org-agenda-start-on-weekday 1) ; Agenda starts on monday in agenda
            (calendar-week-start-day 1) ; Date picker starts on monday
@@ -376,7 +376,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (org-roam-db-autosync-mode)
   :custom
   (org-return-follows-link t)
-  (org-roam-directory "~/.org_roam")
+  (org-roam-directory "~/.emacs.d/org_roam")
   (org-roam-completion-everywhere t))
 
 (defun org-roam-pull-commit-push()
