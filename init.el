@@ -342,11 +342,14 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package org
   :custom-face
   (org-warning ((t (:underline nil)))) ; Do not underline org-warnings, red is enough
-  (org-document-title ((t (:weight bold :height 1.3))))
+  (org-done ((t (:foreground "lightgreen" :box(:color "lightgreen")) )))
+  (org-document-title ((t (:weight bold :height 1.6))))
   (org-level-1        ((t (:height 1.2))))
   (org-level-2        ((t (:height 1.1))))
   (org-block          ((t (:inherit 'fixed-pitch))))
   :custom ((org-agenda-files '("~/.emacs.d/org_roam")) ; For autopopulating todos from notes
+           (org-todo-keywords '((sequence "A FAIRE(t)" "EN ATTENTE(w@/!)" "|" "ANNULÉ(c@/!)" "FAIT(d!)")))
+           (org-todo-keyword-faces '(("EN ATTENTE" . "gold") ("ANNULÉ" . "grey")))
            (org-agenda-span 'month) ; To have a monthly view by default
            (org-startup-folded 'content)
            (org-agenda-start-on-weekday 1) ; Agenda starts on monday in agenda
@@ -1016,10 +1019,10 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("l" org-insert-link "Insert a link to another file/website")
   ("g" org-roam-node-find "Go to an org roam file")
   ("y" org-download-clipboard "Insert an image from the clipboard")
-  ("," org-toggle-inline-images "Insert an image from the clipboard")
+  ("," org-toggle-inline-images "Toggle image display")
   ("n" my/org-now-time-stamp "Insert today's date")
   ("N" org-time-stamp "Choose date from calendar")
-  ("t" org-todo "Changes the TODO state of the current line" :exit nil)
+  ("t" org-todo "Changes the TODO state of the current line")
   ("P" org-roam-pull-commit-push "Org roam sync")
   ("h" org-roam-buffer-toggle  "Org roam info for current file")
   ("q" nil "Quit"))
