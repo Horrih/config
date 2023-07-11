@@ -168,6 +168,32 @@ There are two things you can do about this warning:
   (interactive)
   (other-window -1))
 
+;;;; replace-chat-at-point
+(defun replace-char-at-point(char)
+  "Replaces the caracter at point by `CHAR'"
+  (interactive "cReplace character at point with : ")
+  (delete-char 1)
+  (insert-char char)
+  (backward-char 1))
+
+;;;; delete-char-or-kill-region
+(defun delete-char-or-kill-region()
+  "If mark is active, kill region, otherwise delete-char"
+  (interactive)
+  (call-interactively
+    (if mark-active
+        'kill-region
+      'delete-char)))
+
+;;;; replace-char-or-rectangle-region
+(defun replace-char-or-rectangle-region()
+  "If mark is active, rectangle actions, otherwise replace-char"
+  (interactive)
+  (call-interactively
+    (if mark-active
+        'rectangle/body
+      'replace-char-at-point)))
+
 ;;; Compilation options
 ;;;; Compilation misc
 (use-package compile
@@ -743,6 +769,11 @@ This mark-ring will record all mark positions globally, multiple times per buffe
                                          (t default-color))))))
 
 ;;; Main keybindings
+;;;; Helper function gen-input
+(defun gen-input(KEYS)
+  "Generates a key `KEYS' sequence as if the user typed it"
+  (setq unread-command-events (nconc (listify-key-sequence (kbd KEYS)) unread-command-events)))
+
 ;;;; Helper macro key-alias
 (defun mode-is-one-of-p(modes)
   "Returns t if the current modes (minor or major) matches one in the input modes list"
@@ -779,12 +810,11 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "TAB") nil)    ; Do not override tab binding
 (define-key ijkl-local-mode-map (kbd "<tab>") nil)  ; Do not override tab binding
 (define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
-(define-key ijkl-local-mode-map (kbd "x") ctl-x-map) ; Bind x to the ctl-x commands
-(define-key ctl-x-map (kbd "e") 'eval-last-sexp) ; Replace C-x e (kmacro-end-and-call-macro) with eval-last-sexp : Eval lisp expression at point
+(define-key ijkl-local-mode-map "x" 'delete-char-or-kill-region) ; Bind x to the delete-char-or-kill-region command
 (define-key ctl-x-map (kbd "k") 'kill-current-buffer) ; Replace C-x k (kill buffer) with kill-current-buffer
 (define-key ctl-x-map (kbd "f") 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
-(define-key ctl-x-map (kbd "r d") 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
-(key-chord-define ijkl-local-mode-map "xx" 'execute-extended-command) ; Bind xx to M-x
+(define-key ctl-x-r-map "d" 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
+(key-alias  ijkl-local-mode-map ":" "M-x") ; Bind : to M-x
 (key-alias  ijkl-local-mode-map "!" "M-!") ; Launch shell commands with !
 (key-alias  ijkl-local-mode-map "m"   "C-m")
 (key-alias  my-keys-mode-map "M-m" "M-<RET>")
@@ -794,9 +824,8 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "'"  ) 'other-window)
 (define-key ijkl-local-mode-map (kbd "4"  ) 'other-window-reverse)
 (define-key ijkl-local-mode-map (kbd "w"  ) 'lsp-format-and-save)
-(key-alias  ijkl-local-mode-map "b" "C-x b")
-(define-key ijkl-local-mode-map (kbd "B"  ) 'consult-buffer-other-window)
-(define-key ijkl-local-mode-map (kbd "r"  ) 'recenter-top-bottom)
+(define-key ijkl-local-mode-map "z" 'recenter-top-bottom)
+(define-key ijkl-local-mode-map "r" ctl-x-r-map)
 (key-alias  ijkl-local-mode-map "c" "M-w")
 (key-chord-define ijkl-local-mode-map "cc" 'kill-region)
 (key-alias  ijkl-local-mode-map "y" "C-y")
@@ -834,13 +863,15 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 
 (define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
 (key-alias     my-keys-mode-map "C-M-i" "M-<")
-(key-chord-define ijkl-local-mode-map "aa" 'beginning-of-buffer)
+(key-alias ijkl-local-mode-map "<" "M-<")
+(key-alias ijkl-local-mode-map "A" "C-M-a")
 
 ;;;;; downwards
 (key-alias  ijkl-local-mode-map "k" "C-n")
 (define-key    my-keys-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
 (key-alias     my-keys-mode-map "C-M-k" "M->")
-(key-chord-define ijkl-local-mode-map "ee" 'end-of-buffer)
+(key-alias ijkl-local-mode-map ">" "M->")
+(key-alias ijkl-local-mode-map "E" "C-M-e")
 
 ;;;;; deletion
 (key-alias  ijkl-local-mode-map "u" "C-M-u" '("dired-mode" "Info-mode"))
@@ -853,7 +884,6 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key    my-keys-mode-map (kbd "M-o") 'kill-word)
 
 ;;;; Misc
-(key-chord-define ijkl-local-mode-map "bb" 'switch-to-last-buffer)
 (define-key ijkl-local-mode-map (kbd "/"   ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
 (define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
 (define-key ijkl-local-mode-map (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
@@ -866,6 +896,15 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "M-S-<left>") 'shrink-window-horizontally)
 (define-key ijkl-local-mode-map (kbd "M-S-<down>") 'enlarge-window)
 (define-key ijkl-local-mode-map (kbd "M-S-<up>") 'shrink-window)
+
+;;;; Hydra ourline
+(defhydra buffer(:columns 2 :exit t)
+  "Buffer actions"
+  ("b" consult-buffer "Switch buffer")
+  ("B" consult-buffer-other-window "Open in other window")
+  ("k" kill-current-buffer "Kill buffer")
+  ("p" switch-to-last-buffer "Last buffer"))
+(define-key ijkl-local-mode-map "b" 'buffer/body)
 
 ;;;; Hydra outline
 (defhydra outline(:columns 3)
@@ -958,17 +997,29 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   "Jump to destination in text"
   ("l" goto-line "Go to line n°")
   ("b" bookmark-jump "Bookmark jump")
-  ("r" jump-to-register "Jump to register (see point-to-register)")
+  ("u" backward-up-list "Go up one level" :color red)
   ("j" xref-find-definitions "Jump to definition (xref)")
-  ("J" xref-find-definitions-other-window  "Jump to definition other window(xref)")
-  ("g" flycheck-next-error "Next error (Flycheck)")
-  ("e" flycheck-next-error "Next error (Flycheck)")
-  ("E" flycheck-previous-error "Previous error (Flycheck)")
-  ("n" forward-sexp  "Go to the closing parenthesis/bracket")
   ("," org-roam-node-find "Go to an org roam file")
-  ("p" backward-sexp "Go to the opening parenthesis/bracket"))
+  ("n" forward-sexp  "Go to the closing parenthesis/bracket" :color red)
+  ("J" xref-find-definitions-other-window  "Jump to definition other window(xref)")
+  ("E" flycheck-previous-error "Previous error (Flycheck)" :color red)
+  ("p" backward-sexp "Go to the opening parenthesis/bracket" :color red)
+  ("r" jump-to-register "Jump to register (see point-to-register)")
+  ("e" flycheck-next-error "Next error (Flycheck)" :color red)
+  ("q" nil "Quit"))
 (define-key ijkl-local-mode-map "g" 'go/body)
 
+;;;; Rectangle
+(defhydra rectangle(:exit t :columns 2)
+  "Rectangle operations"
+  ("t" string-rectangle "Edition")
+  ("k" kill-rectangle "Cut")
+  ("c" copy-rectangle-as-kill "Copy")
+  ("C" clear-rectangle "Clear")
+  ("y" yank-rectangle "Paste")
+  ("o" open-rectangle "Insert whitespace")
+  ("n" rectangle-number-lines "Number the lines"))
+(define-key ijkl-local-mode-map "r" 'replace-char-or-rectangle-region)
 
 ;;;; Org ijkl
 (with-eval-after-load "org"
@@ -1010,6 +1061,15 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("q" nil "Quit"))
 (define-key ijkl-local-mode-map "," 'org/body)
 
+;;;; Hydra commands
+(defhydra commands(:exit t :columns 1)
+  "Execute commands"
+  ("!" execute-extended-command "Emacs command")
+  ("x" execute-extended-command)
+  (":" eval-expression "Interpret lisp code")
+  ("e" eval-last-sexp "Interpret last lisp expression"))
+(define-key ijkl-local-mode-map "!" 'commands/body)
+
 ;;;; Magit hydra
 (defhydra magit(:exit t :columns 1)
   "Magit commands"
@@ -1023,8 +1083,6 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   (key-chord-define magit-log-select-mode-map "cc" 'magit-log-select-pick)
   (key-chord-define magit-log-select-mode-map "qq" 'magit-log-select-quit)
   (dolist (keymap (list magit-diff-section-base-map magit-mode-map))
-    (key-chord-define keymap "bb" 'switch-to-last-buffer)
-    (define-key keymap "x" ctl-x-map)
     (define-key keymap "h" help-map)
     (define-key keymap "v" 'magit-dispatch)
     (key-alias keymap "&"  "C-x 1")
@@ -1033,7 +1091,6 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
     (define-key keymap "'" 'other-window)
     (define-key keymap "4" 'other-window-reverse)
     (key-alias keymap "m" "RET")
-    (key-alias keymap "b" "C-x b")
     (key-alias keymap "j" "C-j")
     (key-alias keymap "l" "C-l")
     (key-alias keymap "i" "C-p")
@@ -1046,4 +1103,3 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   (key-chord-define with-editor-mode-map "cc" 'with-editor-finish)
   (key-chord-define with-editor-mode-map "qq" 'with-editor-cancel))
 
-;;; Custom section : modified when experimenting with the customize menu.
