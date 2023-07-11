@@ -464,12 +464,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; prettier-js : Formatting on save, used by my-ts-mode for .js and .ts files
 (use-package prettier-js
   :custom
-  (prettier-js-show-errors nil)
-  (prettier-js-args '("--semi" "false"
-                      "--single-quote" "false"
-                      "--tab-width" "4"
-                      "--trailing-comma" "all"
-                      "--print-width" "150")))
+  (prettier-js-show-errors nil))
 
 ;;;; Outline mode with package outline-minor-faces and outshine
 ;;;;; Enable sane bindings and actions for outline mode
@@ -594,19 +589,6 @@ It will add the following code :
   :custom
   ;; Formatting options for vue.js (.vue files)
   (lsp-enable-links nil) ; Make links non clickable
-  (lsp-vetur-format-default-formatter-html "js-beautify-html")
-  (lsp-vetur-format-default-formatter-options
-   '((js-beautify-html
-      (wrap_attributes . "preserve")
-      (indent_size . 2)
-      (wrap_attributes_indent_size . 2))
-     (prettier
-      (singleQuote . :json-false)
-      (printWidth . 100)
-      (tabWidth . 4)
-      (trailingComma . "all")
-      (vueIndentScriptAndStyle . :json-false)
-      (semi . :json-false))))
   :config
   (setq lsp-headerline-arrow ">")) ; Material design icon not working on windows
 
