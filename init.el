@@ -827,7 +827,6 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map "z" 'recenter-top-bottom)
 (define-key ijkl-local-mode-map "r" ctl-x-r-map)
 (key-alias  ijkl-local-mode-map "c" "M-w")
-(key-chord-define ijkl-local-mode-map "cc" 'kill-region)
 (key-alias  ijkl-local-mode-map "y" "C-y")
 (key-alias  ijkl-local-mode-map "_" "C-_")
 (define-key ijkl-local-mode-map (kbd "p"  ) 'asmr-backward) ; Reimplementation of a mark ring
@@ -897,13 +896,13 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "M-S-<down>") 'enlarge-window)
 (define-key ijkl-local-mode-map (kbd "M-S-<up>") 'shrink-window)
 
-;;;; Hydra ourline
+;;;; Hydra buffer
 (defhydra buffer(:columns 2 :exit t)
   "Buffer actions"
-  ("b" consult-buffer "Switch buffer")
+  ("l" consult-buffer "Show buffer list")
   ("B" consult-buffer-other-window "Open in other window")
   ("k" kill-current-buffer "Kill buffer")
-  ("p" switch-to-last-buffer "Last buffer"))
+  ("b" switch-to-last-buffer "Last buffer"))
 (define-key ijkl-local-mode-map "b" 'buffer/body)
 
 ;;;; Hydra outline
