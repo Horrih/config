@@ -47,6 +47,11 @@ There are two things you can do about this warning:
   (diminish 'eldoc-mode)
   (diminish 'abbrev-mode))
 
+(use-package simple
+  :ensure nil
+  :config
+  (diminish 'auto-fill-function))
+
 ;;;; esup : Launch the esup command to measure startup time of each emacs plugin
 (use-package esup
   :custom (esup-depth 0)) ; Sometimes fixes the bug https://github.com/jschaf/esup/issues/54
@@ -73,6 +78,7 @@ There are two things you can do about this warning:
   (mode-line-inactive ((t :background "#333333"))) ; Dark grey
   :custom
   (doom-modeline-unicode-fallback t)
+  (doom-modeline-minor-modes t)
   :init
   (doom-modeline-mode))
 
@@ -388,6 +394,10 @@ This can be useful in conjunction to projectile's .dir-locals variables"
                       (org-indent-mode) ; Auto indent lines according to depth
                       (auto-fill-mode)))) ; Wrap lines when longer than fill column
 
+(use-package org-indent
+  :ensure nil
+  :diminish)
+
 ;;;; Org org-agenda-other-window-no-switch()
 (defun org-agenda-other-window-no-switch()
   "Opens the org agenda (monthly view) in a side window without leaving the current window"
@@ -518,9 +528,10 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; hide-show-mode : Hide/show sections of code : current function, class, or if/else section
 (use-package hideshow
   :ensure nil ; Built-in emacs
-  :hook (prog-mode . (lambda()
-                       (hs-minor-mode)
-                       (diminish hs-minor-mode))))
+  :config
+  (diminish 'hs-minor-mode)
+  :hook
+  (prog-mode . hs-minor-mode))
 
 ;;;; include-guards(text) : Add include guards to the current file
 (defun include-guards(text)
