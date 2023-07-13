@@ -928,12 +928,15 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "M-S-<up>") 'shrink-window)
 
 ;;;; Hydra buffer
-(defhydra buffer(:columns 2 :exit t)
+(defhydra buffer(:columns 3 :exit t)
   "Buffer actions"
+  ("b" switch-to-last-buffer "Last buffer")
   ("l" consult-buffer "Show buffer list")
+  ("s" (lambda() (interactive)(switch-to-buffer "*scratch*"))  "Switch to *scratch* buffer")
   ("B" consult-buffer-other-window "Open in other window")
   ("k" kill-current-buffer "Kill buffer")
-  ("b" switch-to-last-buffer "Last buffer"))
+  ("m" (lambda() (interactive)(switch-to-buffer "*Messages*"))  "Switch to *Messages* buffer"))
+
 (define-key ijkl-local-mode-map "b" 'buffer/body)
 
 ;;;; Hydra outline
