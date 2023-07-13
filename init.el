@@ -824,6 +824,19 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
          ;; Call the appropriate function
          (call-interactively to-call)))))
 
+;;;; remap : new binding in the same keymap
+(defun remap(keymap from to)
+  "Creates a new binding TO in KEYMAP for the command bound to FROM"
+  (let ((existing (lookup-key keymap (kbd from))))
+    (when existing (define-key keymap (kbd to) existing))))
+
+;;;; define-key-remap : define binding and rebind existing if it exists
+(defmacro define-key-remap(keymap keys command fallback)
+  "Like `define-key' : binds KEYS to COMMAND but remaps the existing binding to FALLBACK"
+  `(progn
+     (remap ,keymap ,keys ,fallback)
+     (key-alias ,keymap ,keys ,command)))
+
 ;;;; utility bindings
 (define-key ijkl-local-mode-map (kbd "C-+") 'text-scale-increase) ; Increase text size with Ctrl +
 (define-key ijkl-local-mode-map (kbd "C--") 'text-scale-decrease) ; Decrease text size with Ctrl -
@@ -834,8 +847,6 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ctl-x-map (kbd "k") 'kill-current-buffer) ; Replace C-x k (kill buffer) with kill-current-buffer
 (define-key ctl-x-map (kbd "f") 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
 (define-key ctl-x-r-map "d" 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
-(key-alias  ijkl-local-mode-map ":" "M-x") ; Bind : to M-x
-(key-alias  ijkl-local-mode-map "!" "M-!") ; Launch shell commands with !
 (key-alias  ijkl-local-mode-map "m"   "C-m")
 (key-alias  my-keys-mode-map "M-m" "M-<RET>")
 (key-alias  ijkl-local-mode-map "&"   "C-x 1")
@@ -1099,26 +1110,27 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 
 ;;;; Magit ijkl
 (with-eval-after-load "magit"
-  (key-chord-define magit-log-select-mode-map "cc" 'magit-log-select-pick)
-  (key-chord-define magit-log-select-mode-map "qq" 'magit-log-select-quit)
+  (key-chord-define magit-log-select-mode-map "CC" 'magit-log-select-pick)
+  (key-chord-define magit-log-select-mode-map "QQ" 'magit-log-select-quit)
   (dolist (keymap (list magit-diff-section-base-map magit-mode-map))
-    (define-key keymap "h" help-map)
-    (define-key keymap "v" 'magit-dispatch)
     (key-alias keymap "&"  "C-x 1")
     (key-alias keymap "é"  "C-x 2")
     (key-alias keymap "\"" "C-x 3")
     (define-key keymap "'" 'other-window)
     (define-key keymap "4" 'other-window-reverse)
-    (key-alias keymap "m" "RET")
-    (key-alias keymap "j" "C-j")
-    (key-alias keymap "l" "C-l")
-    (key-alias keymap "i" "C-p")
-    (key-alias keymap "k" "C-n")))
+    (define-key-remap keymap "m" "RET" "C-c m")
+    (define-key-remap keymap "j" "C-j" "C-c j")
+    (define-key-remap keymap "i" "C-p" "C-c i")
+    (define-key-remap keymap "l" "C-l" "C-c l")
+    (define-key-remap keymap "k" "C-n" "C-c k")))
 (with-eval-after-load "git-rebase"
-  (key-alias git-rebase-mode-map "k" "C-n")
-  (key-alias git-rebase-mode-map "l" "C-f")
+  (define-key-remap git-rebase-mode-map "m" "RET" "C-c m")
+  (define-key-remap git-rebase-mode-map "j" "C-l" "C-c j")
+  (define-key-remap git-rebase-mode-map "i" "C-p" "C-c i")
+  (define-key-remap git-rebase-mode-map "k" "C-n" "C-c k")
+  (define-key-remap git-rebase-mode-map "l" "C-f" "C-c l")
   (define-key git-rebase-mode-map "d" 'git-rebase-kill-line))
 (with-eval-after-load "with-editor"  ; Called for commits
-  (key-chord-define with-editor-mode-map "cc" 'with-editor-finish)
-  (key-chord-define with-editor-mode-map "qq" 'with-editor-cancel))
-
+  (diminish "with-editor-mode")
+  (key-chord-define with-editor-mode-map "CC" 'with-editor-finish)
+  (key-chord-define with-editor-mode-map "QQ" 'with-editor-cancel))
