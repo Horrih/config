@@ -629,6 +629,15 @@ It will add the following code :
   :config
   (setq lsp-headerline-arrow ">")) ; Material design icon not working on windows
 
+;;;; inhibit-lsp-mode : When turned on, lsp won't trigger unless manually calling 'lsp
+(define-minor-mode inhibit-lsp-mode
+  "Minor mode to temporarily inhibit the `lsp-deferred' command"
+  :lighter " NoLSP"
+  :global t
+  (if inhibit-lsp-mode
+      (advice-add 'lsp-deferred :override #'ignore) ;; lsp-deferred will be inhibited
+    (advice-remove 'lsp-deferred #'ignore)))
+
 ;;;; lsp-format-and-save : format on save if lsp-auto-format is not nil
 (defcustom lsp-auto-format nil
   "If not nil, lsp-format-and-save will format the buffer before saving"
