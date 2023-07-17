@@ -379,7 +379,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (org-level-1        ((t (:height 1.2))))
   (org-level-2        ((t (:height 1.1))))
   (org-block          ((t (:inherit 'fixed-pitch))))
-  :custom ((org-agenda-files '("~/.emacs.d/org_roam")) ; For autopopulating todos from notes
+  :custom ((org-agenda-files '("~/.config/emacs/org_roam")) ; For autopopulating todos from notes
            (org-todo-keywords '((sequence "A FAIRE(t)" "EN ATTENTE(w@/!)" "|" "ANNULÉ(c@/!)" "FAIT(d!)")))
            (org-todo-keyword-faces '(("EN ATTENTE" . "gold") ("ANNULÉ" . "grey")))
            (org-agenda-span 'month) ; To have a monthly view by default
@@ -416,7 +416,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (org-roam-db-autosync-mode)
   :custom
   (org-return-follows-link t)
-  (org-roam-directory "~/.emacs.d/org_roam")
+  (org-roam-directory "~/.config/emacs/org_roam")
   (org-roam-completion-everywhere t))
 
 (defun org-roam-pull-commit-push()
@@ -928,6 +928,10 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (define-key ijkl-local-mode-map (kbd "M-S-<up>") 'shrink-window)
 
 ;;;; Hydra buffer
+(defcustom emacs-config-main "~/.config/emacs/init.el"
+  "Path to the emacs main config file. Used for some direct navigation bindings"
+  :type 'string)
+
 (defhydra buffer(:columns 3 :exit t)
   "Buffer actions"
   ("b" switch-to-last-buffer "Last buffer")
@@ -935,8 +939,8 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("s" (lambda() (interactive)(switch-to-buffer "*scratch*"))  "Switch to *scratch* buffer")
   ("B" consult-buffer-other-window "Open in other window")
   ("k" kill-current-buffer "Kill buffer")
-  ("m" (lambda() (interactive)(switch-to-buffer "*Messages*"))  "Switch to *Messages* buffer"))
-
+  ("m" (lambda() (interactive)(switch-to-buffer "*Messages*"))  "Switch to *Messages* buffer")
+  ("e" (lambda() (interactive)(find-file emacs-config-main)) "Switch to emacs config file"))
 (define-key ijkl-local-mode-map "b" 'buffer/body)
 
 ;;;; Hydra outline
