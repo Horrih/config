@@ -508,9 +508,11 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :ensure nil ; emacs built-in
   :hook
   (emacs-lisp-mode . outline-minor-mode)
-  (outline-minor-mode . (lambda()(diminish 'outline-minor-mode)))
+  :config
+  (diminish 'outline-minor-mode)
   :custom
-  (outline-minor-mode-cycle t)) ; Tab and S-Tab cycle between different visibility settings
+  (outline-minor-mode-cycle t) ; Tab and S-Tab cycle between different visibility settings
+  (outline-minor-mode-cycle-filter 'bolp))
 
 ;;;;; Pretty colors for headings
 ;; We don't use (outline-minor-mode-highlight 'override) because it applies to some non headings as well
