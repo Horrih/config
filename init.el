@@ -135,18 +135,6 @@ There are two things you can do about this warning:
   (setq make-backup-files nil) ; Do not use backup files (filename~)
   (setq create-lockfiles nil)) ; Do not use lock files (.#filename)
 
-;;;; rename-file-and-buffer(name)
-(defun rename-file-and-buffer (new-name)
-  "Renames both current buffer and file it's visiting to NEW-NAME."
-  (interactive "sNew name: ")
-  (when (get-buffer new-name)
-    (error "A buffer named '%s' already exists!" new-name))
-  (when (buffer-file-name)
-    (rename-file (buffer-file-name) new-name t)
-    (set-visited-file-name new-name))
-  (rename-buffer new-name)
-  (set-buffer-modified-p nil))
-
 ;;;; switch-to-last-buffer
 (defun switch-to-last-buffer()
   "Use `switch-to-buffer' to visit the last buffer"
@@ -915,7 +903,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 ;;;; Misc
 (define-key ijkl-local-mode-map (kbd "/"   ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
 (define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
-(define-key ijkl-local-mode-map (kbd "<f2>"   ) 'rename-file-and-buffer) ; Rename the current file/buffer
+(define-key ijkl-local-mode-map (kbd "<f2>"   ) 'rename-visited-file) ; Rename the current file/buffer
 (define-key ijkl-local-mode-map (kbd "<f5>"   ) 'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
 (define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ; Refreshes all the current files/buffers
 (define-key ijkl-local-mode-map (kbd "<f12>"  ) 'include-c-header) ; Shortcuts for a #include directive
