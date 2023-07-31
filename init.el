@@ -395,14 +395,12 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; org-roam : Notes organizing
 (use-package org-roam
-  :init
-  (setq org-roam-v2-ack t)
-  :config
-  (org-roam-db-autosync-mode)
   :custom
-  (org-return-follows-link t)
   (org-roam-directory "~/.config/emacs/org_roam")
-  (org-roam-completion-everywhere t))
+  (org-return-follows-link t)
+  (org-roam-completion-everywhere t)
+  :config
+  (org-roam-db-autosync-mode))
 
 (defun org-roam-pull-commit-push()
   "Git commit and push all the modified files in `org-roam-directory'"
