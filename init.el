@@ -278,11 +278,11 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package ediff
   :ensure nil ; Built-in
   :hook (ediff-keymap-setup . (lambda()
-                        (define-key ediff-mode-map "h" 'ediff-status-info)
-                        (define-key ediff-mode-map "'" 'other-window)
-                        (define-key ediff-mode-map "4" 'other-window-reverse)
-                        (define-key ediff-mode-map "i" 'ediff-previous-difference)
-                        (define-key ediff-mode-map "k" 'ediff-next-difference)))
+                        (keymap-set ediff-mode-map "h" 'ediff-status-info)
+                        (keymap-set ediff-mode-map "'" 'other-window)
+                        (keymap-set ediff-mode-map "4" 'other-window-reverse)
+                        (keymap-set ediff-mode-map "i" 'ediff-previous-difference)
+                        (keymap-set ediff-mode-map "k" 'ediff-next-difference)))
   :custom
   (ediff-split-window-function 'split-window-horizontally)) ; Make ediff split side by side
 
@@ -746,7 +746,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   :keymap '(([remap self-insert-command]  ignore)) ; The actual keymaps are defined later below
   (add-to-list 'emulation-mode-map-alists '(ijkl-local-mode . ijkl-local-mode-map))
   )
-(define-key ijkl-local-mode-map "d" 'ijkl-local-mode)
+(keymap-set ijkl-local-mode-map "d" 'ijkl-local-mode)
 
 (defun ijkl-local-mode-and-save()
   "Enables ijkl-local-mode and saves the current file if applicable"
@@ -756,7 +756,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
     (save-buffer)))
 (key-chord-define my-keys-mode-map "sd" 'ijkl-local-mode-and-save)
 (key-chord-define my-keys-mode-map "qs" 'ijkl-local-mode)
-(define-key my-keys-mode-map (kbd "C-q") 'ijkl-local-mode) ; Fallback if key-chord fails
+(keymap-set my-keys-mode-map "C-q" 'ijkl-local-mode) ; Fallback if key-chord fails
 (diminish 'ijkl-local-mode)
 
 ;;;; ijkl global mode definition
@@ -785,7 +785,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   "Generates a key `KEYS' sequence as if the user typed it"
   (setq unread-command-events (nconc (listify-key-sequence (kbd KEYS)) unread-command-events)))
 
-;;;; Helper macro key-alias
+;;;; Helper function - mode-is-one-of-p
 (defun mode-is-one-of-p(modes)
   "Returns t if the current modes (minor or major) matches one in the input modes list"
   (let (res)
@@ -794,6 +794,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
         (when (string-equal input-mode mode)
           (setq res t))))))
 
+;;;; Helper macro key-alias (mostly obsolete in emacs 29 with the introduction of keymap-set)
 (defmacro key-alias(keymap from to &optional exceptions)
   "Binds the key-binding FROM to the function called by typing TO.
 
@@ -815,108 +816,100 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
          ;; Call the appropriate function
          (call-interactively to-call)))))
 
-;;;; remap : new binding in the same keymap
-(defun remap(keymap from to)
-  "Creates a new binding TO in KEYMAP for the command bound to FROM"
-  (let ((existing (lookup-key keymap (kbd from))))
-    (when existing (define-key keymap (kbd to) existing))))
-
-;;;; define-key-remap : define binding and rebind existing if it exists
-(defmacro define-key-remap(keymap keys command fallback)
-  "Like `define-key' : binds KEYS to COMMAND but remaps the existing binding to FALLBACK"
+;;;; keymap-set-remap : define binding and rebind existing if it exists
+(defmacro keymap-set-remap(keymap keys command fallback)
+  "Like `keymap-set' : binds KEYS to COMMAND but remaps the existing binding to FALLBACK"
   `(progn
-     (remap ,keymap ,keys ,fallback)
-     (key-alias ,keymap ,keys ,command)))
+     (keymap-substitute ,keymap ,keys ,fallback)
+     (keymap-set ,keymap ,keys ,command)))
 
 ;;;; utility bindings
-(define-key ijkl-local-mode-map (kbd "C-+") 'text-scale-increase) ; Increase text size with Ctrl +
-(define-key ijkl-local-mode-map (kbd "C--") 'text-scale-decrease) ; Decrease text size with Ctrl -
-(define-key ijkl-local-mode-map (kbd "TAB") nil)    ; Do not override tab binding
-(define-key ijkl-local-mode-map (kbd "<tab>") nil)  ; Do not override tab binding
-(define-key ijkl-local-mode-map (kbd "h") help-map) ; Use the help functions
-(define-key ijkl-local-mode-map "x" 'delete-char-or-kill-region) ; Bind x to the delete-char-or-kill-region command
-(define-key ctl-x-map (kbd "k") 'kill-current-buffer) ; Replace C-x k (kill buffer) with kill-current-buffer
-(define-key ctl-x-map (kbd "f") 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
-(define-key ctl-x-r-map "d" 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
-(key-alias  ijkl-local-mode-map "m"   "C-m")
-(key-alias  my-keys-mode-map "M-m" "M-<RET>")
-(key-alias  ijkl-local-mode-map "&"   "C-x 1")
-(define-key ijkl-local-mode-map (kbd "é"  ) (kbd "C-x 2"))
-(key-alias  ijkl-local-mode-map "\"" "C-x 3")
-(define-key ijkl-local-mode-map (kbd "'"  ) 'other-window)
-(define-key ijkl-local-mode-map (kbd "4"  ) 'other-window-reverse)
-(define-key ijkl-local-mode-map (kbd "w"  ) 'lsp-format-and-save)
-(define-key ijkl-local-mode-map "z" 'recenter-top-bottom)
-(define-key ijkl-local-mode-map "r" ctl-x-r-map)
-(key-alias  ijkl-local-mode-map "c" "M-w")
-(key-alias  ijkl-local-mode-map "y" "C-y")
-(key-alias  ijkl-local-mode-map "_" "C-_")
-(define-key ijkl-local-mode-map (kbd "p"  ) 'asmr-backward) ; Reimplementation of a mark ring
-(define-key ijkl-local-mode-map (kbd "n"  ) 'asmr-forward)  ; Reimplementation of a mark ring
-(key-alias  ijkl-local-mode-map "<SPC>" "C-@")
-(define-key ijkl-local-mode-map (kbd "I") 'er/expand-region)   ; Expand the selection progressively
-(define-key ijkl-local-mode-map (kbd "K") 'er/contract-region) ; Reduce the selection progressively
+(keymap-set ijkl-local-mode-map "C-+" 'text-scale-increase) ; Increase text size with Ctrl +
+(keymap-set ijkl-local-mode-map "C--" 'text-scale-decrease) ; Decrease text size with Ctrl -
+(keymap-set ijkl-local-mode-map "TAB" nil)    ; Do not override tab binding
+(keymap-set ijkl-local-mode-map "<tab>" nil)  ; Do not override tab binding
+(keymap-set ijkl-local-mode-map "h" help-map) ; Use the help functions
+(keymap-set ijkl-local-mode-map "x" 'delete-char-or-kill-region) ; Bind x to the delete-char-or-kill-region command
+(keymap-set ctl-x-map "k" 'kill-current-buffer) ; Replace C-x k (kill buffer) with kill-current-buffer
+(keymap-set ctl-x-map "f" 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
+(keymap-set ctl-x-r-map "d" 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
+(keymap-set ijkl-local-mode-map "m" "C-m")
+(keymap-set my-keys-mode-map "M-m" "M-<RET>")
+(keymap-set ijkl-local-mode-map "&"  "C-x 1")
+(keymap-set ijkl-local-mode-map "é"  "C-x 2")
+(keymap-set ijkl-local-mode-map "\"" "C-x 3")
+(keymap-set ijkl-local-mode-map "'" 'other-window)
+(keymap-set ijkl-local-mode-map "4" 'other-window-reverse)
+(keymap-set ijkl-local-mode-map "w" 'lsp-format-and-save)
+(keymap-set ijkl-local-mode-map "z" 'recenter-top-bottom)
+(keymap-set ijkl-local-mode-map "r" ctl-x-r-map)
+(keymap-set ijkl-local-mode-map "c" "M-w")
+(keymap-set ijkl-local-mode-map "y" "C-y")
+(keymap-set ijkl-local-mode-map "_" "C-_")
+(keymap-set ijkl-local-mode-map "p" 'asmr-backward) ; Reimplementation of a mark ring
+(keymap-set ijkl-local-mode-map "n" 'asmr-forward)  ; Reimplementation of a mark ring
+(keymap-set ijkl-local-mode-map "<SPC>" "C-@")
+(keymap-set ijkl-local-mode-map "I" 'er/expand-region)   ; Expand the selection progressively
+(keymap-set ijkl-local-mode-map "K" 'er/contract-region) ; Reduce the selection progressively
 
 ;;;; movement and deletion bindings (accessible in both modes)
 ;;;;; backwards
-(key-alias  ijkl-local-mode-map "j"   "C-j")
-(key-alias     my-keys-mode-map "C-j" "C-b")
-(key-alias     my-keys-mode-map "M-j" "M-b")
-(key-alias     my-keys-mode-map "C-M-j" "C-a")
-(key-alias  ijkl-local-mode-map "a" "C-a")
+(keymap-set ijkl-local-mode-map "j"   "C-j")
+(keymap-set    my-keys-mode-map "C-j" "C-b")
+(keymap-set    my-keys-mode-map "M-j" "M-b")
+(keymap-set    my-keys-mode-map "C-M-j" "C-a")
+(keymap-set ijkl-local-mode-map "a" "C-a")
 
 ;;;;; forwards
-(key-alias     my-keys-mode-map "C-l" "C-f")
-(key-alias  ijkl-local-mode-map "l"   "C-l")
-(key-alias     my-keys-mode-map "M-l" "M-f")
-(key-alias     my-keys-mode-map "C-M-l" "C-e")
-(key-alias  ijkl-local-mode-map "e" "C-e")
+(keymap-set    my-keys-mode-map "C-l" "C-f")
+(keymap-set ijkl-local-mode-map "l"   "C-l")
+(keymap-set    my-keys-mode-map "M-l" "M-f")
+(keymap-set    my-keys-mode-map "C-M-l" "C-e")
+(keymap-set ijkl-local-mode-map "e" "C-e")
 
 ;;;;; upwards
-(key-alias  ijkl-local-mode-map "i" "C-p")
-(key-alias  my-keys-mode-map "C-k" "C-n")
+(keymap-set ijkl-local-mode-map "i" "C-p")
 ;; C-i is bound to TAB in terminals. You need to remap C-i to C-p at your GUI app level
 ;; For example powertoys on windows, konsole or xterm remapping on linux
 (when (display-graphic-p)
-  (define-key input-decode-map "\C-i" [C-i])  ; Disable C-i -> TAB
-  ;; Rebind C-i as previous line
-  (key-alias my-keys-mode-map "<C-i>" "C-p"))
+  (define-key input-decode-map "\C-i" [C-i])   ; Disable C-i -> TAB
+  (key-alias ijkl-local-mode-map "<C-i>" "C-p")) ;; Rebind C-i as previous line
 
-(define-key    my-keys-mode-map (kbd "M-i") (lambda() (interactive)(previous-line 7)))
-(key-alias     my-keys-mode-map "C-M-i" "M-<")
-(key-alias ijkl-local-mode-map "<" "M-<")
-(key-alias ijkl-local-mode-map "A" "C-M-a")
+(keymap-set my-keys-mode-map "M-i" (lambda() (interactive)(previous-line 7)))
+(keymap-set my-keys-mode-map "C-M-i" "M-<")
+(keymap-set ijkl-local-mode-map "<" "M-<")
+(keymap-set ijkl-local-mode-map "A" "C-M-a")
 
 ;;;;; downwards
-(key-alias  ijkl-local-mode-map "k" "C-n")
-(define-key    my-keys-mode-map (kbd "M-k") (lambda() (interactive)(next-line 7)))
-(key-alias     my-keys-mode-map "C-M-k" "M->")
-(key-alias ijkl-local-mode-map ">" "M->")
-(key-alias ijkl-local-mode-map "E" "C-M-e")
+(keymap-set ijkl-local-mode-map "k" "C-n")
+(keymap-set    my-keys-mode-map "M-k" (lambda() (interactive)(next-line 7)))
+(keymap-set    my-keys-mode-map "C-M-k" "M->")
+(keymap-set ijkl-local-mode-map ">" "M->")
+(keymap-set ijkl-local-mode-map "E" "C-M-e")
 
 ;;;;; deletion
-(key-alias  ijkl-local-mode-map "u" "C-M-u" '("dired-mode" "Info-mode"))
-(define-key    my-keys-mode-map (kbd "C-u") 'delete-backward-char)
-(define-key    my-keys-mode-map (kbd "C-M-u") 'delete-start-or-previous-line)
-(define-key    my-keys-mode-map (kbd "M-u") 'backward-kill-word)
-(define-key    my-keys-mode-map (kbd "C-o") 'delete-forward-char)
-(define-key    my-keys-mode-map (kbd "C-M-o") 'kill-line)
-(key-alias  ijkl-local-mode-map "o" "C-M-o")
-(define-key    my-keys-mode-map (kbd "M-o") 'kill-word)
+(key-alias ijkl-local-mode-map "u" "C-M-u" '("dired-mode" "Info-mode"))
+(keymap-set    my-keys-mode-map "C-u" 'delete-backward-char)
+(keymap-set    my-keys-mode-map "C-M-u" 'delete-start-or-previous-line)
+(keymap-set    my-keys-mode-map "M-u" 'backward-kill-word)
+(keymap-set    my-keys-mode-map "C-o" 'delete-forward-char)
+(keymap-set    my-keys-mode-map "C-M-o" 'kill-line)
+(keymap-set ijkl-local-mode-map "o" "C-M-o")
+(keymap-set    my-keys-mode-map "M-o" 'kill-word)
 
 ;;;; Misc
-(define-key ijkl-local-mode-map (kbd "/"   ) 'comment-or-uncomment-region) ; Comment all the lines of the selected area
-(define-key ijkl-local-mode-map (kbd "M-s" ) 'multi-occur-in-matching-buffers) ; Search in all buffers
-(define-key ijkl-local-mode-map (kbd "<f2>"   ) 'rename-visited-file) ; Rename the current file/buffer
-(define-key ijkl-local-mode-map (kbd "<f5>"   ) 'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
-(define-key ijkl-local-mode-map (kbd "<f6>"   ) 'revert-all-file-buffers) ; Refreshes all the current files/buffers
-(define-key ijkl-local-mode-map (kbd "<f12>"  ) 'include-c-header) ; Shortcuts for a #include directive
+(keymap-set ijkl-local-mode-map "/"     'comment-or-uncomment-region) ; Comment all the lines of the selected area
+(keymap-set ijkl-local-mode-map "M-s"   'multi-occur-in-matching-buffers) ; Search in all buffers
+(keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
+(keymap-set ijkl-local-mode-map "<f5>"  'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
+(keymap-set ijkl-local-mode-map "<f6>"  'revert-all-file-buffers) ; Refreshes all the current files/buffers
+(keymap-set ijkl-local-mode-map "<f12>" 'include-c-header) ; Shortcuts for a #include directive
 
 ;;;; Resize the window when split using split screen (C-2 or C-3)
-(define-key ijkl-local-mode-map (kbd "M-S-<right>") 'enlarge-window-horizontally)
-(define-key ijkl-local-mode-map (kbd "M-S-<left>") 'shrink-window-horizontally)
-(define-key ijkl-local-mode-map (kbd "M-S-<down>") 'enlarge-window)
-(define-key ijkl-local-mode-map (kbd "M-S-<up>") 'shrink-window)
+(keymap-set ijkl-local-mode-map "M-S-<right>" 'enlarge-window-horizontally)
+(keymap-set ijkl-local-mode-map "M-S-<left>" 'shrink-window-horizontally)
+(keymap-set ijkl-local-mode-map "M-S-<down>" 'enlarge-window)
+(keymap-set ijkl-local-mode-map "M-S-<up>" 'shrink-window)
 
 ;;;; Hydra buffer
 (defcustom emacs-config-main "~/.config/emacs/init.el"
@@ -927,12 +920,12 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   "Buffer actions"
   ("b" switch-to-last-buffer "Last buffer")
   ("l" consult-buffer "Show buffer list")
-  ("s" (lambda() (interactive)(switch-to-buffer "*scratch*"))  "Switch to *scratch* buffer")
+  ("s" scratch-buffer  "Switch to *scratch* buffer")
   ("B" consult-buffer-other-window "Open in other window")
   ("k" kill-current-buffer "Kill buffer")
   ("m" (lambda() (interactive)(switch-to-buffer "*Messages*"))  "Switch to *Messages* buffer")
   ("e" (lambda() (interactive)(find-file emacs-config-main)) "Switch to emacs config file"))
-(define-key ijkl-local-mode-map "b" 'buffer/body)
+(keymap-set ijkl-local-mode-map "b" 'buffer/body)
 
 ;;;; Hydra outline
 (defhydra outline(:columns 3)
@@ -945,7 +938,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("s" outline-show-subtree "show all subtree")
   ("p" outline-previous-visible-heading "prev")
   ("h" outline-hide-subtree "hide subtree"))
-(define-key ijkl-local-mode-map "à" 'outline/body)
+(keymap-set ijkl-local-mode-map "à" 'outline/body)
 
 ;;;; Hydra gdb/gud
 (defhydra hydra-gdb(:columns 4 :color pink :foreign-keys run)
@@ -967,12 +960,13 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (defhydra hydra-hide-show (:exit t :columns 2)
   "Hydra for hide-show commands"
   ("t" hs-toggle-hiding "Toggle H/S")
+  ("H" hs-toggle-hiding)
   ("l" hs-hide-level "Hide Level")
   ("q" hs-hide-all "Hide all")
   ("s" hs-show-block "Show block")
   ("a" hs-show-all "Show all")
   ("h" hs-hide-block "Hide block"))
-(key-chord-define ijkl-local-mode-map "hh" 'hydra-hide-show/body)
+(keymap-set ijkl-local-mode-map "H" 'hydra-hide-show/body)
 
 ;;;; Hydra search text
 (defhydra search(:exit t :columns 3)
@@ -986,7 +980,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("p" projectile-ag "Grep in current project")
   ("P" projectile-replace "Replace in current project")
   ("b" multi-occur-in-matching-buffers "Occur in all buffers"))
-(define-key ijkl-local-mode-map "s" 'search/body)
+(keymap-set ijkl-local-mode-map "s" 'search/body)
 
 ;;;; Hydra find
 (defhydra find(:exit t :columns 2)
@@ -999,7 +993,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("o" ff-find-other-file "switch header/cpp")
   ("p" project-find-file "project-find-file")
   ("P" projectile-find-file-other-window "projectile-find-file-other-window"))
-(define-key ijkl-local-mode-map "f" 'find/body)
+(keymap-set ijkl-local-mode-map "f" 'find/body)
 
 ;;;; Hydra compile
 (defhydra compile(:exit t :columns 3)
@@ -1016,9 +1010,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("n" next-error "Go to next error")
   ("p" previous-error "Go to previous error")
   ("d" dap-hydra "Dap mode commands"))
-(define-key ijkl-local-mode-map "ç" 'compile/body)
-(key-chord-define ijkl-local-mode-map "nn" 'next-error)
-(key-chord-define ijkl-local-mode-map "pp" 'previous-error)
+(keymap-set ijkl-local-mode-map "ç" 'compile/body)
 
 ;;;; Hydra go
 (defhydra go(:exit t :columns 3)
@@ -1035,7 +1027,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("r" jump-to-register "Jump to register (see point-to-register)")
   ("e" flycheck-next-error "Next error (Flycheck)" :color red)
   ("q" nil "Quit"))
-(define-key ijkl-local-mode-map "g" 'go/body)
+(keymap-set ijkl-local-mode-map "g" 'go/body)
 
 ;;;; Rectangle
 (defhydra rectangle(:exit t :columns 2)
@@ -1047,23 +1039,23 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("y" yank-rectangle "Paste")
   ("o" open-rectangle "Insert whitespace")
   ("n" rectangle-number-lines "Number the lines"))
-(define-key ijkl-local-mode-map "r" 'replace-char-or-rectangle-region)
+(keymap-set ijkl-local-mode-map "r" 'replace-char-or-rectangle-region)
 
 ;;;; Org ijkl
 (with-eval-after-load "org"
   ;; Use ijkl in the date selection buffer
-  (key-alias org-read-date-minibuffer-local-map "m" "RET")
-  (key-alias org-read-date-minibuffer-local-map "i" "S-<up>")
-  (key-alias org-read-date-minibuffer-local-map "j" "S-<left>")
-  (key-alias org-read-date-minibuffer-local-map "k" "S-<down>")
-  (key-alias org-read-date-minibuffer-local-map "l" "S-<right>"))
+  (keymap-set org-read-date-minibuffer-local-map "m" "RET")
+  (keymap-set org-read-date-minibuffer-local-map "i" "S-<up>")
+  (keymap-set org-read-date-minibuffer-local-map "j" "S-<left>")
+  (keymap-set org-read-date-minibuffer-local-map "k" "S-<down>")
+  (keymap-set org-read-date-minibuffer-local-map "l" "S-<right>"))
 
 ;;;; isearch ijkl
 (with-eval-after-load "isearch"
   ;; Make C-u delete the last character of isearch
   ;; Since there is no isearch-del-word, make M-u delete the last 10 characters
-  (define-key isearch-mode-map (kbd "C-u") 'isearch-del-char)
-  (define-key isearch-mode-map (kbd "M-u") (lambda() (interactive) (isearch-del-char 10))))
+  (keymap-set isearch-mode-map "C-u" 'isearch-del-char)
+  (keymap-set isearch-mode-map "M-u" (lambda() (interactive) (isearch-del-char 10))))
 
 ;;;; Hydra org-roam
 (defun my/org-now-time-stamp()
@@ -1087,7 +1079,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("P" org-roam-pull-commit-push "Org roam sync")
   ("h" org-roam-buffer-toggle  "Org roam info for current file")
   ("q" nil "Quit"))
-(define-key ijkl-local-mode-map "," 'org/body)
+(keymap-set ijkl-local-mode-map "," 'org/body)
 
 ;;;; Hydra commands
 (defhydra commands(:exit t :columns 1)
@@ -1096,7 +1088,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("x" execute-extended-command)
   (":" eval-expression "Interpret lisp code")
   ("e" eval-last-sexp "Interpret last lisp expression"))
-(define-key ijkl-local-mode-map "!" 'commands/body)
+(keymap-set ijkl-local-mode-map "!" 'commands/body)
 
 ;;;; Magit hydra
 (defhydra magit(:exit t :columns 1)
@@ -1104,30 +1096,30 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("s" magit-status "Status (Home)")
   ("f" magit-file-dispatch "File commands")
   ("v" magit-dispatch "Global Commands"))
-(define-key ijkl-local-mode-map "v" 'magit/body)
+(keymap-set ijkl-local-mode-map "v" 'magit/body)
 
 ;;;; Magit ijkl
 (with-eval-after-load "magit"
   (key-chord-define magit-log-select-mode-map "CC" 'magit-log-select-pick)
   (key-chord-define magit-log-select-mode-map "QQ" 'magit-log-select-quit)
   (dolist (keymap (list magit-diff-section-base-map magit-mode-map))
-    (key-alias keymap "&"  "C-x 1")
-    (key-alias keymap "é"  "C-x 2")
-    (key-alias keymap "\"" "C-x 3")
-    (define-key keymap "'" 'other-window)
-    (define-key keymap "4" 'other-window-reverse)
-    (define-key-remap keymap "m" "RET" "C-c m")
-    (define-key-remap keymap "j" "C-j" "C-c j")
-    (define-key-remap keymap "i" "C-p" "C-c i")
-    (define-key-remap keymap "l" "C-l" "C-c l")
-    (define-key-remap keymap "k" "C-n" "C-c k")))
+    (keymap-set keymap "&"  "C-x 1")
+    (keymap-set keymap "é"  "C-x 2")
+    (keymap-set keymap "\"" "C-x 3")
+    (keymap-set keymap "'" 'other-window)
+    (keymap-set keymap "4" 'other-window-reverse)
+    (keymap-set-remap keymap "m" "RET" "C-c m")
+    (keymap-set-remap keymap "j" "C-j" "C-c j")
+    (keymap-set-remap keymap "i" "C-p" "C-c i")
+    (keymap-set-remap keymap "l" "C-l" "C-c l")
+    (keymap-set-remap keymap "k" "C-n" "C-c k")))
 (with-eval-after-load "git-rebase"
-  (define-key-remap git-rebase-mode-map "m" "RET" "C-c m")
-  (define-key-remap git-rebase-mode-map "j" "C-l" "C-c j")
-  (define-key-remap git-rebase-mode-map "i" "C-p" "C-c i")
-  (define-key-remap git-rebase-mode-map "k" "C-n" "C-c k")
-  (define-key-remap git-rebase-mode-map "l" "C-f" "C-c l")
-  (define-key git-rebase-mode-map "d" 'git-rebase-kill-line))
+  (keymap-set-remap git-rebase-mode-map "m" "RET" "C-c m")
+  (keymap-set-remap git-rebase-mode-map "j" "C-l" "C-c j")
+  (keymap-set-remap git-rebase-mode-map "i" "C-p" "C-c i")
+  (keymap-set-remap git-rebase-mode-map "k" "C-n" "C-c k")
+  (keymap-set-remap git-rebase-mode-map "l" "C-f" "C-c l")
+  (keymap-set git-rebase-mode-map "d" 'git-rebase-kill-line))
 (with-eval-after-load "with-editor"  ; Called for commits
   (diminish "with-editor-mode")
   (key-chord-define with-editor-mode-map "CC" 'with-editor-finish)
