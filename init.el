@@ -103,7 +103,8 @@ There are two things you can do about this warning:
 ;;;; Misc
 (progn
   (tool-bar-mode 0) ; Disable the toolbar in GUI mode
-  (when (display-graphic-p) (scroll-bar-mode 0)) ; Disable the scroll bar in GUI mode
+  (customize-set-variable 'scroll-bar-mode nil)
+  (customize-set-variable 'horizontal-scroll-bar-mode nil)
   (setq inhibit-startup-screen t) ; Hide the startup screen
   (savehist-mode) ; Save history for commands
   (setq isearch-resume-in-command-history t) ; Use history for isearch as well
