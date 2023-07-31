@@ -28,11 +28,6 @@ There are two things you can do about this warning:
 (package-initialize)
 
 ;;;; use-package : Use package will be used as a package loader in this file
-;; Install use-package if not installed yet
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
 ;; Install the package if not available yet
 (use-package use-package
   :custom
