@@ -551,9 +551,8 @@ It will add the following code :
   (save-buffer))
 
 ;;;; c++ mode
-(use-package c++-mode
+(use-package cc-mode
   :ensure nil  ; Part of emacs
-  :mode ("\\.h\\'" "\\.cpp\\'" "\\.hpp\\'" "\\.hxx\\'" "\\.cxx\\'")
   :hook (c++-mode . lsp-deferred)
   :config
   (advice-add 'c-update-modeline :override #'ignore)) ;; Don't use a modeline suffix (i.e C++//l)
@@ -573,6 +572,11 @@ It will add the following code :
   :hook (lsp-mode . (lambda()
                       (yas-minor-mode)
                       (diminish 'yas-minor-mode))))
+
+;;;; cmake-mode : Major mode for CMakeLists.txt
+(use-package cmake-mode
+  :custom (cmake-tab-width 4)
+  :mode ("CMakeLists\\.txt"))
 
 ;;;; dap-mode : Debug adapter protocol for emacs
 ;; For c++ Install mono on linux then run dap-cpptools-setup for c++
