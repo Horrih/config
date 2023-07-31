@@ -131,6 +131,7 @@ There are two things you can do about this warning:
   (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
   (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
   (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
+  (customize-set-variable 'recenter-positions '(top middle bottom)) ; Start recenter on top instead of middle
   (setq make-backup-files nil) ; Do not use backup files (filename~)
   (setq create-lockfiles nil)) ; Do not use lock files (.#filename)
 
