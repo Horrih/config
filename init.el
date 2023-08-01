@@ -924,7 +924,7 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   "Buffer actions"
   ("b" switch-to-last-buffer "Last buffer")
   ("l" consult-buffer "Show buffer list")
-  ("s" (lambda() (interactive)(switch-to-buffer "*scratch*"))  "Switch to *scratch* buffer")
+  ("s" scratch-buffer "Switch to *scratch* buffer")
   ("B" consult-buffer-other-window "Open in other window")
   ("k" kill-current-buffer "Kill buffer")
   ("m" (lambda() (interactive)(switch-to-buffer "*Messages*"))  "Switch to *Messages* buffer")
@@ -964,12 +964,13 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 (defhydra hydra-hide-show (:exit t :columns 2)
   "Hydra for hide-show commands"
   ("t" hs-toggle-hiding "Toggle H/S")
+  ("H" hs-toggle-hiding)
   ("l" hs-hide-level "Hide Level")
   ("q" hs-hide-all "Hide all")
   ("s" hs-show-block "Show block")
   ("a" hs-show-all "Show all")
   ("h" hs-hide-block "Hide block"))
-(key-chord-define ijkl-local-mode-map "hh" 'hydra-hide-show/body)
+(keymap-set ijkl-local-mode-map "H" 'hydra-hide-show/body)
 
 ;;;; Hydra search text
 (defhydra search(:exit t :columns 3)
@@ -1014,8 +1015,6 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
   ("p" previous-error "Go to previous error")
   ("d" dap-hydra "Dap mode commands"))
 (keymap-set ijkl-local-mode-map "ç" 'compile/body)
-(key-chord-define ijkl-local-mode-map "nn" 'next-error)
-(key-chord-define ijkl-local-mode-map "pp" 'previous-error)
 
 ;;;; Hydra go
 (defhydra go(:exit t :columns 3)
