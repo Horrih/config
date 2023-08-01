@@ -783,7 +783,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   "Generates a key `KEYS' sequence as if the user typed it"
   (setq unread-command-events (nconc (listify-key-sequence (kbd KEYS)) unread-command-events)))
 
-;;;; Helper macro key-alias
+;;;; mode-is-one-of-p helper function
 (defun mode-is-one-of-p(modes)
   "Returns t if the current modes (minor or major) matches one in the input modes list"
   (let (res)
@@ -792,23 +792,24 @@ This mark-ring will record all mark positions globally, multiple times per buffe
         (when (string-equal input-mode mode)
           (setq res t))))))
 
-(defmacro key-alias(keymap from to &optional exceptions)
+;;;; Helper macro key-alias
+(defmacro key-alias(keymap from to &optional except-modes)
   "Binds the key-binding FROM to the function called by typing TO.
 
-The forwarding will only occur if the current major mode is not in EXCEPTIONS list"
-  `(define-key ,keymap ,(kbd from)
+The forwarding will only occur if the current major mode is not in EXCEPT-MODES list"
+  `(keymap-set ,keymap ,from
      (defun ,(intern (format "%s-alias/%s/%s" keymap from to))(&optional args)
-       ,(format "Forwards the interactive call from %s to %s (bound by default to `%s')" from to (key-binding (kbd to)))
+       ,(format "Forwards the interactive call from %s to %s (bound by default to `%s')" from to (keymap-lookup nil to))
        (interactive "P")
        ;; By default, fetch the binding bound to `to'
-       (let ((to-call (key-binding ,(kbd to)))
-             (old-binding (key-binding ,(kbd from))))
+       (let ((to-call (keymap-lookup nil ,to))
+             (old-binding (keymap-lookup nil ,from)))
          ;; If exception : then the appropriate command must be fetched in other keymaps
          ;; This is done here by temporarily setting the `from' binding to nil in the input keymap
-         (when (mode-is-one-of-p ,exceptions)
-           (define-key ,keymap ,(kbd from) nil) ; Disable the keybinding temporarily
-           (setq to-call (key-binding ,(kbd from))) ; Get the command bound in other keymaps
-           (define-key ,keymap ,(kbd from) old-binding)) ; Restore the original keybinding
+         (when (mode-is-one-of-p ,except-modes)
+           (keymap-set ,keymap ,from nil) ; Disable the keybinding temporarily
+           (setq to-call (keymap-lookup nil ,from)) ; Get the command bound in other keymaps
+           (keymap-set ,keymap ,from old-binding)) ; Restore the original keybinding
 
          ;; Call the appropriate function
          (call-interactively to-call)))))
@@ -816,15 +817,15 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 ;;;; remap : new binding in the same keymap
 (defun remap(keymap from to)
   "Creates a new binding TO in KEYMAP for the command bound to FROM"
-  (let ((existing (lookup-key keymap (kbd from))))
-    (when existing (define-key keymap (kbd to) existing))))
+  (let ((existing (keymap-lookup keymap from)))
+    (when existing (keymap-set keymap to existing))))
 
-;;;; define-key-remap : define binding and rebind existing if it exists
-(defmacro define-key-remap(keymap keys command fallback)
-  "Like `define-key' : binds KEYS to COMMAND but remaps the existing binding to FALLBACK"
+;;;; key-alias-fallback : define binding and rebind existing if it exists
+(defmacro key-alias-fallback(keymap from to fallback)
+  "Like `key-alias' : binds FROM to function called with TO, remapping existing bindings to FALLBACK"
   `(progn
-     (remap ,keymap ,keys ,fallback)
-     (key-alias ,keymap ,keys ,command)))
+     (remap ,keymap ,from ,fallback)
+     (key-alias ,keymap ,from ,to)))
 
 ;;;; utility bindings
 (keymap-set ijkl-local-mode-map "C-+" 'text-scale-increase) ; Increase text size with Ctrl +
@@ -1112,17 +1113,17 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
     (key-alias keymap "\"" "C-x 3")
     (keymap-set keymap "'" 'other-window)
     (keymap-set keymap "4" 'other-window-reverse)
-    (define-key-remap keymap "m" "RET" "C-c m")
-    (define-key-remap keymap "j" "C-j" "C-c j")
-    (define-key-remap keymap "i" "C-p" "C-c i")
-    (define-key-remap keymap "l" "C-l" "C-c l")
-    (define-key-remap keymap "k" "C-n" "C-c k")))
+    (key-alias-fallback keymap "m" "RET" "C-c m")
+    (key-alias-fallback keymap "j" "C-j" "C-c j")
+    (key-alias-fallback keymap "i" "C-p" "C-c i")
+    (key-alias-fallback keymap "l" "C-l" "C-c l")
+    (key-alias-fallback keymap "k" "C-n" "C-c k")))
 (with-eval-after-load "git-rebase"
-  (define-key-remap git-rebase-mode-map "m" "RET" "C-c m")
-  (define-key-remap git-rebase-mode-map "j" "C-l" "C-c j")
-  (define-key-remap git-rebase-mode-map "i" "C-p" "C-c i")
-  (define-key-remap git-rebase-mode-map "k" "C-n" "C-c k")
-  (define-key-remap git-rebase-mode-map "l" "C-f" "C-c l")
+  (key-alias-fallback git-rebase-mode-map "m" "RET" "C-c m")
+  (key-alias-fallback git-rebase-mode-map "j" "C-l" "C-c j")
+  (key-alias-fallback git-rebase-mode-map "i" "C-p" "C-c i")
+  (key-alias-fallback git-rebase-mode-map "k" "C-n" "C-c k")
+  (key-alias-fallback git-rebase-mode-map "l" "C-f" "C-c l")
   (keymap-set git-rebase-mode-map "d" 'git-rebase-kill-line))
 (with-eval-after-load "with-editor"  ; Called for commits
   (diminish "with-editor-mode")
