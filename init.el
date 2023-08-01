@@ -372,12 +372,16 @@ This can be useful in conjunction to projectile's .dir-locals variables"
            (org-agenda-start-on-weekday 1) ; Agenda starts on monday in agenda
            (calendar-week-start-day 1) ; Date picker starts on monday
            (org-capture-bookmark nil)) ; To disable adding a bookmark on each org capture
-  :hook (org-mode . (lambda()
-                      (require 'org-tempo) ; For templates like <sTAB to insert a code block
-                      (require 'recentf)
-                      (add-to-list 'recentf-exclude ".*org$") ; Ignore org files from recentf due to agenda loading everything
-                      (org-indent-mode) ; Auto indent lines according to depth
-                      (auto-fill-mode)))) ; Wrap lines when longer than fill column
+  :hook
+  (org-mode . (lambda()
+                (require 'org-tempo) ; For templates like <sTAB to insert a code block
+                (key-chord-define org-mode-map "CC" 'org-ctrl-c-ctrl-c) ; Close notes by typing CC
+                (org-indent-mode) ; Auto indent lines according to depth
+                (auto-fill-mode) ; Wrap lines when longer than fill column
+
+                ;; Ignore org files from recentf due to agenda loading everything
+                (require 'recentf)
+                (add-to-list 'recentf-exclude ".*org$"))))
 
 (use-package org-indent
   :ensure nil
@@ -764,6 +768,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
     (unless (or (minibufferp)
                 (string-match "[Gg]it" (format "%s" major-mode))
                 (string-match "[Gg]it" (format "%s" major-mode))
+                (string-equal (buffer-name) "*Org Note*")
                 (string-equal (buffer-name) "*Ediff Control Panel*")
                 (string-equal (buffer-name) "COMMIT_EDITMSG"))
       (ijkl-local-mode))))
@@ -838,7 +843,9 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (keymap-set ctl-x-map "f" 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
 (keymap-set ctl-x-r-map "d" 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
 (key-alias  ijkl-local-mode-map "m"   "C-m")
-(key-alias  my-keys-mode-map "M-m" "M-<RET>")
+(key-alias  my-keys-mode-map "C-S-m" "S-<return>")
+(key-alias  my-keys-mode-map "M-m" "C-<return>")
+(key-alias  my-keys-mode-map "C-M-m" "M-<return>")
 (key-alias  ijkl-local-mode-map "&"   "C-x 1")
 (keymap-set ijkl-local-mode-map "é" "C-x 2")
 (key-alias  ijkl-local-mode-map "\"" "C-x 3")
