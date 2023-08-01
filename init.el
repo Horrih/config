@@ -876,9 +876,8 @@ The forwarding will only occur if the current major mode is not in EXCEPTIONS li
 ;; C-i is bound to TAB in terminals. You need to remap C-i to C-p at your GUI app level
 ;; For example powertoys on windows, konsole or xterm remapping on linux
 (when (display-graphic-p)
-  (define-key input-decode-map "\C-i" [C-i])  ; Disable C-i -> TAB
-  ;; Rebind C-i as previous line
-  (key-alias my-keys-mode-map "<C-i>" "C-p"))
+  (keymap-set input-decode-map "C-i" "C-<i>") ; Disable C-i -> TAB
+  (key-alias my-keys-mode-map "C-<i>" "C-p")) ; Rebind C-i as previous line
 
 (keymap-set   my-keys-mode-map "M-i" (lambda() (interactive)(previous-line 7)))
 (key-alias    my-keys-mode-map "C-M-i" "M-<")
