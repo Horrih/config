@@ -105,6 +105,7 @@ There are two things you can do about this warning:
   (tool-bar-mode 0) ; Disable the toolbar in GUI mode
   (customize-set-variable 'scroll-bar-mode nil)
   (customize-set-variable 'horizontal-scroll-bar-mode nil)
+  (customize-set-variable 'vc-follow-symlinks t) ; Do not ask to follow symlinks to version controlled files (mostly my emacs config)
   (setq inhibit-startup-screen t) ; Hide the startup screen
   (savehist-mode) ; Save history for commands
   (setq isearch-resume-in-command-history t) ; Use history for isearch as well
