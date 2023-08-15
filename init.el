@@ -845,7 +845,6 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (key-alias  ijkl-local-mode-map "m"   "C-m")
 (key-alias  my-keys-mode-map "C-S-m" "S-<return>")
 (key-alias  my-keys-mode-map "M-m" "C-<return>")
-(key-alias  my-keys-mode-map "C-M-m" "M-<return>")
 (key-alias  ijkl-local-mode-map "&"   "C-x 1")
 (keymap-set ijkl-local-mode-map "é" "C-x 2")
 (key-alias  ijkl-local-mode-map "\"" "C-x 3")
