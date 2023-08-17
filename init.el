@@ -49,6 +49,7 @@ There are two things you can do about this warning:
 
 ;;;; esup : Launch the esup command to measure startup time of each emacs plugin
 (use-package esup
+  :disabled
   :custom (esup-depth 0)) ; Sometimes fixes the bug https://github.com/jschaf/esup/issues/54
 
 ;;; Various customizations options
@@ -106,15 +107,15 @@ There are two things you can do about this warning:
   (customize-set-variable 'scroll-bar-mode nil)
   (customize-set-variable 'horizontal-scroll-bar-mode nil)
   (customize-set-variable 'vc-follow-symlinks t) ; Do not ask to follow symlinks to version controlled files (mostly my emacs config)
-  (setq inhibit-startup-screen t) ; Hide the startup screen
-  (savehist-mode) ; Save history for commands
-  (setq isearch-resume-in-command-history t) ; Use history for isearch as well
+  (customize-set-variable 'inhibit-startup-screen t) ; Hide the startup screen
+  (savehist-mode t) ; Save history for commands
+  (customize-set-variable 'isearch-resume-in-command-history t) ; Use history for isearch as well
   (global-auto-revert-mode) ; Refresh files automatically when modified from outside emacs
-  (setq enable-local-eval t) ; Enable eval blocks in .dir-locals.el
-  (setq enable-local-variables :all) ; Enable by default variables in .dir-locals.el
-  (setq ring-bell-function 'ignore) ; Disable the bell for emacs
-  (setq debug-on-error nil) ; Display the stacktrace if error encountered in one of the lisp method
-  (setq completions-detailed t) ; Detailed description for the built in describe symbol etc
+  (customize-set-variable 'enable-local-eval t) ; Enable eval blocks in .dir-locals.el
+  (customize-set-variable 'enable-local-variables :all) ; Enable by default variables in .dir-locals.el
+  (customize-set-variable 'ring-bell-function 'ignore) ; Disable the bell for emacs
+  (customize-set-variable 'debug-on-error nil) ; Display the stacktrace if error encountered in one of the lisp method
+  (customize-set-variable 'completions-detailed t) ; Detailed description for the built in describe symbol etc
   (column-number-mode t) ; Display column numbers in the status line
   (global-display-line-numbers-mode t) ; Display line numbers on the left
   (line-number-mode t) ; Display line number
@@ -122,19 +123,18 @@ There are two things you can do about this warning:
   (delete-selection-mode 1) ; If text is selected, we expect that typing will replace the selection
   (show-paren-mode 1) ; Highlight the matching parenthesis
   (setq-default show-trailing-whitespace t) ; Show in red the spaces forgotten at the end of lines
-  (setq-default indent-tabs-mode nil) ; Use spaces for indent
-  (setq next-error-message-highlight t) ; When jumping between errors, occurs, etc, highlight the current line
+  (customize-set-variable 'indent-tabs-mode nil) ; Use spaces for indent
+  (customize-set-variable 'next-error-message-highlight t) ; When jumping between errors, occurs, etc, highlight the current line
   (menu-bar-mode -1) ; Hide Menu bar
-  (setq use-short-answers t) ; Abreviate Yes/No to y or n
-  (setq default-tab-width 4) ; Number of spaces inserted by tab
-  (setq-default c-basic-offset  4) ; Base indent size when indented automatically
+  (customize-set-variable 'use-short-answers t) ; Abreviate Yes/No to y or n
+  (customize-set-variable 'c-basic-offset  4) ; Base indent size when indented automatically
   (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
   (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
   (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
   (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
   (customize-set-variable 'recenter-positions '(top middle bottom)) ; Start recenter on top instead of middle
-  (setq make-backup-files nil) ; Do not use backup files (filename~)
-  (setq create-lockfiles nil)) ; Do not use lock files (.#filename)
+  (customize-set-variable 'make-backup-files nil) ; Do not use backup files (filename~)
+  (customize-set-variable 'create-lockfiles nil)) ; Do not use lock files (.#filename)
 
 ;;;; switch-to-last-buffer
 (defun switch-to-last-buffer()
