@@ -834,8 +834,10 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
      (key-alias ,keymap ,from ,to)))
 
 ;;;; utility bindings
-(keymap-set ijkl-local-mode-map "C-+" 'text-scale-increase) ; Increase text size with Ctrl +
-(keymap-set ijkl-local-mode-map "C--" 'text-scale-decrease) ; Decrease text size with Ctrl -
+(keymap-set my-keys-mode-map "C-+" 'text-scale-increase) ; Increase text size with Ctrl +
+(keymap-set my-keys-mode-map "C--" 'text-scale-decrease) ; Decrease text size with Ctrl -
+(keymap-set ijkl-local-mode-map "+" 'text-scale-increase) ; Increase text size with Ctrl +
+(keymap-set ijkl-local-mode-map "-" 'text-scale-decrease) ; Decrease text size with Ctrl -
 (keymap-set ijkl-local-mode-map "TAB" nil)    ; Do not override tab binding
 (keymap-set ijkl-local-mode-map "<tab>" nil)  ; Do not override tab binding
 (keymap-set ijkl-local-mode-map "h" help-map) ; Use the help functions
