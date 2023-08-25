@@ -22,27 +22,22 @@ function print_help()
     echo "Usage $0  DOSSIER_LOCAL   DOSSIER_NAS"
     echo ""
     echo "exemple:"
-    echo './renommage_date.sh "/mnt/c/Users/Charles/Desktop/A trier/2018" ~/PhotosNAS/Photos/2018'
+    echo './renommage_date.sh "DOSSIER_A_TRIER'
     echo ""
     echo "Options:"
-    echo "    --move, -m : On déplace le fichier existant au lieu de copier. Plus rapide mais plus risqué"
     echo "    --dry-run, -d : Execution en mode simulation, la copie ne sera pas effectuée"
     echo "    --help, -h : Ce message d'aide"
     echo ""
 }
 
 dry_run=false
-move=false
 for arg in "$@"; do
     case "$arg" in
         -h | --help) print_help; exit 0;;
         --dry-run | -d) dry_run=true;;
-        --move | -m) move=true;;
         *)
-            if [[ -z "$LOCAL" ]]; then
-                LOCAL="$arg";
-            elif [[ -z "$NAS" ]]; then
-                NAS="$arg"
+            if [[ -z "$DIR" ]]; then
+                DIR="$arg";
             else
                 echo "Argument en trop : $arg"
                 exit 1
@@ -50,58 +45,48 @@ for arg in "$@"; do
             ;;
     esac
 done
-
-if [[ -z "$LOCAL" ]] || [[ -z "$NAS" ]]; then
-    echo "Erreur : usage incorrect"
+if [[ ! -d "$DIR" ]]; then
+    echo "Erreur : usage incorrect ou chemins invalides"
     print_help
     exit 1
 fi
 
 echo "Lancement du script de renommage des dates:"
-echo "  - Dossier de départ : $LOCAL"
-echo "  - Dossier destination : $NAS"
+echo "  - Dossier à trier : $DIR"
 if [ "$dry_run" = true ]; then
     echo "Options de lancement de simulation : les opérations seront fictives"
-fi
-if [ "$move" = true ]; then
-    echo "Les fichiers seront déplacés et non copiés"
 fi
 total=0
 
 #To disable the splitting of files with a whitespace in the name
 IFS=$(echo -en "\n\b")
 
-#for f in $(cd "$LOCAL" && find . -maxdepth 1 -type f | sed 's|./||' ); do
-for f in $(cd "$LOCAL" && ls -rtp | grep -v '/' | grep -v 'Thumbs.db' ); do
+TMP="$DIR/temp_tri"
+if [ "$dry_run" = false ]; then
+    mkdir -pv "$TMP"
+fi
+last_date=""
+for f in $(find $DIR -type f -printf "%T@|%p\n" | sort -u | sed 's/.*|//g'); do
     ((total++))
-    date=$(stat -c %y "$LOCAL/$f" | cut -d ' ' -f 1) # Uncomment to remove year | sed 's/[0-9]*-//')
-    #already_present=false
-    #for f2 in "$NAS/"$date*; do test -f "$f2" && cmp -s "$f2" "$LOCAL/$f" && already_present=true; done
-    #if [ "$already_present" = true ]; then
-    #    echo "Source=$LOCAL/$f identique à $NAS/$f2 : il sera ignoré"
-    #    continue
-    #fi
-    i=1
-    while : ; do
-	extension="${f##*.}"
-	destfile="$date ($i).$extension"
-	naspath="$NAS/$destfile"
-	printf "Source=$LOCAL/$f -> $naspath"
-	if [[ -f $naspath ]]; then
-	    echo " | Déjà pris";
-	else
-	    echo " | OK! | Fichier n°$total"
-            if [ "$dry_run" = false ]; then
-                if [ "$move" = true ]; then
-                    mv "$LOCAL/$f" "$naspath"
-                else
-	            cp -a "$LOCAL/$f" "$naspath"
-                fi
-            fi
-	    break
-	fi
-	((i++))
-    done
+    date=$(stat -c %y "$f" | cut -d ' ' -f 1) # Uncomment to remove year | sed 's/[0-9]*-//')
+    if [[ "$last_date" != "$date" ]]; then
+        i=1
+    fi
+    last_date=$date
+    extension="${f##*.}"
+    destfile="$date ($i).$extension"
+    destpath="$TMP/$destfile"
+    echo "Source=$DIR/$f -> $destpath -> $DIR/$destfile"
+    if [ "$dry_run" = false ]; then
+        mv "$f" "$destpath"
+    fi
+    ((i++))
 done
+if [ "$dry_run" = false ]; then
+    echo ""
+    echo "Rappatriement de $TMP vers $DIR"
+    mv -v "$TMP"/* "$DIR"
+fi
+test -d $TMP && rmdir $TMP
 echo ""
-echo "Terminé : copie de $total fichiers"
+echo "Terminé : renommage de $total fichiers"
