@@ -374,6 +374,9 @@ This can be useful in conjunction to projectile's .dir-locals variables"
            (calendar-week-start-day 1) ; Date picker starts on monday
            (org-capture-bookmark nil)) ; To disable adding a bookmark on each org capture
   :hook
+  (org-agenda-mode . (lambda()
+                       (keymap-set org-agenda-mode-map "C-c p" 'org-agenda-earlier)
+                       (keymap-set org-agenda-mode-map "C-c n" 'org-agenda-later)))
   (org-mode . (lambda()
                 (require 'org-tempo) ; For templates like <sTAB to insert a code block
                 (key-chord-define org-mode-map "CC" 'org-ctrl-c-ctrl-c) ; Close notes by typing CC
