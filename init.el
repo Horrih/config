@@ -28,12 +28,10 @@ There are two things you can do about this warning:
 (package-initialize)
 
 ;;;; use-package : Use package will be used as a package loader in this file
-;; Install the package if not available yet
 (use-package use-package
   :custom
   (use-package-always-ensure t) ; Download missing packages by default
-  (use-package-always-defer t) ; Lazy load by default, use :demand otherwise
-)
+  (use-package-always-defer t)) ; Lazy load by default, use :demand otherwise
 
 ;;;; diminish : Hide the mode line string for modes (called the lighter)
 (use-package diminish
@@ -78,28 +76,9 @@ There are two things you can do about this warning:
   :init
   (doom-modeline-mode))
 
-;;;; All the icons
-;; TODO on 1st install : use all-the-icons-install-fonts
-;; Caskaydia => https://www.nerdfonts.com/font-downloads
-;; Symbola => https://fontlibrary.org/fr/font/symbola
-(use-package all-the-icons
-  :if (display-graphic-p))
-
 ;;;; Dired as default buffer
 (when (< (length command-line-args) 2)
   (add-hook 'after-init-hook 'dired-jump))
-
-;;;; Dashboard as default buffer
-(use-package dashboard
-  :disabled
-  :demand
-  :hook (dashboard-mode . (lambda()(setq-local show-trailing-whitespace nil)))
-  :diminish dashboard-mode
-  :custom (dashboard-items '((projects . 5)
-                             (bookmarks . 10)
-                             (recents  . 10)))
-  :config
-  (dashboard-setup-startup-hook))
 
 ;;;; Misc
 (progn
@@ -192,8 +171,7 @@ There are two things you can do about this warning:
   :ensure nil ; Emacs built in
   :hook (compilation-mode . (lambda()(setq show-trailing-whitespace nil)))
   :custom
-  (compilation-always-kill t) ; Do not ask for confirmation when I stop current compilation
-  (compilation-message-face 'all-the-icons-green))
+  (compilation-always-kill t)) ; Do not ask for confirmation when I stop current compilation
 
 ;;;; switch-to-compilation-other-window()
 (defun switch-to-compilation-other-window()
@@ -423,8 +401,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package org-download
   :commands (org-download-clipboard)
   :custom (org-image-actual-width 900)
-  :config
-  ;; Override the default dir to have one dir for each org file
+  ;; Override the default dir to have one dir for each org file instead of per heading
   (defun org-download--dir-1 ()
     (or org-download-image-dir (concat (file-name-sans-extension (buffer-file-name)) "-img"))))
 
