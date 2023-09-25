@@ -879,20 +879,39 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (keymap-set ijkl-local-mode-map "M-S-<up>" 'shrink-window)
 
 ;;;; Hydra buffer
-(defcustom my/emacs-config-main "~/.config/emacs/init.el"
-  "Path to the emacs main config file. Used for some direct navigation bindings"
+;;;;; hydra
+(defhydra buffer(:exit t :hint nil)
+  "
+^Commands^                        ^Shortcuts^
+--------------------------------------------
+_l_: List buffers                 _e_: Emacs config file
+_L_: List buffers other window    _s_: *scratch* buffer
+_b_: Go to last buffer            _m_: *messages* buffer
+_k_: Kill current buffer
+"
+  ("l" consult-buffer)              ("e" my/switch-to-emacs-config)
+  ("L" consult-buffer-other-window) ("s" scratch-buffer)
+  ("b" my/switch-to-last-buffer)    ("m" my/switch-to-messages)
+  ("k" kill-current-buffer))
+(keymap-set ijkl-local-mode-map "b" 'buffer/body)
+
+;;;;; my/switch-to-messages
+(defun my/switch-to-messages()
+  "Switch to *Messages* buffer"
+  (interactive)
+  (switch-to-buffer "*Messages*"))
+
+
+;;;;; my/switch-to-emacs-config
+(defcustom my/emacs-config "~/.config/emacs/init.el"
+  "Path to the emacs main config file. Used by `my/switch-to-emacs-config'
+for some direct navigation bindings"
   :type 'string)
 
-(defhydra buffer(:columns 3 :exit t)
-  "Buffer actions"
-  ("b" my/switch-to-last-buffer "Last buffer")
-  ("l" consult-buffer "Show buffer list")
-  ("s" scratch-buffer "Switch to *scratch* buffer")
-  ("B" consult-buffer-other-window "Open in other window")
-  ("k" kill-current-buffer "Kill buffer")
-  ("m" (lambda() (interactive)(switch-to-buffer "*Messages*"))  "Switch to *Messages* buffer")
-  ("e" (lambda() (interactive)(find-file my/emacs-config-main)) "Switch to emacs config file"))
-(keymap-set ijkl-local-mode-map "b" 'buffer/body)
+(defun my/switch-to-emacs-config()
+  "Switch to *Messages* buffer"
+  (interactive)
+  (find-file my/emacs-config))
 
 ;;;; Hydra outline
 (defhydra outline(:columns 3)
@@ -936,62 +955,77 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (keymap-set ijkl-local-mode-map "H" 'hydra-hide-show/body)
 
 ;;;; Hydra search text
-(defhydra search(:exit t :columns 3)
-  "Text search related commands"
-  ("o" consult-line "Occurences in file")
-  ("s" isearch-forward "Next occurence in file")
-  ("S" isearch-backward "Previous occurence in file")
-  ("w" isearch-forward-symbol-at-point "Next occurence in file of word")
-  ("r" query-replace "Next occurence in file")
-  ("a" (lambda() (interactive) (consult-grep default-directory)) "Grep in current directory")
-  ("p" projectile-ag "Grep in current project")
-  ("P" projectile-replace "Replace in current project")
-  ("b" multi-occur-in-matching-buffers "Occur in all buffers"))
+;;;;; Hydra
+(defhydra search(:exit t :hint nil)
+  "
+^Incremental search^         ^Occurences^                   ^Replace^
+---------------------------------------------------------------------
+_s_: Forward                 _o_: In file                   _r_: String
+_S_: Backward                _b_: In all buffers            _R_: Regexp
+_w_: Symbol at point         _p_: In current project        _P_: Project
+^ ^                          _a_: In current directory
+"
+  ("s" isearch-forward)                 ("o" consult-line)                    ("r" query-replace)
+  ("S" isearch-backward)                ("b" multi-occur-in-matching-buffers) ("R" query-replace-regexp)
+  ("w" isearch-forward-symbol-at-point) ("p" projectile-ag)                   ("P" projectile-replace)
+                                        ("a" my/consult-directory))
 (keymap-set ijkl-local-mode-map "s" 'search/body)
 
+;;;;; my/consult-directory
+(defun my/consult-directory()
+  "`consult-grep' in `default-directory'"
+  (interactive)
+  (consult-grep default-directory))
+
 ;;;; Hydra find
-(defhydra find(:exit t :columns 2)
-  "Search related commands"
-  ("d" dired-jump "Open current directory in dired")
-  ("f" find-file "Find file by URL")
-  ("e" flycheck-list-errors "Errors current file (flycheck + LSP)")
-  ("t" lsp-treemacs-errors-list "Errors current project (LSP treemacs)")
-  ("r" xref-find-references "Find references (xref)")
-  ("o" ff-find-other-file "switch header/cpp")
-  ("p" project-find-file "project-find-file")
-  ("P" projectile-find-file-other-window "projectile-find-file-other-window"))
+(defhydra find(:exit t :hint nil)
+  "
+^Find files^                      ^Coding^
+-------------------------------------------------------------
+_d_: Dired - Current directory    _e_: List errors (file)
+_f_: By path                      _t_: List errors (project)
+_p_: Project                      _r_: Find references (xref)
+_P_: Project in other window      _o_: Switch header/cpp
+"
+  ("d" dired-jump)                        ("e" flycheck-list-errors)
+  ("f" find-file)                         ("t" lsp-treemacs-errors-list)
+  ("p" project-find-file)                 ("r" xref-find-references)
+  ("P" projectile-find-file-other-window) ("o" ff-find-other-file))
 (keymap-set ijkl-local-mode-map "f" 'find/body)
 
 ;;;; Hydra compile
-(defhydra compile(:exit t :columns 3)
-  "Compilation commands"
-  ("ç" my/recompile-switch "Reuse last compilation command")
-  ("e" compile "Edit the compilation command")
-  ("a" my/compile-all "Compile project")
-  ("f" my/compile-file "Compile the current file")
-  ("k" kill-compilation "Kill compilation")
-  ("o" my/switch-to-compilation-other-window "Switch to compilation in side window")
-  ("l" compilation-set-skip-threshold "Cycle skip level(0, 1, 2) for errors navigation")
-  ("d" dap-hydra "Use dap mode hydra as an interactive debugger")
-  ("g" hydra-gdb/body "Use gdb-hydra as an interactive debugger")
-  ("n" next-error "Go to next error")
-  ("p" previous-error "Go to previous error"))
+(defhydra compile(:exit t :hint nil)
+  "
+^Start compilation^             ^Buffer commands^
+--------------------------------------------------------------
+_e_: Edit command               _o_: Open *compilation* buffer
+_ç_: Recompile                  _n_: Next compilation error
+_a_: Compile project            _p_: Prev compilation error
+_f_: Compile current file       _l_: Cycle error threshold
+_k_: Stop compilation
+"
+  ("e" compile)             ("o" my/switch-to-compilation-other-window)
+  ("ç" my/recompile-switch) ("l" compilation-set-skip-threshold :color red)
+  ("a" my/compile-all)      ("n" next-error     :color red)
+  ("f" my/compile-file)     ("p" previous-error :color red)
+  ("k" kill-compilation))
 (keymap-set ijkl-local-mode-map "ç" 'compile/body)
 
 ;;;; Hydra go
-(defhydra go(:exit t :columns 3)
-  "Jump to destination in text"
-  ("l" goto-line "Go to line n°")
-  ("b" bookmark-jump "Bookmark jump")
-  ("u" backward-up-list "Go up one level" :color red)
-  ("j" xref-find-definitions "Jump to definition (xref)")
-  ("," org-roam-node-find "Go to an org roam file")
-  ("n" forward-sexp  "Go to the closing parenthesis/bracket" :color red)
-  ("J" xref-find-definitions-other-window  "Jump to definition other window(xref)")
-  ("E" flycheck-previous-error "Previous error (Flycheck)" :color red)
-  ("p" backward-sexp "Go to the opening parenthesis/bracket" :color red)
-  ("r" jump-to-register "Jump to register (see point-to-register)")
-  ("e" flycheck-next-error "Next error (Flycheck)" :color red)
+(defhydra go(:exit t :hint nil)
+  "
+^Go to^                                 ^LSP Navigation^                  ^Expressions^
+-------------------------------------------------------------------------------------------
+_l_: Line n°                            _j_: Definition                   _n_: Forward expression
+_b_: Bookmark                           _J_: Definition other window      _p_: Backward expression
+_,_: Org roam file                      _e_: Next error                   _u_: Upward expression
+_r_: Register (see point-to-register)   _E_: Previous error
+
+"
+  ("l" goto-line)          ("j" xref-find-definitions)                ("n" forward-sexp     :color red)
+  ("b" bookmark-jump)      ("J" xref-find-definitions-other-window)   ("p" backward-sexp    :color red)
+  ("," org-roam-node-find) ("e" flycheck-next-error :color red)       ("u" backward-up-list :color red)
+  ("r" jump-to-register)   ("E" flycheck-previous-error :color red)
   ("q" nil "Quit"))
 (keymap-set ijkl-local-mode-map "g" 'go/body)
 
@@ -1040,22 +1074,23 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
   (interactive)
   (org-insert-time-stamp (current-time) t))
 
-(defhydra org(:exit t :columns 4)
-  "Jump to destination in text"
-  ("a" org-agenda-list "Org Agenda")
-  ("i" org-roam-node-insert "Insert new org roam file")
-  ("s" org-schedule "Set a scheduled date for the TODO item")
-  ("y" org-download-clipboard "Insert an image from the clipboard")
-  ("l" org-insert-link "Insert a link to another file/website")
-  ("g" org-roam-node-find "Go to an org roam file")
-  ("d" org-deadline "Set a deadline for the TODO item")
-  ("," org-toggle-inline-images "Toggle image display")
-  ("n" my/org-now-time-stamp "Insert today's date")
-  ("N" org-time-stamp "Choose date from calendar")
-  ("L" org-todo-list "List all TODOs")
-  ("t" org-todo "Changes the TODO state of the current line")
-  ("P" my/org-roam-pull-commit-push "Org roam sync")
-  ("h" org-roam-buffer-toggle  "Org roam info for current file")
+(defhydra org(:exit t :hint nil)
+  "
+^Agenda/TODOs^             ^Edition^                ^Org Roam^
+---------------------------------------------------------------------------------
+_a_: Show agenda           _l_: Insert link         _g_: Go to an org-roam file
+_s_: Set scheduled date    _n_: Now timestamp       _i_: Link to an org-roam file
+_d_: Set deadline date     _N_: Pick timestamp      _h_: Info for file
+_t_: Cycle TODOs states    _y_: Yank(paste) image   _S_: Sync
+_L_: List TODOs            _,_: Toggle images
+
+"
+  ("a" org-agenda-list)        ("l" org-insert-link)           ("i" org-roam-node-insert)
+  ("s" org-schedule)           ("t" org-todo)                  ("g" org-roam-node-find)
+  ("d" org-deadline)           ("y" org-download-clipboard)    ("h" org-roam-buffer-toggle )
+  ("n" my/org-now-time-stamp)  ("L" org-todo-list)             ("S" my/org-roam-pull-commit-push)
+  ("N" org-time-stamp)         ("," org-toggle-inline-images)
+
   ("q" nil "Quit"))
 (keymap-set ijkl-local-mode-map "," 'org/body)
 
