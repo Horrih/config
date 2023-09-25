@@ -36,26 +36,29 @@
   :custom (esup-depth 0)) ; Sometimes fixes the bug https://github.com/jschaf/esup/issues/54
 
 ;;; Various customizations options
-;;;; my-keys minor mode for global keybindings overriding
-(define-minor-mode my-keys-mode
+;;;; my/keys minor mode for global keybindings overriding to be turned off/on
+(define-minor-mode my/keys-mode
   "Minor mode to enable custom keybindings"
   :lighter ""
   :global t
   :keymap '())
-(my-keys-mode)
+(my/keys-mode)
 
 ;;;; Main color theme : vscode-dark-plus-theme
 (use-package vscode-dark-plus-theme
   :demand
   :config (load-theme 'vscode-dark-plus t))
 
-;;;; Mode line theme : doom mode line
+;;;; Mode line theme : doom mode line - Must download CaskaydiaCove Nerd Font
 (use-package doom-modeline
   :demand
   :custom-face
   (mode-line ((t :background "black")))
   (mode-line-inactive ((t :background "#333333"))) ; Dark grey
   :custom
+  ;; Font with icons to download here
+  ;; https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/CascadiaCode.zip
+  (nerd-icons-font-family "CaskaydiaCove NFM")
   (doom-modeline-unicode-fallback t)
   (doom-modeline-minor-modes t)
   :init
@@ -100,55 +103,46 @@
   (customize-set-variable 'make-backup-files nil) ; Do not use backup files (filename~)
   (customize-set-variable 'create-lockfiles nil)) ; Do not use lock files (.#filename)
 
-;;;; switch-to-last-buffer
-(defun switch-to-last-buffer()
+;;;; my/switch-to-last-buffer
+(defun my/switch-to-last-buffer()
   "Use `switch-to-buffer' to visit the last buffer"
   (interactive)
   (switch-to-buffer nil))
 
-;;;; delete-start-or-previous-line
-(defun delete-start-or-previous-line()
+;;;; my/delete-start-or-previous-line
+(defun my/delete-start-or-previous-line()
   "Use `kill-line' to delete either the start of the line, or the previous line if empty"
   (interactive)
   (kill-line (if (= (line-beginning-position) (point)) -1 0)))
 
-;;;; match-buffer-extension
-(defun match-buffer-extension(&rest extensions)
+;;;; my/match-buffer-extension
+(defun my/match-buffer-extension(&rest extensions)
   "Returns t if the current buffer has an extension in EXTENSIONS"
   (if (member (file-name-extension (buffer-name)) extensions)
       t))
 
-;;;; other-window-reverse
-(defun other-window-reverse()
+;;;; my/other-window-reverse
+(defun my/other-window-reverse()
   "Like `other-window' but in the reverse order"
   (interactive)
   (other-window -1))
 
-;;;; replace-chat-at-point
-(defun replace-char-at-point(char)
+;;;; my/replace-chat-at-point
+(defun my/replace-char-at-point(char)
   "Replaces the caracter at point by `CHAR'"
   (interactive "cReplace character at point with : ")
   (delete-char 1)
   (insert-char char)
   (backward-char 1))
 
-;;;; delete-char-or-kill-region
-(defun delete-char-or-kill-region()
+;;;; my/delete-char-or-kill-region
+(defun my/delete-char-or-kill-region()
   "If mark is active, kill region, otherwise delete-char"
   (interactive)
   (call-interactively
     (if mark-active
         'kill-region
       'delete-char)))
-
-;;;; replace-char-or-rectangle-region
-(defun replace-char-or-rectangle-region()
-  "If mark is active, rectangle actions, otherwise replace-char"
-  (interactive)
-  (call-interactively
-    (if mark-active
-        'rectangle/body
-      'replace-char-at-point)))
 
 ;;; Compilation options
 ;;;; Compilation misc
@@ -158,51 +152,51 @@
   :custom
   (compilation-always-kill t)) ; Do not ask for confirmation when I stop current compilation
 
-;;;; switch-to-compilation-other-window()
-(defun switch-to-compilation-other-window()
+;;;; my/switch-to-compilation-other-window()
+(defun my/switch-to-compilation-other-window()
   "Switches to the compilation buffer in another window"
   (interactive)
   (unless (string-equal "*compilation*" (buffer-name))
     (switch-to-buffer-other-window "*compilation*")))
 
-(defun switch-to-compilation-other-window-end()
+(defun my/switch-to-compilation-other-window-end()
   "Switches to the compilation buffer in another window and go to buffer end"
   (interactive)
-  (switch-to-compilation-other-window)
+  (my/switch-to-compilation-other-window)
   (end-of-buffer))
 
-;;;; recompile-switch
-(defun recompile-switch()
+;;;; my/recompile-switch
+(defun my/recompile-switch()
   "Uses the recompile function and switches to the buffer end"
   (interactive)
   (recompile)
-  (switch-to-compilation-other-window-end))
+  (my/switch-to-compilation-other-window-end))
 
-;;;; compile-all
-(defcustom compile-all-command nil
-  "If non nil, `compile-all' will use it as command instead of `compile-command'
+;;;; my/compile-all
+(defcustom my/compile-all-command nil
+  "If non nil, `my/compile-all' will use it as command instead of `compile-command'
 This can be useful in conjunction to projectile's .dir-locals variables"
   :type 'string
   :risky nil)
 
-(defun compile-all()
+(defun my/compile-all()
   "Compiles the whole project and switch to buffer end"
   (interactive)
-  (compile (or compile-all-command "make -j8"))
-  (switch-to-compilation-other-window-end))
+  (compile (or my/compile-all-command "make -j8"))
+  (my/switch-to-compilation-other-window-end))
 
-;;;; compile-file
-(defun compile-file(file-name)
+;;;; my/compile-file
+(defun my/compile-file(file-name)
   "Compiles the file FILE-NAME using a command to be define `compile-file-command'
   This function should take a filename as parameter and returning the command as output"
   (interactive (list (buffer-file-name)))
   (unless (fboundp 'compile-file-command)
     (error "compile-file expects the compile-file-command function to be defined"))
   (compile (compile-file-command file-name))
-  (switch-to-compilation-other-window-end))
+  (my/switch-to-compilation-other-window-end))
 
 ;;;; ansi-color : Translate TTY escape sequences into colors
-(defun ansi-color-compilation-filter-except-ag()
+(defun my/ansi-color-compilation-filter-except-ag()
   "Like `ansi-color-compilation-filter', except on buffers generated by the ag package.
    If we use vanilla ansi-color-compilation-filter, the colors get messed up"
   (unless (string-match "ag search text" (buffer-name))
@@ -210,9 +204,9 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 (use-package ansi-color
   :ensure nil ; Emacs built-in
-  :hook (compilation-filter . ansi-color-compilation-filter-except-ag)) ; Handle terminal colors in the compilation buffer
+  :hook (compilation-filter . my/ansi-color-compilation-filter-except-ag)) ; Handle terminal colors in the compilation buffer
 
-;;;; regexps : Set compilation regex for errors
+;;;; Error regexps : Set compilation regex for errors
 (let ((enabled-regexps ())
       (custom-error-list '(
         ;; Insert your custom regexps here
@@ -244,7 +238,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :hook (ediff-keymap-setup . (lambda()
                         (keymap-set ediff-mode-map "h" 'ediff-status-info)
                         (keymap-set ediff-mode-map "'" 'other-window)
-                        (keymap-set ediff-mode-map "4" 'other-window-reverse)
+                        (keymap-set ediff-mode-map "4" 'my/other-window-reverse)
                         (keymap-set ediff-mode-map "i" 'ediff-previous-difference)
                         (keymap-set ediff-mode-map "k" 'ediff-next-difference)))
   :custom
@@ -292,7 +286,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 
 ;;;; Consult : a collection of commands that improve emacs defaults
 (use-package consult
-  :bind (:map my-keys-mode-map
+  :bind (:map my/keys-mode-map
          ("M-y" . consult-yank-pop)
          :map help-map
          ("a" . consult-apropos)
@@ -319,7 +313,9 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :bind (:map dired-mode-map ("u" . dired-up-directory))
   :custom(dired-kill-when-opening-new-dired-buffer t)) ; Auto close previous folder buffer
 
-;;;; Org mode : Base mode for note taking
+
+;;; Org mode : Note taking and presentation
+;;;; Org mode : package customizations
 (use-package org
   :custom-face
   (org-warning ((t (:underline nil)))) ; Do not underline org-warnings, red is enough
@@ -354,12 +350,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :ensure nil
   :diminish)
 
-;;;; Org org-agenda-other-window-no-switch()
-(defun org-agenda-other-window-no-switch()
-  "Opens the org agenda (monthly view) in a side window without leaving the current window"
-  (interactive)
-  (save-selected-window (org-agenda-list)))
-
 ;;;; Org bullets : Pretty mode for org
 (use-package org-bullets
   :hook (org-mode . org-bullets-mode))
@@ -373,7 +363,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :config
   (org-roam-db-autosync-mode))
 
-(defun org-roam-pull-commit-push()
+(defun my/org-roam-pull-commit-push()
   "Git commit and push all the modified files in `org-roam-directory'"
   (interactive)
   (let ((default-directory org-roam-directory))
@@ -396,7 +386,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
            (visual-fill-column-center-text t)))
 
 ;;;; org-present : Using org files for powerpoints
-(setq my/original-default_face 'default)
 (defun my/org-present-start()
   "To be called when enabling `org-present-mode' : sets up the various presentation options"
   (setq-local face-remapping-alist '((default (:height 1.5 :family "Arial") default)
@@ -443,7 +432,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package web-mode
   :mode ("\\.css\\'" "\\.html\\'" "\\.ts\\'" "\\.js\\'" "\\.vue\\'")
   :hook
-  (web-mode . (lambda () (when (match-buffer-extension "ts" "js" "vue")
+  (web-mode . (lambda () (when (my/match-buffer-extension "ts" "js" "vue")
                            (lsp-deferred)
                            (setq-local lsp-auto-format t))))
   :custom
@@ -455,8 +444,8 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :custom
   (prettier-js-show-errors nil))
 
-;;;; Outline mode with package outline-minor-faces and outshine
-;;;;; Enable sane bindings and actions for outline mode
+;;;; Outline mode with package outline-minor-faces
+;;;;; Package configuration
 (use-package outline
   :ensure nil ; emacs built-in
   :hook
@@ -465,7 +454,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (diminish 'outline-minor-mode)
   :custom
   (outline-minor-mode-cycle t) ; Tab and S-Tab cycle between different visibility settings
-  (outline-minor-mode-cycle-filter 'bolp))
+  (outline-minor-mode-cycle-filter 'bolp)) ; Cycle only when on line beginning
 
 ;;;;; Pretty colors for headings
 ;; We don't use (outline-minor-mode-highlight 'override) because it applies to some non headings as well
@@ -488,8 +477,8 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :hook
   (prog-mode . hs-minor-mode))
 
-;;;; include-guards(text) : Add include guards to the current file
-(defun include-guards(text)
+;;;; my/include-guards(text) : Add include guards to the current file
+(defun my/include-guards(text)
   "Adds include guards in the current file, useful for C/C++ devs
 
 It will add the following code :
@@ -511,8 +500,8 @@ It will add the following code :
     (insert (format "#endif // %s" text))
     ))
 
-;;;; include-c-header-val() : Inserts a #include directive for C/C++
-(defun include-c-header(val)
+;;;; my/include-c-header-val() : Inserts a #include directive for C/C++
+(defun my/include-c-header(val)
   "Adds a #include \"VAL.h\" at point and saves the file"
   (interactive "MHeader file name: ")
   (insert (format "#include \"%s.h\"\n" val))
@@ -588,24 +577,24 @@ It will add the following code :
   :config
   (setq lsp-headerline-arrow ">")) ; Material design icon not working on windows
 
-;;;; inhibit-lsp-mode : When turned on, lsp won't trigger unless manually calling 'lsp
-(define-minor-mode inhibit-lsp-mode
+;;;; my/inhibit-lsp-mode : When turned on, lsp won't trigger unless manually calling 'lsp
+(define-minor-mode my/inhibit-lsp-mode
   "Minor mode to temporarily inhibit the `lsp-deferred' command"
   :lighter " NoLSP"
   :global t
-  (if inhibit-lsp-mode
+  (if my/inhibit-lsp-mode
       (advice-add 'lsp-deferred :override #'ignore) ;; lsp-deferred will be inhibited
     (advice-remove 'lsp-deferred #'ignore)))
 
-;;;; lsp-format-and-save : format on save if lsp-auto-format is not nil
-(defcustom lsp-auto-format nil
+;;;; my/lsp-format-and-save : format on save if my/lsp-auto-format is not nil
+(defcustom my/lsp-auto-format nil
   "If not nil, lsp-format-and-save will format the buffer before saving"
    :type 'boolean)
 
-(defun lsp-format-and-save()
+(defun my/lsp-format-and-save()
   "Saves the current buffer and formats it if lsp-format-on-save is not nil"
   (interactive)
-  (when (and (not buffer-read-only) lsp-auto-format)
+  (when (and (not buffer-read-only) my/lsp-auto-format)
     (lsp-format-buffer))
   (save-buffer))
 
@@ -692,7 +681,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
       (pop asmr--mark-previous)
       (asmr--jump-to-marker (car asmr--mark-previous)))))
 
-;;;; forward-mark() : main next function
+;;;; asmr-forward() : main next function
 (defun asmr-forward()
   "Goes back to the last mark before `asmr-backward' was called"
   (interactive)
@@ -722,9 +711,9 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   (ijkl-local-mode)
   (when (and (buffer-modified-p) buffer-file-name)
     (save-buffer)))
-(key-chord-define my-keys-mode-map "sd" 'ijkl-local-mode-and-save)
-(key-chord-define my-keys-mode-map "qs" 'ijkl-local-mode)
-(keymap-set my-keys-mode-map "C-q" 'ijkl-local-mode) ; Fallback if key-chord fails
+(key-chord-define my/keys-mode-map "sd" 'ijkl-local-mode-and-save)
+(key-chord-define my/keys-mode-map "qs" 'ijkl-local-mode)
+(keymap-set my/keys-mode-map "C-q" 'ijkl-local-mode) ; Fallback if key-chord fails
 (diminish 'ijkl-local-mode)
 
 ;;;; ijkl global mode definition
@@ -750,12 +739,12 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 
 ;;; Main keybindings
 ;;;; Helper function gen-input
-(defun gen-input(KEYS)
+(defun my/gen-input(KEYS)
   "Generates a key `KEYS' sequence as if the user typed it"
   (setq unread-command-events (nconc (listify-key-sequence (kbd KEYS)) unread-command-events)))
 
-;;;; mode-is-one-of-p helper function
-(defun mode-is-one-of-p(modes)
+;;;; my/mode-is-one-of-p helper function
+(defun my/mode-is-one-of-p(modes)
   "Returns t if the current modes (minor or major) matches one in the input modes list"
   (let (res)
     (dolist (input-mode modes res)
@@ -769,7 +758,7 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 
 The forwarding will only occur if the current major mode is not in EXCEPT-MODES list"
   `(keymap-set ,keymap ,from
-     (defun ,(intern (format "%s-alias/%s/%s" keymap from to))(&optional args)
+     (defun ,(intern (format "my/%s-alias/%s/%s" keymap from to))(&optional args)
        ,(format "Forwards the interactive call from %s to %s (bound by default to `%s')" from to (keymap-lookup nil to))
        (interactive "P")
        ;; By default, fetch the binding bound to `to'
@@ -777,7 +766,7 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
              (old-binding (keymap-lookup nil ,from)))
          ;; If exception : then the appropriate command must be fetched in other keymaps
          ;; This is done here by temporarily setting the `from' binding to nil in the input keymap
-         (when (mode-is-one-of-p ,except-modes)
+         (when (my/mode-is-one-of-p ,except-modes)
            (keymap-set ,keymap ,from nil) ; Disable the keybinding temporarily
            (setq to-call (keymap-lookup nil ,from)) ; Get the command bound in other keymaps
            (keymap-set ,keymap ,from old-binding)) ; Restore the original keybinding
@@ -786,7 +775,7 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
          (call-interactively to-call)))))
 
 ;;;; remap : new binding in the same keymap
-(defun remap(keymap from to)
+(defun my/remap(keymap from to)
   "Creates a new binding TO in KEYMAP for the command bound to FROM"
   (let ((existing (keymap-lookup keymap from)))
     (when existing (keymap-set keymap to existing))))
@@ -795,30 +784,30 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (defmacro key-alias-fallback(keymap from to fallback)
   "Like `key-alias' : binds FROM to function called with TO, remapping existing bindings to FALLBACK"
   `(progn
-     (remap ,keymap ,from ,fallback)
+     (my/remap ,keymap ,from ,fallback)
      (key-alias ,keymap ,from ,to)))
 
 ;;;; utility bindings
-(keymap-set my-keys-mode-map "C-+" 'text-scale-increase) ; Increase text size with Ctrl +
-(keymap-set my-keys-mode-map "C--" 'text-scale-decrease) ; Decrease text size with Ctrl -
-(key-alias ijkl-local-mode-map "+" "C-+" '("dired-mode")) ; See above
-(key-alias ijkl-local-mode-map "-" "C-\-") ; See above
+(keymap-set    my/keys-mode-map "C-+" 'text-scale-increase) ; Increase text size with Ctrl +
+(keymap-set    my/keys-mode-map "C--" 'text-scale-decrease) ; Decrease text size with Ctrl -
+(key-alias  ijkl-local-mode-map "+" "C-+" '("dired-mode")) ; See above
+(key-alias  ijkl-local-mode-map "-" "C-\-") ; See above
 (keymap-set ijkl-local-mode-map "TAB" nil)    ; Do not override tab binding
 (keymap-set ijkl-local-mode-map "<tab>" nil)  ; Do not override tab binding
 (keymap-set ijkl-local-mode-map "h" help-map) ; Use the help functions
-(keymap-set ijkl-local-mode-map "x" 'delete-char-or-kill-region) ; Bind x to the delete-char-or-kill-region command
-(keymap-set ctl-x-map "k" 'kill-current-buffer) ; Replace C-x k (kill buffer) with kill-current-buffer
-(keymap-set ctl-x-map "f" 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
-(keymap-set ctl-x-r-map "d" 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
+(keymap-set ijkl-local-mode-map "x" 'my/delete-char-or-kill-region)
+(keymap-set           ctl-x-map "k" 'kill-current-buffer) ; Replace C-x k (kill buffer) with kill-current-buffer
+(keymap-set           ctl-x-map "f" 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
+(keymap-set         ctl-x-r-map "d" 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
 (key-alias  ijkl-local-mode-map "m"   "C-m")
-(key-alias  my-keys-mode-map "C-S-m" "S-<return>")
-(key-alias  my-keys-mode-map "M-m" "C-<return>")
+(key-alias     my/keys-mode-map "C-S-m" "S-<return>")
+(key-alias     my/keys-mode-map "M-m" "C-<return>")
 (key-alias  ijkl-local-mode-map "&"   "C-x 1")
 (keymap-set ijkl-local-mode-map "é" "C-x 2")
 (key-alias  ijkl-local-mode-map "\"" "C-x 3")
 (keymap-set ijkl-local-mode-map "'" 'other-window)
-(keymap-set ijkl-local-mode-map "4" 'other-window-reverse)
-(keymap-set ijkl-local-mode-map "w" 'lsp-format-and-save)
+(keymap-set ijkl-local-mode-map "4" 'my/other-window-reverse)
+(keymap-set ijkl-local-mode-map "w" 'my/lsp-format-and-save)
 (keymap-set ijkl-local-mode-map "z" 'recenter-top-bottom)
 (keymap-set ijkl-local-mode-map "r" ctl-x-r-map)
 (key-alias  ijkl-local-mode-map "c" "M-w")
@@ -832,57 +821,56 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 
 ;;;; movement and deletion bindings (accessible in both modes)
 ;;;;; backwards
-(key-alias  ijkl-local-mode-map "j"   "C-j")
-(key-alias     my-keys-mode-map "C-j" "C-b")
-(key-alias     my-keys-mode-map "M-j" "M-b")
-(key-alias     my-keys-mode-map "C-M-j" "C-a")
-(key-alias  ijkl-local-mode-map "a" "C-a")
+(key-alias ijkl-local-mode-map "j"   "C-j")
+(key-alias    my/keys-mode-map "C-j" "C-b")
+(key-alias    my/keys-mode-map "M-j" "M-b")
+(key-alias    my/keys-mode-map "C-M-j" "C-a")
+(key-alias ijkl-local-mode-map "a" "C-a")
 
 ;;;;; forwards
-(key-alias     my-keys-mode-map "C-l" "C-f")
-(key-alias  ijkl-local-mode-map "l"   "C-l")
-(key-alias     my-keys-mode-map "M-l" "M-f")
-(key-alias     my-keys-mode-map "C-M-l" "C-e")
-(key-alias  ijkl-local-mode-map "e" "C-e")
+(key-alias ijkl-local-mode-map "l"   "C-l")
+(key-alias    my/keys-mode-map "C-l" "C-f")
+(key-alias    my/keys-mode-map "M-l" "M-f")
+(key-alias    my/keys-mode-map "C-M-l" "C-e")
+(key-alias ijkl-local-mode-map "e" "C-e")
 
 ;;;;; upwards
-(key-alias  ijkl-local-mode-map "i" "C-p")
-(key-alias  my-keys-mode-map "C-k" "C-n")
+(key-alias ijkl-local-mode-map "i" "C-p")
+(key-alias    my/keys-mode-map "C-k" "C-n")
 ;; C-i is bound to TAB in terminals. You need to remap C-i to C-p at your GUI app level
 ;; For example powertoys on windows, konsole or xterm remapping on linux
 (when (display-graphic-p)
   (keymap-set input-decode-map "C-i" "C-<i>") ; Disable C-i -> TAB
-  (key-alias my-keys-mode-map "C-<i>" "C-p")) ; Rebind C-i as previous line
+  (key-alias my/keys-mode-map "C-<i>" "C-p")) ; Rebind C-i as previous line
 
-(keymap-set   my-keys-mode-map "M-i" (lambda() (interactive)(previous-line 7)))
-(key-alias    my-keys-mode-map "C-M-i" "M-<")
+(keymap-set   my/keys-mode-map "M-i" (lambda() (interactive)(previous-line 7)))
+(key-alias    my/keys-mode-map "C-M-i" "M-<")
 (key-alias ijkl-local-mode-map "<" "M-<")
 (key-alias ijkl-local-mode-map "A" "C-M-a")
 
 ;;;;; downwards
 (key-alias ijkl-local-mode-map "k" "C-n")
-(keymap-set   my-keys-mode-map "M-k" (lambda() (interactive)(next-line 7)))
-(key-alias    my-keys-mode-map "C-M-k" "M->")
+(keymap-set   my/keys-mode-map "M-k" (lambda() (interactive)(next-line 7)))
+(key-alias    my/keys-mode-map "C-M-k" "M->")
 (key-alias ijkl-local-mode-map ">" "M->")
 (key-alias ijkl-local-mode-map "E" "C-M-e")
 
 ;;;;; deletion
 (key-alias  ijkl-local-mode-map "u" "C-M-u" '("dired-mode" "Info-mode"))
-(keymap-set    my-keys-mode-map "C-u" 'delete-backward-char)
-(keymap-set    my-keys-mode-map "C-M-u" 'delete-start-or-previous-line)
-(keymap-set    my-keys-mode-map "M-u" 'backward-kill-word)
-(keymap-set    my-keys-mode-map "C-o" 'delete-forward-char)
-(keymap-set    my-keys-mode-map "C-M-o" 'kill-line)
+(keymap-set    my/keys-mode-map "C-u" 'delete-backward-char)
+(keymap-set    my/keys-mode-map "C-M-u" 'my/delete-start-or-previous-line)
+(keymap-set    my/keys-mode-map "M-u" 'backward-kill-word)
+(keymap-set    my/keys-mode-map "C-o" 'delete-forward-char)
+(keymap-set    my/keys-mode-map "C-M-o" 'kill-line)
 (key-alias  ijkl-local-mode-map "o" "C-M-o")
-(keymap-set    my-keys-mode-map "M-o" 'kill-word)
+(keymap-set    my/keys-mode-map "M-o" 'kill-word)
 
 ;;;; Misc
 (keymap-set ijkl-local-mode-map "/"     'comment-or-uncomment-region) ; Comment all the lines of the selected area
 (keymap-set ijkl-local-mode-map "M-s"   'multi-occur-in-matching-buffers) ; Search in all buffers
 (keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
 (keymap-set ijkl-local-mode-map "<f5>"  'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
-(keymap-set ijkl-local-mode-map "<f6>"  'revert-all-file-buffers) ; Refreshes all the current files/buffers
-(keymap-set ijkl-local-mode-map "<f12>" 'include-c-header) ; Shortcuts for a #include directive
+(keymap-set ijkl-local-mode-map "<f12>" 'my/include-c-header) ; Shortcuts for a #include directive
 
 ;;;; Resize the window when split using split screen (C-2 or C-3)
 (keymap-set ijkl-local-mode-map "M-S-<right>" 'enlarge-window-horizontally)
@@ -891,19 +879,19 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (keymap-set ijkl-local-mode-map "M-S-<up>" 'shrink-window)
 
 ;;;; Hydra buffer
-(defcustom emacs-config-main "~/.config/emacs/init.el"
+(defcustom my/emacs-config-main "~/.config/emacs/init.el"
   "Path to the emacs main config file. Used for some direct navigation bindings"
   :type 'string)
 
 (defhydra buffer(:columns 3 :exit t)
   "Buffer actions"
-  ("b" switch-to-last-buffer "Last buffer")
+  ("b" my/switch-to-last-buffer "Last buffer")
   ("l" consult-buffer "Show buffer list")
   ("s" scratch-buffer "Switch to *scratch* buffer")
   ("B" consult-buffer-other-window "Open in other window")
   ("k" kill-current-buffer "Kill buffer")
   ("m" (lambda() (interactive)(switch-to-buffer "*Messages*"))  "Switch to *Messages* buffer")
-  ("e" (lambda() (interactive)(find-file emacs-config-main)) "Switch to emacs config file"))
+  ("e" (lambda() (interactive)(find-file my/emacs-config-main)) "Switch to emacs config file"))
 (keymap-set ijkl-local-mode-map "b" 'buffer/body)
 
 ;;;; Hydra outline
@@ -977,18 +965,17 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 ;;;; Hydra compile
 (defhydra compile(:exit t :columns 3)
   "Compilation commands"
-  ("ç" recompile-switch "Reuse last compilation command")
+  ("ç" my/recompile-switch "Reuse last compilation command")
   ("e" compile "Edit the compilation command")
-  ("a" compile-all "Compile STC")
-  ("f" compile-file "Compile the current file")
+  ("a" my/compile-all "Compile project")
+  ("f" my/compile-file "Compile the current file")
   ("k" kill-compilation "Kill compilation")
-  ("o" switch-to-compilation-other-window "Switch to compilation in side window")
+  ("o" my/switch-to-compilation-other-window "Switch to compilation in side window")
   ("l" compilation-set-skip-threshold "Cycle skip level(0, 1, 2) for errors navigation")
   ("d" dap-hydra "Use dap mode hydra as an interactive debugger")
   ("g" hydra-gdb/body "Use gdb-hydra as an interactive debugger")
   ("n" next-error "Go to next error")
-  ("p" previous-error "Go to previous error")
-  ("d" dap-hydra "Dap mode commands"))
+  ("p" previous-error "Go to previous error"))
 (keymap-set ijkl-local-mode-map "ç" 'compile/body)
 
 ;;;; Hydra go
@@ -1009,6 +996,18 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (keymap-set ijkl-local-mode-map "g" 'go/body)
 
 ;;;; Rectangle
+;;;;; my/replace-char-or-rectangle-region
+(defun my/replace-char-or-rectangle-region()
+  "If mark is active, rectangle actions, otherwise replace-char"
+  (interactive)
+  (call-interactively
+    (if mark-active
+        'rectangle/body
+      'my/replace-char-at-point)))
+
+(keymap-set ijkl-local-mode-map "r" 'my/replace-char-or-rectangle-region)
+
+;;;;; Hydra
 (defhydra rectangle(:exit t :columns 2)
   "Rectangle operations"
   ("t" string-rectangle "Edition")
@@ -1018,7 +1017,6 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
   ("y" yank-rectangle "Paste")
   ("o" open-rectangle "Insert whitespace")
   ("n" rectangle-number-lines "Number the lines"))
-(keymap-set ijkl-local-mode-map "r" 'replace-char-or-rectangle-region)
 
 ;;;; Org ijkl
 (with-eval-after-load "org"
@@ -1056,7 +1054,7 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
   ("N" org-time-stamp "Choose date from calendar")
   ("L" org-todo-list "List all TODOs")
   ("t" org-todo "Changes the TODO state of the current line")
-  ("P" org-roam-pull-commit-push "Org roam sync")
+  ("P" my/org-roam-pull-commit-push "Org roam sync")
   ("h" org-roam-buffer-toggle  "Org roam info for current file")
   ("q" nil "Quit"))
 (keymap-set ijkl-local-mode-map "," 'org/body)
