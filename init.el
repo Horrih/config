@@ -525,10 +525,12 @@ It will add the following code :
   :hook (emacs-lisp-mode . company-mode))
 
 ;;;; yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands like completion
+;;;; yasnippet : Snippets for various languages
 (use-package yasnippet
-  :hook (lsp-mode . (lambda()
-                      (yas-minor-mode)
-                      (diminish 'yas-minor-mode))))
+  :demand
+  :config
+  (yas-global-mode)
+  (diminish 'yas-minor-mode))
 
 ;;;; cmake-mode : Major mode for CMakeLists.txt
 (use-package cmake-mode
