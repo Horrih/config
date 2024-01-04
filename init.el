@@ -586,7 +586,28 @@ It will add the following code :
   (insert (format "#include \"%s.h\"\n" val))
   (save-buffer))
 
-;;;; c++ mode
+;;;; Clang format
+(use-package clang-format)
+(defun my/clang-format-save-hook()
+  "Create a buffer local save hook to apply `clang-format-buffer'"
+  ;; Only format if .clang-format is found
+  (when (locate-dominating-file "." ".clang-format")
+    (clang-format-buffer))
+  ;; Continue to save
+  nil)
+
+(define-minor-mode my/clang-format-on-save-mode
+  "Minor mode to enable/disable automated clang format on save"
+  :lighter " ClangFormat"
+  (if my/clang-format-on-save-mode
+      (add-hook 'before-save-hook 'my/clang-format-save-hook nil t)
+    (remove-hook 'before-save-hook 'my/clang-format-save-hook t)))
+
+(define-globalized-minor-mode my/clang-format-auto-mode my/clang-format-on-save-mode
+  (lambda()(my/clang-format-on-save-mode t))
+  :predicate '(c-mode c-ts-mode c++-mode c++-ts-mode c-or-c++-mode c-or-c++-ts-mode))
+(my/clang-format-auto-mode t) ; Turn it on
+
 ;;;; legacy c++ mode
 (use-package cc-mode
   :ensure nil  ; Part of emacs
