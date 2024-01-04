@@ -90,6 +90,8 @@
   (delete-selection-mode 1) ; If text is selected, we expect that typing will replace the selection
   (show-paren-mode 1) ; Highlight the matching parenthesis
   (setq-default show-trailing-whitespace t) ; Show in red the spaces forgotten at the end of lines
+  (put 'narrow-to-region 'disabled nil) ; Allow narrow to region without prompt
+
   (customize-set-variable 'indent-tabs-mode nil) ; Use spaces for indent
   (customize-set-variable 'next-error-message-highlight t) ; When jumping between errors, occurs, etc, highlight the current line
   (menu-bar-mode -1) ; Hide Menu bar
