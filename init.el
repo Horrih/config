@@ -84,7 +84,7 @@
   (customize-set-variable 'debug-on-error nil) ; Display the stacktrace if error encountered in one of the lisp method
   (customize-set-variable 'completions-detailed t) ; Detailed description for the built in describe symbol etc
   (column-number-mode t) ; Display column numbers in the status line
-  (global-display-line-numbers-mode t) ; Display line numbers on the left
+  (global-display-line-numbers-mode -1) ; If true, display line numbers on the left
   (line-number-mode t) ; Display line number
   (size-indication-mode t) ; Display size indication
   (delete-selection-mode 1) ; If text is selected, we expect that typing will replace the selection
