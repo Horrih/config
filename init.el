@@ -106,11 +106,6 @@
   (customize-set-variable 'next-error-message-highlight t) ; When jumping between errors, occurs, etc, highlight the current line
   (menu-bar-mode -1) ; Hide Menu bar
   (customize-set-variable 'use-short-answers t) ; Abreviate Yes/No to y or n
-  (customize-set-variable 'c-basic-offset  4) ; Base indent size when indented automatically
-  (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
-  (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
-  (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
-  (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
   (customize-set-variable 'recenter-positions '(top middle bottom)) ; Start recenter on top instead of middle
   (customize-set-variable 'make-backup-files nil) ; Do not use backup files (filename~)
   (customize-set-variable 'create-lockfiles nil)) ; Do not use lock files (.#filename)
@@ -553,10 +548,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package csv-mode
   :mode "\\.csv\\'")
 
-;;;; yaml-mode : Support gitlab-ci.yml
-(use-package yaml-mode
-  :mode "\\.yml\\'")
-
 ;;;; hide-show-mode : Hide/show sections of code : current function, class, or if/else section
 (use-package hideshow
   :ensure nil ; Built-in emacs
@@ -596,11 +587,86 @@ It will add the following code :
   (save-buffer))
 
 ;;;; c++ mode
+;;;; legacy c++ mode
 (use-package cc-mode
   :ensure nil  ; Part of emacs
-  :hook (c++-mode . lsp-deferred)
+  ;; :hook (c++-mode . lsp-deferred)
   :config
+  (setq-default c-basic-offset  4) ; Base indent size when indented automatically
+  (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
+  (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
+  (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
+  (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
   (advice-add 'c-update-modeline :override #'ignore)) ;; Don't use a modeline suffix (i.e C++//l)
+
+;;; Tree-Sitter Section
+;;;; Cheatsheet
+;; (setq treesit--indent-verbose t)
+;; M-x treesit-explore-mode
+;; M-x treesit-inspect-mode
+;; (treesit-query-capture (treesit-buffer-root-node) '((compound_statement "{") @comp))
+;; (treesit-query-validate 'cpp '((if_statement consequence: (_)@exp)))
+
+;;;; Require treesit at startup
+(use-package treesit
+  :ensure nil
+  :demand t)
+
+;;;; cmake-ts-mode : Major mode for CMakeLists.txt
+(use-package cmake-ts-mode
+  :if (treesit-language-available-p 'cmake)
+  :mode ("CMakeLists\\.txt" "\\.cmake\\'")
+  :custom (cmake-ts-mode-indent-offset 4)
+  :config
+  (setq cmake-ts-mode--indent-rules
+        `((cmake
+           ,@(alist-get 'cmake cmake-ts-mode--indent-rules)
+           ((parent-is "source_file") parent-bol 0)   ; If top level, no indent
+           ((match nil nil nil 1 nil) prev-line 0) ; Otherwise align with previous-sibiling
+           ((match nil nil nil nil nil) parent-bol cmake-ts-mode-indent-offset))))) ; No sibling : parent + offset
+
+;;;; docker-ts-mode : Major mode for Dockerfiles
+(use-package dockerfile-ts-mode
+  :if (treesit-language-available-p 'dockerfile)
+  :mode ("Dockerfile" "\\.dockerfile\\'" "\\.docker\\'"))
+
+;;;; yaml-ts-mode : Major mode for yaml files
+(use-package yaml-ts-mode
+  :if (treesit-language-available-p 'yaml)
+  :hook (yaml-ts-mode . (lambda()
+                          ;; Tab indentation is traditionnally 2 for yaml
+                          (setq-local tab-width 2)
+                          ;; Remap string face so that it is displayed as plain text
+                          (face-remap-add-relative 'font-lock-string-face :inherit 'default)))
+  :mode ("\\.ya?ml\\'"))
+
+;;;; c/c++-ts-mode : Major mode for C/C++ files
+(defun my/cpp-indent-style()
+  "Override the built-in K&R indentation style with some additional rules"
+  `(
+    ((node-is ")") parent-bol 0) ; Otherwise aligned with opening parenthese
+    ((node-is "compound_statement") parent-bol 0) ; Blocks with {}
+    ((parent-is "template_declaration") parent-bol 0) ; function declaration on the line following the template declaration
+    ((parent-is "comment") parent-bol 0) ; Align comments at the start of the comment section
+    ((match nil "argument_list" nil 1 1) parent-bol c-ts-mode-indent-offset) ; Standard indent if argument starts on next-line
+    ((parent-is "argument_list") prev-line 0) ; Align argument with previous one systematically
+    ((node-is "field_initializer_list") parent-bol ,(/ c-ts-mode-indent-offset 2)) ; class field initializer : use half i
+    ((match nil "parameter_list" nil 1 1) parent-bol c-ts-mode-indent-offset) ; Standard indent if parameter starts on next-line
+    ((parent-is "parameter_list") prev-line 0) ; Align parameter with previous one systematically
+    ,@(alist-get 'k&r (c-ts-mode--indent-styles 'cpp))))
+
+(use-package c-ts-mode
+  :if (treesit-language-available-p 'c)
+  :custom
+  (c-ts-mode-indent-offset 4)
+  (c-ts-mode-indent-style #'my/cpp-indent-style)
+  :hook (c-ts-base-mode . (lambda() (setq-local my/margin-line-width 100)))
+  :init
+  (advice-add 'c-ts-mode-set-modeline :override 'ignore) ; Do not add a // suffix to the modeline
+  ;; Remap the standard C/C++ modes
+  (add-to-list 'major-mode-remap-alist '(c-mode . c++-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c++-ts-mode)))
 
 ;;; LSP + DAP : completion, linting, debugging
 ;;;; lsp-treemacs : treemacs style views for various lsp results
