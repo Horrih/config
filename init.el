@@ -340,7 +340,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; key-chord  : Enables combination of keys like zz
 (use-package key-chord
   :demand
-  :custom (key-chord-two-keys-delay 0.1)
+  :custom (key-chord-safety-interval-forward 0.1)
   :config (key-chord-mode))
 
 ;;;; hydra : Keybindings combinations
