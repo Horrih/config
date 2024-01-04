@@ -181,6 +181,26 @@
   (interactive)
   (other-window -1))
 
+;;;; my/split-window-right-pick
+(defun my/split-window-right-pick()
+  "Like `split-window-right' except it lets you pick the buffer on the other side"
+  (interactive)
+  (split-window-right)
+  (other-window 1)
+  (condition-case nil
+      (consult-buffer)
+    (quit (delete-window))))
+
+;;;; my/split-window-below-pick
+(defun my/split-window-below-pick()
+  "Like `split-window-below' except it lets you pick the buffer on the other side"
+  (interactive)
+  (split-window-below)
+  (other-window 1)
+  (condition-case nil
+      (consult-buffer)
+    (quit (delete-window))))
+
 ;;;; my/replace-chat-at-point
 (defun my/replace-char-at-point(char)
   "Replaces the caracter at point by `CHAR'"
@@ -860,9 +880,12 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (key-alias  ijkl-local-mode-map "m"   "C-m")
 (key-alias     my/keys-mode-map "C-S-m" "S-<return>")
 (key-alias     my/keys-mode-map "M-m" "C-<return>")
+(key-alias  ijkl-local-mode-map "1"   "C-x 0")
 (key-alias  ijkl-local-mode-map "&"   "C-x 1")
-(keymap-set ijkl-local-mode-map "é" "C-x 2")
-(key-alias  ijkl-local-mode-map "\"" "C-x 3")
+(key-alias  ijkl-local-mode-map "2" "C-x 2")
+(key-alias  ijkl-local-mode-map "3" "C-x 3")
+(keymap-set ijkl-local-mode-map "é"  'my/split-window-below-pick)
+(keymap-set ijkl-local-mode-map "\"" 'my/split-window-right-pick)
 (keymap-set ijkl-local-mode-map "'" 'other-window)
 (keymap-set ijkl-local-mode-map "4" 'my/other-window-reverse)
 (keymap-set ijkl-local-mode-map "w" 'my/lsp-format-and-save)
