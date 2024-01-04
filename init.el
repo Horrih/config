@@ -874,12 +874,23 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 ;;; Modal edition mode using ijkl for movement
 ;;;; ijkl minor mode definition
 (define-minor-mode ijkl-local-mode
-  "Minor mode to be able to move using ijkl"
+  "Minor mode to enable movement using ijkl"
   :lighter " ijkl"
   :keymap '(([remap self-insert-command]  ignore)) ; The actual keymaps are defined later below
   (add-to-list 'emulation-mode-map-alists '(ijkl-local-mode . ijkl-local-mode-map))
+  (ijkl-insert-mode (if ijkl-local-mode -1 1))
   )
-(keymap-set ijkl-local-mode-map "d" 'ijkl-local-mode)
+(diminish 'ijkl-local-mode)
+
+(define-minor-mode ijkl-insert-mode
+  "Minor mode for key bindings to be used when `ijkl-local-mode' is disabled"
+  :keymap '())
+
+(keymap-set ijkl-local-mode-map "d" 'ijkl-local-mode) ; Leave ijkl mode with d
+(key-chord-define ijkl-insert-mode-map "jj" 'ijkl-local-mode-and-save) ; Enter ijkl mode with "jj"
+(key-chord-define ijkl-insert-mode-map "qq" 'ijkl-local-mode) ; Enter ijkl mode with "qq"
+(keymap-set my/keys-mode-map "C-q" 'ijkl-local-mode) ; Fallback if "kk" key-chord fails (e.g high latency ssh)
+(keymap-set ijkl-insert-mode-map "M-c" ijkl-local-mode-map) ; Make ijkl bindings available in insert mode
 
 (defun ijkl-local-mode-and-save()
   "Enables ijkl-local-mode and saves the current file if applicable"
@@ -887,23 +898,18 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   (ijkl-local-mode)
   (when (and (buffer-modified-p) buffer-file-name)
     (save-buffer)))
-(key-chord-define my/keys-mode-map "sd" 'ijkl-local-mode-and-save)
-(key-chord-define my/keys-mode-map "qs" 'ijkl-local-mode)
-(keymap-set my/keys-mode-map "C-q" 'ijkl-local-mode) ; Fallback if key-chord fails
-(keymap-set my/keys-mode-map "M-q" 'quoted-insert) ; Fallback if key-chord fails
-(keymap-set my/keys-mode-map "M-c" ijkl-local-mode-map) ; Make all bindings accessible with M-c
-(diminish 'ijkl-local-mode)
 
 ;;;; ijkl global mode definition
 (define-globalized-minor-mode ijkl-mode ijkl-local-mode
   (lambda()
     "Only enable the ijkl-local-mode on traditional buffers"
-    (unless (or (minibufferp)
+    (if (or (minibufferp)
                 (string-match "[Gg]it" (format "%s" major-mode))
                 (string-match "[Gg]it" (format "%s" major-mode))
                 (string-equal (buffer-name) "*Org Note*")
                 (string-equal (buffer-name) "*Ediff Control Panel*")
                 (string-equal (buffer-name) "COMMIT_EDITMSG"))
+        (ijkl-insert-mode)
       (ijkl-local-mode))))
 (ijkl-mode)
 
