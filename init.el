@@ -1062,10 +1062,10 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (keymap-set ijkl-local-mode-map "<f12>" 'my/include-c-header) ; Shortcuts for a #include directive
 
 ;;;; Resize the window when split using split screen (C-2 or C-3)
-(keymap-set ijkl-local-mode-map "M-S-<right>" 'enlarge-window-horizontally)
-(keymap-set ijkl-local-mode-map "M-S-<left>" 'shrink-window-horizontally)
-(keymap-set ijkl-local-mode-map "M-S-<down>" 'enlarge-window)
-(keymap-set ijkl-local-mode-map "M-S-<up>" 'shrink-window)
+(keymap-set ijkl-local-mode-map "C-M-<right>" 'enlarge-window-horizontally)
+(keymap-set ijkl-local-mode-map "C-M-<left>" 'shrink-window-horizontally)
+(keymap-set ijkl-local-mode-map "C-M-<down>" 'enlarge-window)
+(keymap-set ijkl-local-mode-map "C-M-<up>" 'shrink-window)
 
 ;;;; Hydra buffer
 ;;;;; hydra
