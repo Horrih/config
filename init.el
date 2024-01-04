@@ -1103,12 +1103,15 @@ _l_: List buffers                 _e_: Emacs config file
 _L_: List buffers other window    _s_: *scratch* buffer
 _b_: Go to last buffer            _m_: *messages* buffer
 _k_: Kill current buffer
+_w_: Kill current window
 "
   ("l" consult-buffer)              ("e" my/switch-to-emacs-config)
   ("L" consult-buffer-other-window) ("s" scratch-buffer)
   ("b" my/switch-to-last-buffer)    ("m" my/switch-to-messages)
-  ("k" kill-current-buffer))
-(keymap-set ijkl-local-mode-map "b" 'buffer/body)
+  ("k" kill-current-buffer)
+  ("w" delete-window))
+
+(keymap-set ijkl-local-mode-map "b" 'my/hydra-buffer/body)
 
 ;;;;; my/switch-to-messages
 (defun my/switch-to-messages()
@@ -1129,7 +1132,7 @@ for some direct navigation bindings"
   (find-file my/emacs-config))
 
 ;;;; Hydra outline
-(defhydra outline(:columns 3)
+(defhydra my/hydra-outline(:columns 3)
   "outline"
   ("u" outline-up-heading "up")
   ("TAB" outline-toggle-children "toggle hide/show children")
@@ -1139,15 +1142,15 @@ for some direct navigation bindings"
   ("s" outline-show-subtree "show all subtree")
   ("p" outline-previous-visible-heading "prev")
   ("h" outline-hide-subtree "hide subtree"))
-(keymap-set ijkl-local-mode-map "à" 'outline/body)
+(keymap-set ijkl-local-mode-map "à" 'my/hydra-outline/body)
 
 ;;;; Hydra gdb/gud
-(defhydra hydra-gdb(:columns 4 :color pink :foreign-keys run)
+(defhydra my/hydra-gdb(:columns 4 :color pink :foreign-keys run)
   "GDB"
   ("n" gud-next "Step")
   ("u" gud-up "Up")
   ("b" gud-break "Breakpoint on")
-  ("g" gdb "Launch GDB")
+  ("g" (lambda ()(interactive)(call-interactively 'gdb)(my/switch-to-last-buffer)) "Launch GDB")
   ("s" gud-step "Step in")
   ("d" gud-down "Down")
   ("B" gud-remove "Breakpoint off")
@@ -1224,7 +1227,7 @@ _w_: Symbol at point         _p_: In current project        _P_: Project
   (set-register char nil))
 
 ;;;; Hydra find
-(defhydra find(:exit t :hint nil)
+(defhydra my/hydra-find(:exit t :hint nil)
   "
 ^Find files^                      ^Coding^
 -------------------------------------------------------------
@@ -1237,10 +1240,10 @@ _P_: Project in other window      _o_: Switch header/cpp
   ("f" find-file)                         ("t" lsp-treemacs-errors-list)
   ("p" project-find-file)                 ("r" xref-find-references)
   ("P" projectile-find-file-other-window) ("o" ff-find-other-file))
-(keymap-set ijkl-local-mode-map "f" 'find/body)
+(keymap-set ijkl-local-mode-map "f" 'my/hydra-find/body)
 
 ;;;; Hydra compile
-(defhydra compile(:exit t :hint nil)
+(defhydra my/hydra-compile(:exit t :hint nil)
   "
 ^Start compilation^             ^Buffer commands^
 --------------------------------------------------------------
@@ -1249,16 +1252,18 @@ _ç_: Recompile                  _n_: Next compilation error
 _a_: Compile project            _p_: Prev compilation error
 _f_: Compile current file       _l_: Cycle error threshold
 _k_: Stop compilation
+_g_: Start GDB
 "
   ("e" compile)             ("o" my/switch-to-compilation-other-window)
   ("ç" my/recompile-switch) ("l" compilation-set-skip-threshold :color red)
   ("a" my/compile-all)      ("n" next-error     :color red)
   ("f" my/compile-file)     ("p" previous-error :color red)
-  ("k" kill-compilation))
-(keymap-set ijkl-local-mode-map "ç" 'compile/body)
+  ("k" kill-compilation)
+  ("g" hydra-gdb/body))
+(keymap-set ijkl-local-mode-map "ç" 'my/hydra-compile/body)
 
 ;;;; Hydra go
-(defhydra go(:exit t :hint nil)
+(defhydra my/hydra-go(:exit t :hint nil)
   "
 ^Go to^                                 ^LSP Navigation^                  ^Expressions^
 -------------------------------------------------------------------------------------------
@@ -1266,14 +1271,17 @@ _l_: Line n°                            _j_: Definition                   _n_: 
 _b_: Bookmark                           _J_: Definition other window      _p_: Backward expression
 _,_: Org roam file                      _e_: Next error                   _u_: Upward expression
 _r_: Register (see point-to-register)   _E_: Previous error
+_c_: Column n°
 
 "
   ("l" goto-line)          ("j" xref-find-definitions)                ("n" forward-sexp     :color red)
   ("b" bookmark-jump)      ("J" xref-find-definitions-other-window)   ("p" backward-sexp    :color red)
-  ("," org-roam-node-find) ("e" flycheck-next-error :color red)       ("u" backward-up-list :color red)
-  ("r" jump-to-register)   ("E" flycheck-previous-error :color red)
+  ("," org-roam-node-find) ("e" flymake-goto-next-error :color red)   ("u" backward-up-list :color red)
+  ("r" jump-to-register)   ("E" flymake-goto-prev-error :color red)
+  ("c" move-to-column)
+
   ("q" nil "Quit"))
-(keymap-set ijkl-local-mode-map "g" 'go/body)
+(keymap-set ijkl-local-mode-map "g" 'my/hydra-go/body)
 
 ;;;; Rectangle
 ;;;;; my/replace-char-or-rectangle-region
@@ -1282,13 +1290,13 @@ _r_: Register (see point-to-register)   _E_: Previous error
   (interactive)
   (call-interactively
     (if mark-active
-        'rectangle/body
+        'my/hydra-rectangle/body
       'my/replace-char-at-point)))
 
 (keymap-set ijkl-local-mode-map "r" 'my/replace-char-or-rectangle-region)
 
 ;;;;; Hydra
-(defhydra rectangle(:exit t :columns 2)
+(defhydra my/hydra-rectangle(:exit t :columns 2)
   "Rectangle operations"
   ("t" string-rectangle "Edition")
   ("k" kill-rectangle "Cut")
@@ -1320,7 +1328,7 @@ _r_: Register (see point-to-register)   _E_: Previous error
   (interactive)
   (org-insert-time-stamp (current-time) t))
 
-(defhydra org(:exit t :hint nil)
+(defhydra my/hydra-org(:exit t :hint nil)
   "
 ^Agenda/TODOs^             ^Edition^                ^Org Roam^
 ---------------------------------------------------------------------------------
@@ -1338,24 +1346,36 @@ _L_: List TODOs            _,_: Toggle images
   ("N" org-time-stamp)         ("," org-toggle-inline-images)
 
   ("q" nil "Quit"))
-(keymap-set ijkl-local-mode-map "," 'org/body)
+(keymap-set ijkl-local-mode-map "," 'my/hydra-org/body)
 
 ;;;; Hydra commands
-(defhydra commands(:exit t :columns 1)
+(defhydra my/hydra-commands(:exit t :columns 2)
   "Execute commands"
   ("!" execute-extended-command "Emacs command")
   ("x" execute-extended-command)
   (":" eval-expression "Interpret lisp code")
-  ("e" eval-last-sexp "Interpret last lisp expression"))
-(keymap-set ijkl-local-mode-map "!" 'commands/body)
+  ("l" eglot "Start eglot (LSP)")
+  ("e" eval-last-sexp "Interpret last lisp expression")
+  ("s" shell-command "Shell Command")
+  ("b" eval-buffer "Interpret the whole lisp buffer"))
+(keymap-set ijkl-local-mode-map "!" 'my/hydra-commands/body)
 
 ;;;; Magit hydra
-(defhydra magit(:exit t :columns 1)
+(defhydra my/hydra-magit(:exit t :columns 1)
   "Magit commands"
   ("s" magit-status "Status (Home)")
   ("f" magit-file-dispatch "File commands")
   ("v" magit-dispatch "Global Commands"))
-(keymap-set ijkl-local-mode-map "v" 'magit/body)
+(keymap-set ijkl-local-mode-map "v" 'my/hydra-magit/body)
+
+;;;; Narrow Hydra
+(defhydra my/hydra-narrow(:exit t :columns 1)
+  "Narrow the displayed buffer to a subsection"
+  ("N" narrow-to-region "Narrow to selected region")
+  ("d" narrow-to-defun "Narrow to function")
+  ("f" narrow-to-defun)
+  ("w" widen "Widen (cancel narrowing)"))
+(keymap-set ijkl-local-mode-map "N" 'my/hydra-narrow/body)
 
 ;;;; Magit ijkl
 (with-eval-after-load "magit"
