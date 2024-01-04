@@ -994,17 +994,19 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (keymap-set ijkl-local-mode-map "\"" 'my/split-window-right-pick)
 (keymap-set ijkl-local-mode-map "'" 'other-window)
 (keymap-set ijkl-local-mode-map "4" 'my/other-window-reverse)
-(keymap-set ijkl-local-mode-map "w" 'my/lsp-format-and-save)
+(key-alias ijkl-local-mode-map "w" "C-x C-s")
 (keymap-set ijkl-local-mode-map "z" 'recenter-top-bottom)
 (keymap-set ijkl-local-mode-map "r" ctl-x-r-map)
 (key-alias  ijkl-local-mode-map "c" "M-w")
 (key-alias  ijkl-local-mode-map "y" "C-y")
-(key-alias  ijkl-local-mode-map "_" "C-_")
+(key-alias  ijkl-local-mode-map "_" "C-_") ; Undo
+(key-alias  ijkl-local-mode-map "8" "C-M-_") ; redo
 (keymap-set ijkl-local-mode-map "p" 'asmr-backward) ; Reimplementation of a mark ring
 (keymap-set ijkl-local-mode-map "n" 'asmr-forward)  ; Reimplementation of a mark ring
 (key-alias  ijkl-local-mode-map "<SPC>" "C-@")
 (keymap-set ijkl-local-mode-map "I" 'er/expand-region)   ; Expand the selection progressively
 (keymap-set ijkl-local-mode-map "K" 'er/contract-region) ; Reduce the selection progressively
+(keymap-set ijkl-local-mode-map "." 'company-indent-or-complete-common) ; Trigger completion
 
 ;;;; movement and deletion bindings (accessible in both modes)
 ;;;;; backwards
