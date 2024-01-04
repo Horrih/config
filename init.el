@@ -1158,17 +1158,6 @@ for some direct navigation bindings"
   ("q" nil "Quit" :color blue))
 
 ;;;; Hydra hide/show
-(defhydra hydra-hide-show (:exit t :columns 2)
-  "Hydra for hide-show commands"
-  ("t" hs-toggle-hiding "Toggle H/S")
-  ("H" hs-toggle-hiding)
-  ("l" hs-hide-level "Hide Level")
-  ("q" hs-hide-all "Hide all")
-  ("s" hs-show-block "Show block")
-  ("a" hs-show-all "Show all")
-  ("h" hs-hide-block "Hide block"))
-(keymap-set ijkl-local-mode-map "H" 'hydra-hide-show/body)
-
 ;;;; Hydra search text
 ;;;;; Hydra
 (defhydra search(:exit t :hint nil)
@@ -1185,6 +1174,24 @@ _w_: Symbol at point         _p_: In current project        _P_: Project
   ("w" isearch-forward-symbol-at-point) ("p" projectile-ag)                   ("P" projectile-replace)
                                         ("a" my/consult-directory))
 (keymap-set ijkl-local-mode-map "s" 'search/body)
+(transient-define-prefix my/transient-hide-show()
+  "Transient for `hs-minor-mode' and other display options"
+  [["Toggle"
+    ("H" "Toggle H/S"       hs-toggle-hiding)
+    ("n" "Line number mode" display-line-numbers-mode)
+    ("m" "Margin mode"      my/auto-margin-mode)
+    ]
+   ["Hide"
+   ("l" "Hide Level" hs-hide-level)
+   ("q" "Hide all"   hs-hide-all)
+   ("h" "Hide block" hs-hide-block)
+   ]
+   ["Show"
+    ("s" "Show block" hs-show-block)
+    ("a" "Show all"   hs-show-all)
+    ]])
+(keymap-set ijkl-local-mode-map "H" 'my/transient-hide-show)
+
 
 ;;;;; my/consult-directory
 (defun my/consult-directory()
