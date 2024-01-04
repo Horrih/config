@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: cout
+# key: cout
+# --
+`(progn (goto-char (point-min)) (unless (re-search-forward
+"#include <iostream>" nil 'no-errer) "#include <iostream>\n" ))
+`std::cout << $1 << std::endl;

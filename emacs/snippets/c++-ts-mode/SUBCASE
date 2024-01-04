@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: SUBCASE
+# key: sub
+# --
+SUBCASE("$1")
+{
+    $0
+}

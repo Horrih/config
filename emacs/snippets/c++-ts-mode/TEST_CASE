@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: TEST_CASE
+# key: test
+# --
+TEST_CASE("$1")
+{
+    $0
+}

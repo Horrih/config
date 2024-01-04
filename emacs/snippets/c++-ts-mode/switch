@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: switch
+# key: switch
+# --
+switch($1)
+{
+case $2:
+    $0
+    break;
+case $2:
+    break;
+}
