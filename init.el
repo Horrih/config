@@ -218,6 +218,15 @@
         'kill-region
       'delete-char)))
 
+;;;; my/comment-dwim
+(defun my/comment-dwim()
+  "Like `comment-dwim', but comment line if cursor at beginning of line"
+  (interactive)
+  (call-interactively
+    (if (or (region-active-p) (/= (line-beginning-position) (point)))
+        #'comment-dwim
+      #'comment-line)))
+
 ;;; Compilation options
 ;;;; Compilation misc
 (use-package compile
@@ -947,7 +956,7 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (keymap-set    my/keys-mode-map "M-o" 'kill-word)
 
 ;;;; Misc
-(keymap-set ijkl-local-mode-map "/"     'comment-or-uncomment-region) ; Comment all the lines of the selected area
+(keymap-set ijkl-local-mode-map "/"     'my/comment-dwim) ; Comment region or line
 (keymap-set ijkl-local-mode-map "M-s"   'multi-occur-in-matching-buffers) ; Search in all buffers
 (keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
 (keymap-set ijkl-local-mode-map "<f5>"  'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
