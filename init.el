@@ -379,6 +379,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
          ("a" . consult-apropos)
          :map ctl-x-map
          ("b" . consult-buffer))
+  :custom (consult-preview-key nil) ; Disable preview
   :config
   (recentf-mode))
 
@@ -399,7 +400,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :ensure nil  ; emacs built-in
   :bind (:map dired-mode-map ("u" . dired-up-directory))
   :custom(dired-kill-when-opening-new-dired-buffer t)) ; Auto close previous folder buffer
-
 
 ;;; Org mode : Note taking and presentation
 ;;;; Org mode : package customizations
