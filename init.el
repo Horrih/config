@@ -102,6 +102,7 @@
             (lambda() (setq-local show-trailing-whitespace nil)))
 
   (customize-set-variable 'indent-tabs-mode nil) ; Use spaces for indent
+  (customize-set-variable 'tab-width 4) ; How to display tab characters in emacs
   (customize-set-variable 'next-error-message-highlight t) ; When jumping between errors, occurs, etc, highlight the current line
   (menu-bar-mode -1) ; Hide Menu bar
   (customize-set-variable 'use-short-answers t) ; Abreviate Yes/No to y or n
