@@ -133,6 +133,48 @@
   (if (member (file-name-extension (buffer-name)) extensions)
       t))
 
+;;;; Automatic margin
+;;;;; my/margin-line-width
+(defcustom my/margin-line-width 90
+  "Standard line width used for a centered display for margins"
+  :local t
+  :type '(integer))
+
+;;;;; my/compute-window-margin
+(defun my/compute-window-margin(window)
+  "Computes the margins for window `WINDOW' if width big enough, 0 otherwise"
+  (let* ((width (window-width window))
+         (margins (car (window-margins window)))
+         (margin (if margins margins 0))
+         (total-width (+ width margin)))
+    (with-current-buffer (window-buffer window)
+      (if (or (not my/auto-margin-local-mode)
+              display-line-numbers-mode
+              (minibufferp))
+          0
+        (max 0 (/ (- total-width my/margin-line-width) 2))))))
+
+;;;;; my/set-window-margins
+(defun my/set-window-margins()
+  "Margin if single window, no margin if split"
+  (mapc (lambda(window)
+          (set-window-margins window (my/compute-window-margin window)))
+        (window-list)))
+
+;;;;; minor mode : my/auto-margin-local-mode and my/auto-margin-mode
+(define-minor-mode my/auto-margin-local-mode
+  "Minor mode to enable/disable left margin"
+  :lighter " Margin"
+  (if my/auto-margin-local-mode
+      (add-hook 'window-configuration-change-hook 'my/set-window-margins nil t)
+    (my/set-window-margins)
+    (remove-hook 'window-configuration-change-hook 'my/set-window-margins t)))
+
+(define-globalized-minor-mode my/auto-margin-mode my/auto-margin-local-mode
+  (lambda()(my/auto-margin-local-mode t)))
+(my/auto-margin-mode t) ; Turn it on
+(diminish 'my/auto-margin-local-mode)
+
 ;;;; my/other-window-reverse
 (defun my/other-window-reverse()
   "Like `other-window' but in the reverse order"
