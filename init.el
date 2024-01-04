@@ -376,6 +376,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package org-download
   :commands (org-download-clipboard)
   :custom (org-image-actual-width 900)
+  :config
   ;; Override the default dir to have one dir for each org file instead of per heading
   (defun org-download--dir-1 ()
     (or org-download-image-dir (concat (file-name-sans-extension (buffer-file-name)) "-img"))))
@@ -500,7 +501,7 @@ It will add the following code :
     (insert (format "#endif // %s" text))
     ))
 
-;;;; my/include-c-header-val() : Inserts a #include directive for C/C++
+;;;; my/include-c-header() : Inserts a #include directive for C/C++
 (defun my/include-c-header(val)
   "Adds a #include \"VAL.h\" at point and saves the file"
   (interactive "MHeader file name: ")
@@ -513,7 +514,6 @@ It will add the following code :
   :hook (c++-mode . lsp-deferred)
   :config
   (advice-add 'c-update-modeline :override #'ignore)) ;; Don't use a modeline suffix (i.e C++//l)
-
 
 ;;; LSP + DAP : completion, linting, debugging
 ;;;; lsp-treemacs : treemacs style views for various lsp results
@@ -716,6 +716,8 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 (key-chord-define my/keys-mode-map "sd" 'ijkl-local-mode-and-save)
 (key-chord-define my/keys-mode-map "qs" 'ijkl-local-mode)
 (keymap-set my/keys-mode-map "C-q" 'ijkl-local-mode) ; Fallback if key-chord fails
+(keymap-set my/keys-mode-map "M-q" 'quoted-insert) ; Fallback if key-chord fails
+(keymap-set my/keys-mode-map "M-c" ijkl-local-mode-map) ; Make all bindings accessible with M-c
 (diminish 'ijkl-local-mode)
 
 ;;;; ijkl global mode definition
@@ -961,7 +963,7 @@ for some direct navigation bindings"
 (defhydra search(:exit t :hint nil)
   "
 ^Incremental search^         ^Occurences^                   ^Replace^
----------------------------------------------------------------------
+------------------------------------------------------------------------
 _s_: Forward                 _o_: In file                   _r_: String
 _S_: Backward                _b_: In all buffers            _R_: Regexp
 _w_: Symbol at point         _p_: In current project        _P_: Project
