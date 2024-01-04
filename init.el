@@ -1065,22 +1065,6 @@ for some direct navigation bindings"
   ("q" nil "Quit" :color blue))
 
 ;;;; Hydra hide/show
-;;;; Hydra search text
-;;;;; Hydra
-(defhydra search(:exit t :hint nil)
-  "
-^Incremental search^         ^Occurences^                   ^Replace^
-------------------------------------------------------------------------
-_s_: Forward                 _o_: In file                   _r_: String
-_S_: Backward                _b_: In all buffers            _R_: Regexp
-_w_: Symbol at point         _p_: In current project        _P_: Project
-^ ^                          _a_: In current directory
-"
-  ("s" isearch-forward)                 ("o" consult-line)                    ("r" query-replace)
-  ("S" isearch-backward)                ("b" multi-occur-in-matching-buffers) ("R" query-replace-regexp)
-  ("w" isearch-forward-symbol-at-point) ("p" projectile-ag)                   ("P" projectile-replace)
-                                        ("a" my/consult-directory))
-(keymap-set ijkl-local-mode-map "s" 'search/body)
 (transient-define-prefix my/transient-hide-show()
   "Transient for `hs-minor-mode' and other display options"
   [["Toggle"
@@ -1099,6 +1083,26 @@ _w_: Symbol at point         _p_: In current project        _P_: Project
     ]])
 (keymap-set ijkl-local-mode-map "H" 'my/transient-hide-show)
 
+;;;; Transient search text
+;;;;; Transient definition
+(transient-define-prefix my/transient-search() "Transient for all string query/replace"
+  [["Incremental search"
+    ("s" "Forward"         isearch-forward)
+    ("S" "Backward"        isearch-backward)
+    ("w" "Symbol at point" isearch-forward-symbol-at-point)
+    ]
+   ["Occurences"
+    ("o" "In file"              consult-line)
+    ("b" "In all buffers"       multi-occur-in-matching-buffers)
+    ("p" "In current project"   projectile-ag)
+    ("a" "In current directory" my/consult-directory)
+    ]
+   ["Replace"
+    ("r" "String"  query-replace)
+    ("R" "Regexp"  query-replace-regexp)
+    ("P" "Project" projectile-replace)
+    ]])
+(keymap-set ijkl-local-mode-map "s" 'my/transient-search)
 
 ;;;;; my/consult-directory
 (defun my/consult-directory()
