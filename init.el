@@ -1192,6 +1192,30 @@ _w_: Symbol at point         _p_: In current project        _P_: Project
   (interactive)
   (consult-grep default-directory))
 
+;;;; Transient register
+;;;;; Transient definition
+(transient-define-prefix my/transient-register() "Transient for all register operations"
+  [["Register - Save"
+   ("p" "Save point" point-to-register)
+   ("w" "Save window configuration" window-configuration-to-register)
+   ("c" "Copy text" window-configuration-to-register)
+   ("R" "Load register" consult-register-load)
+   ]
+   ["Register - Load"
+    ("R" "Load register" consult-register-load)
+    ("l" "List registers" list-registers)
+    ("v" "View registers" view-register)
+    ("x" "Clear register" my/clear-register)
+    ]
+   ])
+(keymap-set ijkl-local-mode-map "R" 'my/transient-register)
+
+;;;;; Clear register
+(defun my/clear-register(char)
+  "Clear register currently referred by `CHAR'"
+  (interactive "cClear register at : ")
+  (set-register char nil))
+
 ;;;; Hydra find
 (defhydra find(:exit t :hint nil)
   "
