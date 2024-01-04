@@ -92,6 +92,10 @@
   (setq-default show-trailing-whitespace t) ; Show in red the spaces forgotten at the end of lines
   (put 'narrow-to-region 'disabled nil) ; Allow narrow to region without prompt
 
+  ;; Automatic pairing for parentheses/braces
+  (add-hook 'prog-mode-hook 'electric-pair-local-mode)
+  (customize-set-variable 'electric-pair-inhibit-predicate ; Inhibit electric pairing for single/double quotes
+      (lambda (c) (if (or (char-equal c ?\')(char-equal c ?\")) t (electric-pair-default-inhibit c))))
   (customize-set-variable 'indent-tabs-mode nil) ; Use spaces for indent
   (customize-set-variable 'next-error-message-highlight t) ; When jumping between errors, occurs, etc, highlight the current line
   (menu-bar-mode -1) ; Hide Menu bar
