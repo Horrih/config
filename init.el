@@ -500,6 +500,13 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package ag
   :custom (ag-highlight-search t))
 
+;;;; yasnippet : Snippets insertion
+(use-package yasnippet
+  :demand
+  :config
+  (yas-global-mode)
+  (diminish 'yas-minor-mode))
+
 ;;;; Projectile : git project functions, like the built in project but better
 (use-package projectile)
 
@@ -514,10 +521,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; web-mode : Support various web files
 (use-package web-mode
   :mode ("\\.css\\'" "\\.html\\'" "\\.ts\\'" "\\.js\\'" "\\.vue\\'")
-  :hook
-  (web-mode . (lambda () (when (my/match-buffer-extension "ts" "js" "vue")
-                           (lsp-deferred)
-                           (setq-local lsp-auto-format t))))
   :custom
   (web-mode-script-padding 0) ; For vue.js SFC : no initial padding in the script section
   (web-mode-markup-indent-offset 2)) ; For html : use an indent of size 2 (default is 4)
@@ -556,35 +559,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   :hook
   (prog-mode . hs-minor-mode))
 
-;;;; my/include-guards(text) : Add include guards to the current file
-(defun my/include-guards(text)
-  "Adds include guards in the current file, useful for C/C++ devs
-
-It will add the following code :
-
-     #ifndef TEXT
-     #define TEXT
-     // Current file content
-     #endif //TEXT
-"
-  (interactive
-   (list
-    (let* ((default (replace-regexp-in-string "\\." "_" (upcase (buffer-name))))
-           (prompt (format "Include guard text (default %s): " default)))
-      (read-string prompt nil  nil default))))
-  (save-excursion
-    (goto-char 0)
-    (insert (format "#ifndef %s\n#define %s\n" text text))
-    (goto-char (max-char))
-    (insert (format "#endif // %s" text))
-    ))
-
-;;;; my/include-c-header() : Inserts a #include directive for C/C++
-(defun my/include-c-header(val)
-  "Adds a #include \"VAL.h\" at point and saves the file"
-  (interactive "MHeader file name: ")
-  (insert (format "#include \"%s.h\"\n" val))
-  (save-buffer))
 
 ;;;; Clang format
 (use-package clang-format)
@@ -611,7 +585,6 @@ It will add the following code :
 ;;;; legacy c++ mode
 (use-package cc-mode
   :ensure nil  ; Part of emacs
-  ;; :hook (c++-mode . lsp-deferred)
   :config
   (setq-default c-basic-offset  4) ; Base indent size when indented automatically
   (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
@@ -689,96 +662,27 @@ It will add the following code :
   (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
   (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c++-ts-mode)))
 
-;;; LSP + DAP : completion, linting, debugging
-;;;; lsp-treemacs : treemacs style views for various lsp results
-(use-package lsp-treemacs)
-
+;;; LSP completion, linting
 ;;;; company : Completion frontend, used by lsp
 (use-package company
   :diminish
-  :hook (emacs-lisp-mode . company-mode))
+  :hook (prog-mode . company-mode))
 
-;;;; yasnippet : Dependency used by lsp to insert snippets. Used by some lsp commands like completion
-;;;; yasnippet : Snippets for various languages
-(use-package yasnippet
-  :demand
-  :config
-  (yas-global-mode)
-  (diminish 'yas-minor-mode))
+;;;; flymake : Syntax highlighting, used by eglot/lsp
+(use-package flymake
+  :custom(flymake-mode-line-lighter ""))
 
-;;;; cmake-mode : Major mode for CMakeLists.txt
-(use-package cmake-mode
-  :custom (cmake-tab-width 4)
-  :mode ("CMakeLists\\.txt"))
-
-;;;; dap-mode : Debug adapter protocol for emacs
-;; For c++ Install mono on linux then run dap-cpptools-setup for c++
-;; For dap-firefox : download and unzip the package in ~/.emacs.d/.extension/vscode/
-;; and modify the path to the executable js file which has been renamed to adapter.bundle.js
-;; For any language, require then the appropriate packages, and use a launch.json at your lsp root
-(use-package dap-mode
-  :hook
-  (c++-mode . (lambda()(require 'dap-cpptools)))
-  (python-mode . (lambda()(require 'dap-python)))
-  (web-mode . (lambda()(require 'dap-firefox))))
-
-;; UI settings for dap-mode (comes with the dap-mode package)
-(use-package dap-ui
+;;;; eglot : Built-in package for completion with LSP. Light-weight alternative to lsp-mode
+(use-package eglot
   :ensure nil
-  :config
-  (unless (display-graphic-p)
-    (set-face-background 'dap-ui-marker-face "color-166") ; An orange background for the line to execute
-    (set-face-attribute 'dap-ui-marker-face nil :inherit nil) ; Do not inherit other styles
-    (set-face-background 'dap-ui-pending-breakpoint-face "blue") ; Blue background for breakpoints line
-    (set-face-attribute 'dap-ui-verified-breakpoint-face nil :inherit 'dap-ui-pending-breakpoint-face)))
-
-
-;;;; flycheck : Syntax highlighting, used by lsp
-(use-package flycheck
-  ;; Add a flake8 for python. Needs to be done after lsp-diagnostics has been loaded
-  :hook (lsp-diagnostics-mode . (lambda()(flycheck-add-next-checker 'lsp 'python-flake8))))
-
-;;;; lsp-mode : Completion and syntax highlighting backend API, available for most languages
-;; The following packages need to be installed according to the language
-;; Python : pip install pyright flake8
-;; c++ : pacman -S clang bear (or jq)
-;; vue.js, javascript, typescript : sudo npm install -g vls typescript-language-server
-(use-package lsp-mode
-  :hook
-  (lsp-mode    . lsp-enable-which-key-integration)
-  :bind (("C-h l" . lsp-describe-thing-at-point))
-  :custom
-  ;; Formatting options for vue.js (.vue files)
-  (lsp-enable-links nil) ; Make links non clickable
-  :config
-  (setq lsp-headerline-arrow ">")) ; Material design icon not working on windows
-
-;;;; my/inhibit-lsp-mode : When turned on, lsp won't trigger unless manually calling 'lsp
-(define-minor-mode my/inhibit-lsp-mode
-  "Minor mode to temporarily inhibit the `lsp-deferred' command"
-  :lighter " NoLSP"
-  :global t
-  (if my/inhibit-lsp-mode
-      (advice-add 'lsp-deferred :override #'ignore) ;; lsp-deferred will be inhibited
-    (advice-remove 'lsp-deferred #'ignore)))
-
-;;;; my/lsp-format-and-save : format on save if my/lsp-auto-format is not nil
-(defcustom my/lsp-auto-format nil
-  "If not nil, lsp-format-and-save will format the buffer before saving"
-   :type 'boolean)
-
-(defun my/lsp-format-and-save()
-  "Saves the current buffer and formats it if lsp-format-on-save is not nil"
-  (interactive)
-  (when (and (not buffer-read-only) my/lsp-auto-format)
-    (lsp-format-buffer))
-  (save-buffer))
-
-;;;; lsp-pyright : An LSP backend for python
-(use-package lsp-pyright
-  :hook (python-mode . (lambda()
-                         (require 'lsp-pyright)
-                         (lsp-deferred))))
+  :hook (eglot-managed-mode . (lambda()
+                                (eglot-inlay-hints-mode -1) ; Disable inlay hint for params by default
+                                (custom-set-variables
+                                 '(help-at-pt-timer-delay 0.5)
+                                 '(help-at-pt-display-when-idle '(flymake-diagnostic)))))
+  :bind (:map help-map ("h" . eldoc))
+  :custom-face
+  (eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow :underline t)))))
 
 ;;; ASMR - A Simple Mark Ring - Reimplementation of an IDE-like mark ring
 ;;;; Define the global variables used
@@ -1236,8 +1140,8 @@ _f_: By path                      _t_: List errors (project)
 _p_: Project                      _r_: Find references (xref)
 _P_: Project in other window      _o_: Switch header/cpp
 "
-  ("d" dired-jump)                        ("e" flycheck-list-errors)
-  ("f" find-file)                         ("t" lsp-treemacs-errors-list)
+  ("d" dired-jump)                        ("e" flymake-show-buffer-diagnostics)
+  ("f" find-file)                         ("t" flymake-show-project-diagnostics)
   ("p" project-find-file)                 ("r" xref-find-references)
   ("P" projectile-find-file-other-window) ("o" ff-find-other-file))
 (keymap-set ijkl-local-mode-map "f" 'my/hydra-find/body)
