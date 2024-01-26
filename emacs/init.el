@@ -71,6 +71,7 @@
 ;;;; Misc
 (progn
   (tool-bar-mode 0) ; Disable the toolbar in GUI mode
+  (customize-set-variable 'cursor-type 'bar)
   (customize-set-variable 'scroll-bar-mode nil)
   (customize-set-variable 'horizontal-scroll-bar-mode nil)
   (customize-set-variable 'vc-follow-symlinks t) ; Do not ask to follow symlinks to version controlled files (mostly my emacs config)
@@ -110,6 +111,8 @@
   (customize-set-variable 'make-backup-files nil) ; Do not use backup files (filename~)
   (customize-set-variable 'create-lockfiles nil)) ; Do not use lock files (.#filename)
 
+
+;;; Helper commands
 ;;;; my/switch-to-last-buffer
 (defun my/switch-to-last-buffer()
   "Use `switch-to-buffer' to visit the last buffer"
@@ -121,12 +124,6 @@
   "Use `kill-line' to delete either the start of the line, or the previous line if empty"
   (interactive)
   (kill-line (if (= (line-beginning-position) (point)) -1 0)))
-
-;;;; my/match-buffer-extension
-(defun my/match-buffer-extension(&rest extensions)
-  "Returns t if the current buffer has an extension in EXTENSIONS"
-  (if (member (file-name-extension (buffer-name)) extensions)
-      t))
 
 ;;;; Automatic margin
 ;;;;; my/margin-line-width
@@ -170,13 +167,14 @@
 (my/auto-margin-mode t) ; Turn it on
 (diminish 'my/auto-margin-local-mode)
 
-;;;; my/other-window-reverse
+;;;; Window management
+;;;;; my/other-window-reverse
 (defun my/other-window-reverse()
   "Like `other-window' but in the reverse order"
   (interactive)
   (other-window -1))
 
-;;;; my/split-window-right-pick
+;;;;; my/split-window-right-pick
 (defun my/split-window-right-pick()
   "Like `split-window-right' except it lets you pick the buffer on the other side"
   (interactive)
@@ -186,7 +184,7 @@
       (consult-buffer)
     (quit (delete-window))))
 
-;;;; my/split-window-below-pick
+;;;;; my/split-window-below-pick
 (defun my/split-window-below-pick()
   "Like `split-window-below' except it lets you pick the buffer on the other side"
   (interactive)
@@ -212,6 +210,17 @@
     (if mark-active
         'kill-region
       'delete-char)))
+
+;;;; my/sexp-other-side
+(defun my/sexp-other-side()
+  "uses `backward-sexp' and `forward-sexp' to switch position between
+start and end of sexp. If inside a sexp, go the the start of the sexp.
+Does not work for strings, since they do not have separate start/end characters"
+  (interactive)
+  (cond
+   ((seq-contains "([{" (char-after)) (forward-sexp))
+   ((seq-contains ")}]" (char-before)) (backward-sexp))
+   (t (backward-up-list))))
 
 ;;;; my/comment-dwim
 (defun my/comment-dwim()
@@ -907,6 +916,8 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (key-alias  ijkl-local-mode-map "8" "C-M-_") ; redo
 (keymap-set ijkl-local-mode-map "p" 'asmr-backward) ; Reimplementation of a mark ring
 (keymap-set ijkl-local-mode-map "n" 'asmr-forward)  ; Reimplementation of a mark ring
+(keymap-set ijkl-local-mode-map "P" 'previous-buffer)
+(keymap-set ijkl-local-mode-map "N" 'next-buffer)
 (key-alias  ijkl-local-mode-map "<SPC>" "C-@")
 (keymap-set ijkl-local-mode-map "I" 'er/expand-region)   ; Expand the selection progressively
 (keymap-set ijkl-local-mode-map "K" 'er/contract-region) ; Reduce the selection progressively
@@ -1178,14 +1189,14 @@ _g_: Start GDB
 _l_: Line n°                            _j_: Definition                   _n_: Forward expression
 _b_: Bookmark                           _J_: Definition other window      _p_: Backward expression
 _,_: Org roam file                      _e_: Next error                   _u_: Upward expression
-_r_: Register (see point-to-register)   _E_: Previous error
+_r_: Register (see point-to-register)   _E_: Previous error               _g_: Go to opposite end
 _c_: Column n°
 
 "
   ("l" goto-line)          ("j" xref-find-definitions)                ("n" forward-sexp     :color red)
   ("b" bookmark-jump)      ("J" xref-find-definitions-other-window)   ("p" backward-sexp    :color red)
   ("," org-roam-node-find) ("e" flymake-goto-next-error :color red)   ("u" backward-up-list :color red)
-  ("r" jump-to-register)   ("E" flymake-goto-prev-error :color red)
+  ("r" jump-to-register)   ("E" flymake-goto-prev-error :color red)   ("g" my/sexp-other-side)
   ("c" move-to-column)
 
   ("q" nil "Quit"))
