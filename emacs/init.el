@@ -1122,13 +1122,17 @@ for some direct navigation bindings"
   (consult-grep default-directory))
 
 ;;;; Transient register
+(defun my/dir-to-register(register)
+  "Saves the current directory in a register. Opening it will use dired"
+  (interactive (list (register-read-with-preview "Directory to register : ")))
+  (set-register register (cons 'file default-directory)))
+
 ;;;;; Transient definition
 (transient-define-prefix my/transient-register() "Transient for all register operations"
   [["Register - Save"
    ("p" "Save point" point-to-register)
    ("w" "Save window configuration" window-configuration-to-register)
-   ("c" "Copy text" window-configuration-to-register)
-   ("R" "Load register" consult-register-load)
+   ("d" "Save directory" my/dir-to-register)
    ]
    ["Register - Load"
     ("R" "Load register" consult-register-load)
