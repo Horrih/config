@@ -127,30 +127,41 @@
 
 ;;;; Automatic margin
 ;;;;; my/margin-line-width
-(defcustom my/margin-line-width 90
-  "Standard line width used for a centered display for margins"
+(defcustom my/margin-center-column 45
+  "Column that should appear at the center when auto margin mode is enabled"
   :local t
   :type '(integer))
 
+(defcustom my/margin-right-ratio 0.75
+  "Ratio of the right margin to the left one"
+  :local t
+  :type '(float))
+
 ;;;;; my/compute-window-margin
-(defun my/compute-window-margin(window)
-  "Computes the margins for window `WINDOW' if width big enough, 0 otherwise"
+(defun my/compute-window-margins(window)
+  "Computes the left margin for window `WINDOW' if width big enough, 0 otherwise"
   (let* ((width (window-width window))
-         (margins (car (window-margins window)))
-         (margin (if margins margins 0))
-         (total-width (+ width margin)))
+         (has-margin (car (window-margins window)))
+         (prev-margin-left (if has-margin has-margin 0))
+         (prev-margin-right (if has-margin (cdr (window-margins window)) 0))
+         (total-width (+ width prev-margin-left prev-margin-right)))
     (with-current-buffer (window-buffer window)
       (if (or (not my/auto-margin-local-mode)
               display-line-numbers-mode
               (minibufferp))
-          0
-        (max 0 (/ (- total-width my/margin-line-width) 2))))))
+          '(0 . 0)
+        (let* ((left-margin (- (/ total-width 2) my/margin-center-column))
+               (right-margin (truncate (* left-margin my/margin-right-ratio))))
+          `(,(max 0 left-margin) . ,(max 0 right-margin)))))))
 
 ;;;;; my/set-window-margins
 (defun my/set-window-margins()
   "Margin if single window, no margin if split"
   (mapc (lambda(window)
-          (set-window-margins window (my/compute-window-margin window)))
+          (let* ((margins (my/compute-window-margins window))
+                 (left-margin (car margins))
+                 (right-margin (cdr margins)))
+            (set-window-margins window left-margin right-margin)))
         (window-list)))
 
 ;;;;; minor mode : my/auto-margin-local-mode and my/auto-margin-mode
