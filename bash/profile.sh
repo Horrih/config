@@ -1,7 +1,10 @@
 alias ls='ls --color'
 export EDITOR="emacs -nw"
 alias e='emacs -nw'
-alias sudoe='sudo -E bash -c "PATH=$PATH LD_LIBRARY_PATH=$LD_LIBRARY_PATH emacs -nw"'
+function sudoe()
+{
+    sudo -E bash -c "PATH=$PATH LD_LIBRARY_PATH=$LD_LIBRARY_PATH emacs -nw $@"
+}
 
 #To enable aliases with sudo
 alias sudo='/usr/bin/sudo '
