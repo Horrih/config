@@ -516,6 +516,9 @@ This can be useful in conjunction to projectile's .dir-locals variables"
          ("C-c C-h" . org-present-hide-cursor)))
 
 ;;; Development packages and options
+;;;; markdown-mode
+(use-package markdown-mode)
+
 ;;;; ag and projectile-ag : Front end for the CLI utility ag
 (use-package ag
   :custom (ag-highlight-search t))
