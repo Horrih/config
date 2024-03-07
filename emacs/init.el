@@ -61,6 +61,7 @@
   (nerd-icons-font-family "CaskaydiaCove NFM")
   (doom-modeline-unicode-fallback t)
   (doom-modeline-minor-modes t)
+  (mode-line-right-align-edge 'right-margin) ; Work around for https://github.com/seagle0128/doom-modeline/issues/701
   :init
   (doom-modeline-mode))
 
