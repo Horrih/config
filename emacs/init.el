@@ -318,7 +318,7 @@ This can be useful in conjunction to projectile's .dir-locals variables"
         (gcc-warning "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): warning:.*$" 1 2 3 1)
         (gcc-info "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): note:.*$" 1 2 3 0)
         (qt-test "^   Loc: \\[\\(.*\\)\(\\([0-9]+\\)\)\\]$" 1 2)
-        (python-unittest "^  File \"\\(.*\\)\", line \\([0-9]+\\),.*$" 1 2)
+        (python-unittest "^  File \"\\(.*\\)\", line \\([0-9]+\\)[^0-9]?.*$" 1 2)
         )))
   (dolist (err custom-error-list)
     (add-to-list 'enabled-regexps (car err)))
@@ -414,7 +414,9 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; Dired : built-in navigation of folders
 (use-package dired
   :ensure nil  ; emacs built-in
-  :bind (:map dired-mode-map ("u" . dired-up-directory))
+  :bind (:map dired-mode-map
+              ("u" . dired-up-directory)
+              ("i" . nil))
   :custom(dired-kill-when-opening-new-dired-buffer t)) ; Auto close previous folder buffer
 
 ;;; Org mode : Note taking and presentation
