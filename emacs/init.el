@@ -59,6 +59,7 @@
   ;; Font with icons to download here
   ;; https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/CascadiaCode.zip
   (nerd-icons-font-family "CaskaydiaCove NFM")
+  (doom-modeline-buffer-file-name-style 'relative-from-project) ; Use 'truncate-nil for full path
   (doom-modeline-unicode-fallback t)
   (doom-modeline-minor-modes t)
   (mode-line-right-align-edge 'right-margin) ; Work around for https://github.com/seagle0128/doom-modeline/issues/701
