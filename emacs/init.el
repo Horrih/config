@@ -541,10 +541,6 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
-;;;; treemacs : Displays the current project on the left as in an IDE
-(use-package treemacs
-  :custom (treemacs-no-delete-other-windows nil))
-
 ;;;; web-mode : Support various web files
 (use-package web-mode
   :mode ("\\.css\\'" "\\.html\\'" "\\.ts\\'" "\\.js\\'" "\\.vue\\'")
