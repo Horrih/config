@@ -180,6 +180,16 @@
 (my/auto-margin-mode t) ; Turn it on
 (diminish 'my/auto-margin-local-mode)
 
+;;;;; Advice : Disable auto-margins when splitting right
+(defun my/auto-margin--tmp-disable(orig-fun &rest r)
+  "Disable auto-margin mode while command ORIG-FUN is being run, like `split-window-right'"
+  (let ((auto-margins my/auto-margin-local-mode))
+    (my/auto-margin-local-mode -1)  ; Disable margins otherwise emacs won't let you split right
+    (apply orig-fun r)
+    (my/auto-margin-local-mode auto-margins)))
+(advice-add  #'my/split-window-right-pick :around #'my/auto-margin--tmp-disable )
+(advice-add  #'split-window-right         :around #'my/auto-margin--tmp-disable )
+
 ;;;; Window management
 ;;;;; my/other-window-reverse
 (defun my/other-window-reverse()
