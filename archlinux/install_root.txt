@@ -10,7 +10,7 @@
    10  passwd
    11  pacman -S gnome
    12  pacman -S gnome-shell eog gdm gedit gnome-backgrounds gnome-calendar gnome-characters gnome-clocks gnome-color-manager gnome-control-center gnome-disk-utility gnome-font-viewer gnome-keyring gnome-menus gnome-photos gnome-screenshot gnome-settings-daemon gnome-system-monitor gnome-terminal nautilus grub grub-btrfs efibootmgr base-devel linux-headers network-manager network-manager-applet dialog os-prober mtools dosfstools git docker sudo
-   13  pacman -S gnome-shell eog gdm gedit gnome-backgrounds gnome-calendar gnome-characters gnome-clocks gnome-color-manager gnome-control-center gnome-disk-utility gnome-font-viewer gnome-keyring gnome-menus gnome-photos gnome-screenshot gnome-settings-daemon gnome-system-monitor gnome-terminal nautilus grub grub-btrfs efibootmgr base-devel linux-headers networkmanager network-manager-applet dialog os-prober mtools dosfstools git docker sudo
+   13  pacman -S gnome-shell eog gdm gedit gnome-backgrounds gnome-calendar gnome-characters gnome-clocks gnome-color-manager gnome-control-center gnome-disk-utility gnome-font-viewer gnome-keyring gnome-menus gnome-photos gnome-screenshot gnome-settings-daemon gnome-system-monitor gnome-terminal nautilus grub grub-btrfs efibootmgr base-devel linux-headers networkmanager network-manager-applet dialog os-prober mtools dosfstools git docker sudo gfs-google
    14  pacman -S xdg-utils xdg-user-dirs cups bluez bluez-utils
    15  pacman -S vim
    16  emacs /etc/mkinitcpio.conf 
