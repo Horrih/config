@@ -696,10 +696,21 @@ This can be useful in conjunction to projectile's .dir-locals variables"
   (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c++-ts-mode)))
 
 ;;; LSP completion, linting
-;;;; company : Completion frontend, used by lsp
-(use-package company
-  :diminish
-  :hook (prog-mode . company-mode))
+;;;; corfu : Completion frontend, used by lsp
+;;;;; corfu-terminal : Corfu's UI only works in GUI emacs
+(use-package corfu-terminal
+  :hook (corfu-mode . (lambda()
+                        (unless (display-graphic-p)
+                          (corfu-terminal-mode t)))))
+
+;;;;; corfu itself
+(use-package corfu
+  :custom
+  (corfu-auto t)  ; Auto completion as you type (can be triggered manyally with completion-at-point)
+  (corfu-cycle t) ; Cycle when at bottom of candidates
+  :init
+  (require 'corfu-info)  ; M-g/M-h to see location/help for candidate
+  (global-corfu-mode))   ; Enable corfu everywhere
 
 ;;;; flymake : Syntax highlighting, used by eglot/lsp
 (use-package flymake
@@ -945,7 +956,7 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (key-alias  ijkl-local-mode-map "<SPC>" "C-@")
 (keymap-set ijkl-local-mode-map "I" 'er/expand-region)   ; Expand the selection progressively
 (keymap-set ijkl-local-mode-map "K" 'er/contract-region) ; Reduce the selection progressively
-(keymap-set ijkl-local-mode-map "." 'company-indent-or-complete-common) ; Trigger completion
+(keymap-set ijkl-local-mode-map "." 'completion-at-point) ; Trigger completion
 
 ;;;; movement and deletion bindings (accessible in both modes)
 ;;;;; backwards
