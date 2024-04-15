@@ -997,6 +997,7 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 ;;;;; deletion
 (key-alias  ijkl-local-mode-map "u" "C-M-u" '("dired-mode" "Info-mode"))
 (keymap-set    my/keys-mode-map "C-u" 'delete-backward-char)
+(keymap-set    my/keys-mode-map "C-S-u" 'universal-argument)
 (keymap-set    my/keys-mode-map "C-M-u" 'my/delete-start-or-previous-line)
 (keymap-set    my/keys-mode-map "M-u" 'backward-kill-word)
 (keymap-set    my/keys-mode-map "C-o" 'delete-forward-char)
