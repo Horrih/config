@@ -185,10 +185,11 @@
   "Disable auto-margin mode while command ORIG-FUN is being run, like `split-window-right'"
   (let ((auto-margins my/auto-margin-local-mode))
     (my/auto-margin-local-mode -1)  ; Disable margins otherwise emacs won't let you split right
-    (apply orig-fun r)
-    (my/auto-margin-local-mode auto-margins)))
-(advice-add  #'my/split-window-right-pick :around #'my/auto-margin--tmp-disable )
-(advice-add  #'split-window-right         :around #'my/auto-margin--tmp-disable )
+    (unwind-protect
+        (apply orig-fun r)
+      (my/auto-margin-local-mode auto-margins))))
+(advice-add  #'my/pick-window-right :around #'my/auto-margin--tmp-disable)
+(advice-add  #'split-window-right   :around #'my/auto-margin--tmp-disable)
 
 ;;;; Window management
 ;;;;; my/other-window-reverse
@@ -197,25 +198,19 @@
   (interactive)
   (other-window -1))
 
-;;;;; my/split-window-right-pick
-(defun my/split-window-right-pick()
+;;;;; my/pick-window-right
+(defun my/pick-window-right()
   "Like `split-window-right' except it lets you pick the buffer on the other side"
   (interactive)
-  (split-window-right)
-  (other-window 1)
-  (condition-case nil
-      (consult-buffer)
-    (quit (delete-window))))
+  (let ((split-height-threshold 1337))  ; Put an absurdly high value to avoid splitting vertically
+    (consult-buffer-other-window)))
 
-;;;;; my/split-window-below-pick
-(defun my/split-window-below-pick()
+;;;;; my/pick-window-below
+(defun my/pick-window-below()
   "Like `split-window-below' except it lets you pick the buffer on the other side"
   (interactive)
-  (split-window-below)
-  (other-window 1)
-  (condition-case nil
-      (consult-buffer)
-    (quit (delete-window))))
+  (let ((split-width-threshold 1337))  ; Put an absurdly high value to avoid splitting horizontally
+    (consult-buffer-other-window)))
 
 ;;;; my/replace-chat-at-point
 (defun my/replace-char-at-point(char)
@@ -285,7 +280,7 @@ Does not work for strings, since they do not have separate start/end characters"
 ;;;; my/compile-all
 (defcustom my/compile-all-command nil
   "If non nil, `my/compile-all' will use it as command instead of `compile-command'
-This can be useful in conjunction to projectile's .dir-locals variables"
+This can be useful in conjunction to your project's variables defined in .dir-locals.el"
   :type 'string
   :risky nil)
 
@@ -339,6 +334,13 @@ This can be useful in conjunction to projectile's .dir-locals variables"
       (add-to-list 'compilation-error-regexp-alist-alist err)))))
 
 ;;; General usage packages
+;;;; project.el : Automatic detection of project, and various related project management commands
+(use-package project
+  :ensure nil  ; built-in
+  :custom
+  ;; Make `project-switch-project' open dired instead of prompting for the command to run
+  (project-switch-commands 'project-dired))
+
 ;;;; magit : Git front end (amazing!)
 (use-package magit
   :custom-face (magit-filename ((t :foreground "white"))) ; Otherwise untracked files have the same color as title in git status
@@ -533,19 +535,12 @@ This can be useful in conjunction to projectile's .dir-locals variables"
 ;;;; markdown-mode
 (use-package markdown-mode)
 
-;;;; ag and projectile-ag : Front end for the CLI utility ag
-(use-package ag
-  :custom (ag-highlight-search t))
-
 ;;;; yasnippet : Snippets insertion
 (use-package yasnippet
   :demand
   :config
   (yas-global-mode)
   (diminish 'yas-minor-mode))
-
-;;;; Projectile : git project functions, like the built in project but better
-(use-package projectile)
 
 ;;;; rainbow-delimiters : Parenthesis color based on depth
 (use-package rainbow-delimiters
@@ -938,8 +933,8 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (key-alias  ijkl-local-mode-map "&"   "C-x 1")
 (key-alias  ijkl-local-mode-map "2" "C-x 2")
 (key-alias  ijkl-local-mode-map "3" "C-x 3")
-(keymap-set ijkl-local-mode-map "é"  'my/split-window-below-pick)
-(keymap-set ijkl-local-mode-map "\"" 'my/split-window-right-pick)
+(keymap-set ijkl-local-mode-map "é"  'my/pick-window-below)
+(keymap-set ijkl-local-mode-map "\"" 'my/pick-window-right)
 (keymap-set ijkl-local-mode-map "'" 'other-window)
 (keymap-set ijkl-local-mode-map "4" 'my/other-window-reverse)
 (key-alias ijkl-local-mode-map "w" "C-x C-s")
@@ -1044,32 +1039,30 @@ _u_: Restore tab       _M_: Move tab left
   (interactive)
   (tab-move -1))
 
-;;;; Hydra buffer
-;;;;; hydra
-(defhydra my/hydra-buffer(:exit t :hint nil)
-  "
-^Commands^                        ^Shortcuts^
---------------------------------------------
-_l_: List buffers                 _e_: Emacs config file
-_L_: List buffers other window    _s_: *scratch* buffer
-_b_: Go to last buffer            _m_: *messages* buffer
-_k_: Kill current buffer
-_w_: Kill current window
-"
-  ("l" consult-buffer)              ("e" my/switch-to-emacs-config)
-  ("L" consult-buffer-other-window) ("s" scratch-buffer)
-  ("b" my/switch-to-last-buffer)    ("m" my/switch-to-messages)
-  ("k" kill-current-buffer)
-  ("w" delete-window))
-
-(keymap-set ijkl-local-mode-map "b" 'my/hydra-buffer/body)
+;;;; Transient for buffer switching commands
+;;;;; transient definition
+(transient-define-prefix my/transient-buffer()
+  "Transient for buffer switching"
+  [["Commands"
+    ("l" "List buffers"              consult-buffer)
+    ("L" "List buffers other window" consult-buffer-other-window)
+    ("p" "Switch between projects"   project-switch-project)
+    ("k" "Kill current buffer"       kill-current-buffer)
+    ("w" "Kill current window"       delete-window)
+    ]
+   ["Shortcuts"
+   ("b" "Go to last buffer" my/switch-to-last-buffer)
+   ("e" "Emacs config file" my/switch-to-emacs-config)
+   ("s" "*scratch* buffer"  scratch-buffer)
+   ("m" "*messages* buffer" my/switch-to-messages)
+   ]])
+(keymap-set ijkl-local-mode-map "b" 'my/transient-buffer)
 
 ;;;;; my/switch-to-messages
 (defun my/switch-to-messages()
   "Switch to *Messages* buffer"
   (interactive)
   (switch-to-buffer "*Messages*"))
-
 
 ;;;;; my/switch-to-emacs-config
 (defcustom my/emacs-config "~/.config/emacs/init.el"
@@ -1141,13 +1134,13 @@ for some direct navigation bindings"
    ["Occurences"
     ("o" "In file"              consult-line)
     ("b" "In all buffers"       multi-occur-in-matching-buffers)
-    ("p" "In current project"   projectile-ag)
+    ("p" "In current project"   project-find-regexp)
     ("a" "In current directory" my/consult-directory)
     ]
    ["Replace"
     ("r" "String"  query-replace)
     ("R" "Regexp"  query-replace-regexp)
-    ("P" "Project" projectile-replace)
+    ("P" "Project" project-query-replace-regexp)
     ]])
 (keymap-set ijkl-local-mode-map "s" 'my/transient-search)
 
@@ -1185,21 +1178,32 @@ for some direct navigation bindings"
   (interactive "cClear register at : ")
   (set-register char nil))
 
-;;;; Hydra find
-(defhydra my/hydra-find(:exit t :hint nil)
-  "
-^Find files^                      ^Coding^
--------------------------------------------------------------
-_d_: Dired - Current directory    _e_: List errors (file)
-_f_: By path                      _t_: List errors (project)
-_p_: Project                      _r_: Find references (xref)
-_P_: Project in other window      _o_: Switch header/cpp
-"
-  ("d" dired-jump)                        ("e" flymake-show-buffer-diagnostics)
-  ("f" find-file)                         ("t" flymake-show-project-diagnostics)
-  ("p" project-find-file)                 ("r" xref-find-references)
-  ("P" projectile-find-file-other-window) ("o" ff-find-other-file))
-(keymap-set ijkl-local-mode-map "f" 'my/hydra-find/body)
+;;;; Transient for find commands
+;;;;; Transient definition
+(transient-define-prefix my/transient-find() "Transient for various find commands"
+  [["Find files"
+   ("d" "Dired - Current director" dired-jump)
+   ("f" "By path"                  find-file)
+   ("p" "Project"                  project-find-file)
+   ("P" "Project in other window"  my/project-find-file-other-window)
+   ]
+   ["Coding"
+    ("e" "List errors (file)"     flymake-show-buffer-diagnostics :if (lambda() (featurep 'flymake)))
+    ("t" "List errors (project)"  flymake-show-project-diagnostics :if (lambda() (featurep 'flymake)))
+    ("r" "Find references (xref)" xref-find-references)
+    ("o" "Switch header/cpp"      ff-find-other-file)
+    ]])
+(keymap-set ijkl-local-mode-map "f" 'my/transient-find)
+
+;;;;; my/project-find-file-other-window()
+(defun my/project-find-file-other-window()
+  "Like `project-find-file' but opens the file in another window"
+  (interactive)
+  (split-window-right)
+  (other-window 1)
+  (condition-case nil
+      (project-find-file)
+    (quit (delete-window))))
 
 ;;;; Hydra compile
 (defhydra my/hydra-compile(:exit t :hint nil)
