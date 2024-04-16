@@ -159,19 +159,37 @@
 ;;;;; my/set-window-margins
 (defun my/set-window-margins()
   "Margin if single window, no margin if split"
-  (mapc (lambda(window)
-          (let* ((margins (my/compute-window-margins window))
-                 (left-margin (car margins))
-                 (right-margin (cdr margins)))
-            (set-window-margins window left-margin right-margin)))
-        (window-list)))
+  (walk-windows
+   (lambda(window)
+     (let* ((margins (my/compute-window-margins window))
+            (left-margin (car margins))
+            (right-margin (cdr margins)))
+       (message "SETTING margins")
+       (set-window-parameter window 'split-window 'my/split-window-reset-margins)
+       (set-window-margins window left-margin right-margin)))
+   nil t))
 
 ;;;;; minor mode : my/auto-margin-local-mode and my/auto-margin-mode
+(defun my/split-window-reset-margins (&optional window size side pixelwise)
+  "Call `split-window' after resetting margins (which interfer with splitting)"
+  ;; (mapc (lambda(w) (set-window-margins w nil)) (window-list))
+  ;; (message "YEAHH RESETTING MARGINS")
+  (walk-windows (lambda(w)
+                  (when (eq (window-parameter w 'split-window) 'my/split-window-reset-margins)
+                    (message "Removing window param and resetting margins")
+                    (set-window-parameter w 'split-window nil)
+                    (set-window-margins w nil)))
+                    nil t)
+  (split-window window size side pixelwise))
+
 (define-minor-mode my/auto-margin-local-mode
   "Minor mode to enable/disable left margin"
   :lighter " Margin"
   (if my/auto-margin-local-mode
-      (add-hook 'window-configuration-change-hook 'my/set-window-margins nil t)
+      (progn
+        ;; (walk-windows (lambda(w)(message "ZOB")(set-window-parameter w 'split-window 'my/split-window-reset-margins)) nil t)
+        (add-hook 'window-configuration-change-hook 'my/set-window-margins nil t))
+    ;; (walk-windows (lambda(window) (set-window-parameter window 'split-window nil) nil t))
     (my/set-window-margins)
     (remove-hook 'window-configuration-change-hook 'my/set-window-margins t)))
 
@@ -188,9 +206,9 @@
     (unwind-protect
         (apply orig-fun r)
       (my/auto-margin-local-mode auto-margins))))
-(advice-add  #'my/pick-window-right :around #'my/auto-margin--tmp-disable)
-(advice-add  #'split-window-right   :around #'my/auto-margin--tmp-disable)
-(advice-add  #'my/project-find-file-other-window :around #'my/auto-margin--tmp-disable)
+;; (advice-add  #'my/pick-window-right :around #'my/auto-margin--tmp-disable)
+;; (advice-add  #'split-window-right   :around #'my/auto-margin--tmp-disable)
+;; (advice-add  #'my/project-find-file-other-window :around #'my/auto-margin--tmp-disable)
 
 ;;;; Window management
 ;;;;; my/other-window-reverse
@@ -203,7 +221,8 @@
 (defun my/pick-window-right()
   "Like `split-window-right' except it lets you pick the buffer on the other side"
   (interactive)
-  (let ((split-height-threshold (+ (window-height) 1)))  ; Increase height threshold to avoid vertical split
+  (let ((split-height-threshold (+ (window-height) 1337)))  ; Increase height threshold to avoid vertical split
+    (message "YEAH SPLIT RIGH %s" (window-margins (selected-window)))
     (consult-buffer-other-window)))
 
 ;;;;; my/pick-window-below
