@@ -190,6 +190,7 @@
       (my/auto-margin-local-mode auto-margins))))
 (advice-add  #'my/pick-window-right :around #'my/auto-margin--tmp-disable)
 (advice-add  #'split-window-right   :around #'my/auto-margin--tmp-disable)
+(advice-add  #'my/project-find-file-other-window :around #'my/auto-margin--tmp-disable)
 
 ;;;; Window management
 ;;;;; my/other-window-reverse
@@ -202,14 +203,14 @@
 (defun my/pick-window-right()
   "Like `split-window-right' except it lets you pick the buffer on the other side"
   (interactive)
-  (let ((split-height-threshold 1337))  ; Put an absurdly high value to avoid splitting vertically
+  (let ((split-height-threshold (+ (window-height) 1)))  ; Increase height threshold to avoid vertical split
     (consult-buffer-other-window)))
 
 ;;;;; my/pick-window-below
 (defun my/pick-window-below()
   "Like `split-window-below' except it lets you pick the buffer on the other side"
   (interactive)
-  (let ((split-width-threshold 1337))  ; Put an absurdly high value to avoid splitting horizontally
+  (let ((split-width-threshold (+ (window-width) 1)))  ; Increase width threshold to avoid horizontal split
     (consult-buffer-other-window)))
 
 ;;;; my/replace-chat-at-point
@@ -1199,11 +1200,8 @@ for some direct navigation bindings"
 (defun my/project-find-file-other-window()
   "Like `project-find-file' but opens the file in another window"
   (interactive)
-  (split-window-right)
-  (other-window 1)
-  (condition-case nil
-      (project-find-file)
-    (quit (delete-window))))
+  (cl-letf (((symbol-function 'find-file) 'find-file-other-window))
+    (project-find-file)))
 
 ;;;; Hydra compile
 (defhydra my/hydra-compile(:exit t :hint nil)
