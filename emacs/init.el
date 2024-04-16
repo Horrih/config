@@ -128,7 +128,7 @@
   (kill-line (if (= (line-beginning-position) (point)) -1 0)))
 
 ;;;; Automatic margin
-;;;;; my/margin-line-width
+;;;;; Customize variables to tweak margin size
 (defcustom my/margin-center-column 45
   "Column that should appear at the center when auto margin mode is enabled"
   :local t
@@ -139,8 +139,8 @@
   :local t
   :type '(float))
 
-;;;;; my/compute-window-margin
-(defun my/compute-window-margins(window)
+;;;;; Implementation functions
+(defun my/margin--compute(window)
   "Computes the left margin for window `WINDOW' if width big enough, 0 otherwise"
   (let* ((width (window-width window))
          (has-margin (car (window-margins window)))
@@ -148,48 +148,60 @@
          (prev-margin-right (if has-margin (cdr (window-margins window)) 0))
          (total-width (+ width prev-margin-left prev-margin-right)))
     (with-current-buffer (window-buffer window)
-      (if (or (not my/auto-margin-local-mode)
-              display-line-numbers-mode
-              (minibufferp))
+      (if (or display-line-numbers-mode (minibufferp))  ; No margin if minibuffer or line numbers
           '(0 . 0)
         (let* ((left-margin (- (/ total-width 2) my/margin-center-column))
                (right-margin (truncate (* left-margin my/margin-right-ratio))))
           `(,(max 0 left-margin) . ,(max 0 right-margin)))))))
 
-;;;;; my/set-window-margins
-(defun my/set-window-margins()
+(defun my/margin--set()
   "Margin if single window, no margin if split"
-  (mapc (lambda(window)
-          (let* ((margins (my/compute-window-margins window))
-                 (left-margin (car margins))
-                 (right-margin (cdr margins)))
-            (set-window-margins window left-margin right-margin)))
-        (window-list)))
+  (walk-windows
+   (lambda(window)
+       (with-current-buffer (window-buffer window)
+         (if my/margin-auto-local-mode
+             (let* ((margins (my/margin--compute window))
+                    (left-margin (car margins))
+                    (right-margin (cdr margins)))
+               (setq-local split-window-preferred-function #'my/margin--reset-split-window-sensibly)
+               (set-window-parameter window 'split-window 'my/margin--reset-split-window)
+               (set-window-margins window left-margin right-margin))
+           (setq-local split-window-preferred-function #'split-window-sensibly)
+           (set-window-parameter window 'split-window nil)
+           (set-window-margins window nil))))
+   nil t))
 
-;;;;; minor mode : my/auto-margin-local-mode and my/auto-margin-mode
-(define-minor-mode my/auto-margin-local-mode
+(defun my/margin--reset()
+  "Reset the margins to 0 for all windows"
+  (walk-windows (lambda(w)
+                  (set-window-parameter w 'split-window nil)
+                  (set-window-margins w nil))
+                nil t))
+
+(defun my/margin--reset-split-window (&optional window size side pixelwise)
+  "Call `split-window' after resetting margins (which interfer with splitting)"
+  (my/margin--reset)
+  (split-window window size side pixelwise))
+
+(defun my/margin--reset-split-window-sensibly (&optional window)
+  "Call `split-window-sensibly' after resetting margins (which interfer with splitting)"
+  (my/margin--reset)
+  (split-window-sensibly window))
+
+;;;;; Define the auto-margin minor mode, local and global
+(define-minor-mode my/margin-auto-local-mode
   "Minor mode to enable/disable left margin"
   :lighter " Margin"
-  (if my/auto-margin-local-mode
-      (add-hook 'window-configuration-change-hook 'my/set-window-margins nil t)
-    (my/set-window-margins)
-    (remove-hook 'window-configuration-change-hook 'my/set-window-margins t)))
+  (if my/margin-auto-local-mode
+      (add-hook 'window-configuration-change-hook 'my/margin--set nil t)
+    (my/margin--set)
+    (remove-hook 'window-configuration-change-hook 'my/margin--set t)))
 
-(define-globalized-minor-mode my/auto-margin-mode my/auto-margin-local-mode
-  (lambda()(my/auto-margin-local-mode t)))
-(my/auto-margin-mode t) ; Turn it on
-(diminish 'my/auto-margin-local-mode)
+(define-globalized-minor-mode my/margin-auto-mode my/margin-auto-local-mode
+  (lambda()(my/margin-auto-local-mode t)))
+(my/margin-auto-mode t) ; Turn it on
+(diminish 'my/margin-auto-local-mode)
 
-;;;;; Advice : Disable auto-margins when splitting right
-(defun my/auto-margin--tmp-disable(orig-fun &rest r)
-  "Disable auto-margin mode while command ORIG-FUN is being run, like `split-window-right'"
-  (let ((auto-margins my/auto-margin-local-mode))
-    (my/auto-margin-local-mode -1)  ; Disable margins otherwise emacs won't let you split right
-    (unwind-protect
-        (apply orig-fun r)
-      (my/auto-margin-local-mode auto-margins))))
-(advice-add  #'my/pick-window-right :around #'my/auto-margin--tmp-disable)
-(advice-add  #'split-window-right   :around #'my/auto-margin--tmp-disable)
 
 ;;;; Window management
 ;;;;; my/other-window-reverse
@@ -202,14 +214,14 @@
 (defun my/pick-window-right()
   "Like `split-window-right' except it lets you pick the buffer on the other side"
   (interactive)
-  (let ((split-height-threshold 1337))  ; Put an absurdly high value to avoid splitting vertically
+  (let ((split-height-threshold (+ (frame-height) 1)))  ; Increase height threshold to avoid vertical split
     (consult-buffer-other-window)))
 
 ;;;;; my/pick-window-below
 (defun my/pick-window-below()
   "Like `split-window-below' except it lets you pick the buffer on the other side"
   (interactive)
-  (let ((split-width-threshold 1337))  ; Put an absurdly high value to avoid splitting horizontally
+  (let ((split-width-threshold (+ (frame-width) 1)))  ; Increase width threshold to avoid horizontal split
     (consult-buffer-other-window)))
 
 ;;;; my/replace-chat-at-point
@@ -1003,7 +1015,7 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 ;;;; Misc
 (keymap-set ijkl-local-mode-map "/"     'my/comment-dwim) ; Comment region or line
 (keymap-set ijkl-local-mode-map "M-s"   'multi-occur-in-matching-buffers) ; Search in all buffers
-(keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
+;; (keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
 (keymap-set ijkl-local-mode-map "<f5>"  'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
 (keymap-set ijkl-local-mode-map "<f12>" 'my/include-c-header) ; Shortcuts for a #include directive
 
@@ -1110,7 +1122,7 @@ for some direct navigation bindings"
   [["Toggle"
     ("H" "Toggle H/S"       hs-toggle-hiding)
     ("n" "Line number mode" display-line-numbers-mode)
-    ("m" "Margin mode"      my/auto-margin-mode)
+    ("m" "Margin mode"      my/margin-auto-local-mode)
     ]
    ["Hide"
    ("l" "Hide Level" hs-hide-level)
@@ -1199,11 +1211,8 @@ for some direct navigation bindings"
 (defun my/project-find-file-other-window()
   "Like `project-find-file' but opens the file in another window"
   (interactive)
-  (split-window-right)
-  (other-window 1)
-  (condition-case nil
-      (project-find-file)
-    (quit (delete-window))))
+  (cl-letf (((symbol-function 'find-file) 'find-file-other-window))
+    (project-find-file)))
 
 ;;;; Hydra compile
 (defhydra my/hydra-compile(:exit t :hint nil)
@@ -1366,3 +1375,7 @@ _L_: List TODOs            _,_: Toggle images
   (diminish "with-editor-mode")
   (key-chord-define with-editor-mode-map "CC" 'with-editor-finish)
   (key-chord-define with-editor-mode-map "QQ" 'with-editor-cancel))
+
+(keymap-set ijkl-local-mode-map "<f1>" #'my/zob-set)
+(keymap-set ijkl-local-mode-map "<f2>" #'my/zob-reset)
+(keymap-set ijkl-local-mode-map "<f3>" #'my/zob-print)
