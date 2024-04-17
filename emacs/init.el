@@ -148,7 +148,7 @@
          (prev-margin-right (if has-margin (cdr (window-margins window)) 0))
          (total-width (+ width prev-margin-left prev-margin-right)))
     (with-current-buffer (window-buffer window)
-      (if (or (not my/auto-margin-local-mode)
+      (if (or ;; (not my/auto-margin-local-mode)
               display-line-numbers-mode
               (minibufferp))
           '(0 . 0)
@@ -161,26 +161,72 @@
   "Margin if single window, no margin if split"
   (walk-windows
    (lambda(window)
+       (with-current-buffer (window-buffer window)
+         (if my/auto-margin-local-mode
+             (let* ((margins (my/compute-window-margins window))
+                    (left-margin (car margins))
+                    (right-margin (cdr margins)))
+               (setq-local split-window-preferred-function #'my/reset-margins-split-window-sensibly)
+               (set-window-parameter window 'split-window 'my/reset-margins-split-window)
+               (set-window-margins window left-margin right-margin))
+           (setq-local split-window-preferred-function #'split-window-sensibly)
+           (set-window-parameter window 'split-window nil)
+           (set-window-margins window nil))))
+   nil t))
+
+
+(defun my/zob-set()
+  (interactive)
+  (message "ZOB SET :")
+  (setq-local split-window-preferred-function 'my/zob-sensibly)
+  (walk-windows
+   (lambda(window)
      (let* ((margins (my/compute-window-margins window))
-            (left-margin (car margins))
-            (right-margin (cdr margins)))
-       (message "SETTING margins")
+            ;; (left-margin (car margins))
+            ;; (right-margin (cdr margins)))
+            (left-margin 60)
+            (right-margin 60))
+       ;; (message "SETTING margins")
        (set-window-parameter window 'split-window 'my/split-window-reset-margins)
        (set-window-margins window left-margin right-margin)))
    nil t))
+
+(defun my/zob-reset()
+  (interactive)
+  (setq-local split-window-preferred-function 'split-window-sensibly)
+  (message "ZOB RESET :")
+  (walk-windows
+   (lambda(window)
+     (set-window-margins window nil))
+   nil t))
+
+(defun my/zob-print()
+  (interactive)
+  (walk-windows
+   (lambda(window)
+     (message "|-- %s" (window-margins window)))))
 
 ;;;;; minor mode : my/auto-margin-local-mode and my/auto-margin-mode
 (defun my/split-window-reset-margins (&optional window size side pixelwise)
   "Call `split-window' after resetting margins (which interfer with splitting)"
   ;; (mapc (lambda(w) (set-window-margins w nil)) (window-list))
   ;; (message "YEAHH RESETTING MARGINS")
+  (message "Removing window param and resetting margins with side %s" side)
   (walk-windows (lambda(w)
-                  (when (eq (window-parameter w 'split-window) 'my/split-window-reset-margins)
-                    (message "Removing window param and resetting margins")
+                  ;; (when (eq (window-parameter w 'split-window) 'my/split-window-reset-margins)
                     (set-window-parameter w 'split-window nil)
-                    (set-window-margins w nil)))
-                    nil t)
+                    (set-window-margins w nil))
+                nil t)
   (split-window window size side pixelwise))
+
+(defun my/zob-sensibly (&optional window)
+  (message "ZOB SENSIBLY")
+  (walk-windows (lambda(w)
+                  ;; (when (eq (window-parameter w 'split-window) 'my/split-window-reset-margins)
+                    (set-window-parameter w 'split-window nil)
+                    (set-window-margins w nil))
+                nil t)
+  (funcall 'split-window-sensibly window))
 
 (define-minor-mode my/auto-margin-local-mode
   "Minor mode to enable/disable left margin"
@@ -188,6 +234,7 @@
   (if my/auto-margin-local-mode
       (progn
         ;; (walk-windows (lambda(w)(message "ZOB")(set-window-parameter w 'split-window 'my/split-window-reset-margins)) nil t)
+        (setq-local split-window-preferred-function 'my/zob-sensibly)
         (add-hook 'window-configuration-change-hook 'my/set-window-margins nil t))
     ;; (walk-windows (lambda(window) (set-window-parameter window 'split-window nil) nil t))
     (my/set-window-margins)
@@ -195,8 +242,10 @@
 
 (define-globalized-minor-mode my/auto-margin-mode my/auto-margin-local-mode
   (lambda()(my/auto-margin-local-mode t)))
-(my/auto-margin-mode t) ; Turn it on
+;; (my/auto-margin-mode t) ; Turn it on
 (diminish 'my/auto-margin-local-mode)
+
+
 
 ;;;;; Advice : Disable auto-margins when splitting right
 (defun my/auto-margin--tmp-disable(orig-fun &rest r)
@@ -1023,7 +1072,7 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 ;;;; Misc
 (keymap-set ijkl-local-mode-map "/"     'my/comment-dwim) ; Comment region or line
 (keymap-set ijkl-local-mode-map "M-s"   'multi-occur-in-matching-buffers) ; Search in all buffers
-(keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
+;; (keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
 (keymap-set ijkl-local-mode-map "<f5>"  'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
 (keymap-set ijkl-local-mode-map "<f12>" 'my/include-c-header) ; Shortcuts for a #include directive
 
@@ -1383,3 +1432,7 @@ _L_: List TODOs            _,_: Toggle images
   (diminish "with-editor-mode")
   (key-chord-define with-editor-mode-map "CC" 'with-editor-finish)
   (key-chord-define with-editor-mode-map "QQ" 'with-editor-cancel))
+
+(keymap-set ijkl-local-mode-map "<f1>" #'my/zob-set)
+(keymap-set ijkl-local-mode-map "<f2>" #'my/zob-reset)
+(keymap-set ijkl-local-mode-map "<f3>" #'my/zob-print)
