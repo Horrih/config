@@ -512,6 +512,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
     (or org-download-image-dir (concat (file-name-sans-extension (buffer-file-name)) "-img"))))
 
 ;;;; visual-fill-column : Center text in the window and wrap around fill-column
+;; TODO : not sure if still useful with my automargin mode
 (use-package visual-fill-column
   :custom ((visual-fill-column-width 130)
            (visual-fill-column-center-text t)))
@@ -632,6 +633,29 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
   (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
   (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
   (advice-add 'c-update-modeline :override #'ignore)) ;; Don't use a modeline suffix (i.e C++//l)
+
+;;;; legacy python mode
+;;;;; my/python-fill-column-display()
+(defun my/python-fill-column-display()
+  "Displays a vertical line for the `fill-column' before the 80 chars limit"
+  (setq-local fill-column 79)
+  (display-fill-column-indicator-mode))
+
+;;;;; python-coverage overlay
+(defun my/toggle-coverage-overlay()
+  (interactive)
+  (cl-case major-mode
+    ('python-mode (call-interactively #'python-coverage-overlay-mode))))
+
+(use-package python-coverage
+  :config
+  (require 'magit))  ; Uses magit's faces
+
+;;;;; python-mode itself
+(use-package python-mode
+  :ensure nil  ; Part of emacs
+  :hook (python-mode . my/python-fill-column-display))
+
 
 ;;; Tree-Sitter Section
 ;;;; Cheatsheet
@@ -1122,9 +1146,11 @@ for some direct navigation bindings"
 (transient-define-prefix my/transient-hide-show()
   "Transient for `hs-minor-mode' and other display options"
   [["Toggle"
-    ("H" "Toggle H/S"       hs-toggle-hiding)
-    ("n" "Line number mode" display-line-numbers-mode)
-    ("m" "Margin mode"      my/margin-auto-local-mode)
+    ("H" "Toggle H/S"            hs-toggle-hiding)
+    ("n" "Line number mode"      display-line-numbers-mode)
+    ("m" "Margin mode"           my/margin-auto-local-mode)
+    ("f" "Fill column indicator" display-fill-column-indicator-mode)
+    ("c" "Show coverage"         my/toggle-coverage-overlay)
     ]
    ["Hide"
    ("l" "Hide Level" hs-hide-level)
@@ -1334,13 +1360,16 @@ _L_: List TODOs            _,_: Toggle images
   ("b" eval-buffer "Interpret the whole lisp buffer"))
 (keymap-set ijkl-local-mode-map "!" 'my/hydra-commands/body)
 
-;;;; Magit hydra
-(defhydra my/hydra-magit(:exit t :columns 1)
-  "Magit commands"
-  ("s" magit-status "Status (Home)")
-  ("f" magit-file-dispatch "File commands")
-  ("v" magit-dispatch "Global Commands"))
-(keymap-set ijkl-local-mode-map "v" 'my/hydra-magit/body)
+;;;; Magit transient
+(transient-define-prefix my/transient-magit()
+  "Transient for `magit' commands"
+  [["Magit commands"
+    ("s" "Status (Home)"   magit-status)
+    ("f" "File commands"   magit-file-dispatch)
+    ("v" "Global Commands" magit-dispatch)
+    ("c" "Clone"           magit-clone)
+    ]])
+(keymap-set ijkl-local-mode-map "v" 'my/transient-magit)
 
 ;;;; Narrow Hydra
 (defhydra my/hydra-narrow(:exit t :columns 1)
