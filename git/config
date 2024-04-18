@@ -1,6 +1,9 @@
 [user]
 	name = Charles Gonnaud
 	email = uyo@hotmail.fr
+# Do not setup the remote branch name automatically
+[branch]
+    autoSetupMerge = false
 [push]
 	default = simple
 [merge]
