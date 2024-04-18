@@ -63,7 +63,18 @@
   (doom-modeline-unicode-fallback t)
   (doom-modeline-minor-modes t)
   (mode-line-right-align-edge 'right-margin) ; Work around for https://github.com/seagle0128/doom-modeline/issues/701
-  :init
+  (display-time-format "%H:%M")  ; Display time as 13:37
+  (display-time-default-load-average nil)  ; Do not show load average when displaying time
+  :config
+  (display-battery-mode)
+  (display-time-mode)
+  (doom-modeline-def-segment ijkl
+    (if (bound-and-true-p ijkl-local-mode)
+        (propertize " ijkl " 'face 'doom-modeline-project-dir)
+      (propertize " edit " 'face 'doom-modeline-evil-insert-state)))
+  (doom-modeline-def-modeline 'main
+    '(ijkl eldoc bar window-number modals matches follow buffer-info remote-host buffer-position word-count parrot selection-info)
+    '(compilation objed-state misc-info battery grip github debug repl lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs check time))
   (doom-modeline-mode))
 
 ;;;; Dired as default buffer
@@ -893,14 +904,6 @@ This mark-ring will record all mark positions globally, multiple times per buffe
         (ijkl-insert-mode)
       (ijkl-local-mode))))
 (ijkl-mode)
-
-;;;; Change color of the mode line according to the mode (command, edit, unsaved)
-(let ((default-color (face-background 'mode-line)))
-  (add-hook 'post-command-hook
-            (lambda ()
-              (set-face-background 'mode-line
-                                   (cond ((not ijkl-local-mode) "red")
-                                         (t default-color))))))
 
 ;;; Main keybindings
 ;;;; Helper function gen-input
