@@ -732,6 +732,8 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
                                  '(help-at-pt-timer-delay 0.5)
                                  '(help-at-pt-display-when-idle '(flymake-diagnostic)))))
   :bind (:map help-map ("h" . eldoc))
+  :custom
+  (eglot-report-progress nil)
   :custom-face
   (eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow :underline t)))))
 
