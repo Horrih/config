@@ -68,13 +68,17 @@
   :config
   (display-battery-mode)
   (display-time-mode)
+
+  ;; Add a segment telling wether we are in insert or edit mode
   (doom-modeline-def-segment ijkl
     (if (bound-and-true-p ijkl-local-mode)
         (propertize " ijkl " 'face 'doom-modeline-project-dir)
       (propertize " edit " 'face 'doom-modeline-evil-insert-state)))
+
+  ;; Use a custom modeline
   (doom-modeline-def-modeline 'main
-    '(ijkl eldoc bar window-number modals matches follow buffer-info remote-host buffer-position word-count parrot selection-info)
-    '(compilation objed-state misc-info battery grip github debug repl lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs check time))
+    '(ijkl eldoc bar buffer-info remote-host buffer-position selection-info)
+    '(compilation misc-info battery debug lsp minor-modes buffer-encoding major-mode process vcs check time))
   (doom-modeline-mode))
 
 ;;;; Dired as default buffer
