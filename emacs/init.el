@@ -996,22 +996,21 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 
 ;;;; movement and deletion bindings (accessible in both modes)
 ;;;;; backwards
-(key-alias ijkl-local-mode-map "j"   "C-j")
-(key-alias    my/keys-mode-map "C-j" "C-b")
-(key-alias    my/keys-mode-map "M-j" "M-b")
-(key-alias    my/keys-mode-map "C-M-j" "C-a")
-(key-alias ijkl-local-mode-map "a" "C-a")
+(keymap-set ijkl-local-mode-map "j"   'backward-char)
+(keymap-set    my/keys-mode-map "C-j" 'backward-char)
+(key-alias     my/keys-mode-map "M-j" "M-b")
+(key-alias     my/keys-mode-map "C-M-j" "C-a")
+(key-alias  ijkl-local-mode-map "a" "C-a")
 
 ;;;;; forwards
-(key-alias ijkl-local-mode-map "l"   "C-l")
-(key-alias    my/keys-mode-map "C-l" "C-f")
-(key-alias    my/keys-mode-map "M-l" "M-f")
-(key-alias    my/keys-mode-map "C-M-l" "C-e")
-(key-alias ijkl-local-mode-map "e" "C-e")
+(keymap-set ijkl-local-mode-map   "l" 'forward-char)
+(keymap-set    my/keys-mode-map "C-l" 'forward-char)
+(key-alias     my/keys-mode-map "M-l" "M-f")
+(key-alias     my/keys-mode-map "C-M-l" "C-e")
+(key-alias  ijkl-local-mode-map "e" "C-e")
 
 ;;;;; upwards
-(key-alias ijkl-local-mode-map "i" "C-p")
-(key-alias    my/keys-mode-map "C-k" "C-n")
+(keymap-set ijkl-local-mode-map "i" 'previous-line)
 ;; C-i is bound to TAB in terminals. You need to remap C-i to C-p at your GUI app level
 ;; For example powertoys on windows, konsole or xterm remapping on linux
 (when (display-graphic-p)
@@ -1024,7 +1023,8 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 (key-alias ijkl-local-mode-map "A" "C-M-a")
 
 ;;;;; downwards
-(key-alias ijkl-local-mode-map "k" "C-n")
+(keymap-set    my/keys-mode-map "C-k" 'next-line)
+(keymap-set ijkl-local-mode-map   "k" 'next-line)
 (keymap-set   my/keys-mode-map "M-k" (lambda() (interactive)(next-line 7)))
 (key-alias    my/keys-mode-map "C-M-k" "M->")
 (key-alias ijkl-local-mode-map ">" "M->")
