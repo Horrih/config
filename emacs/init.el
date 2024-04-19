@@ -1409,7 +1409,3 @@ _L_: List TODOs            _,_: Toggle images
   (diminish "with-editor-mode")
   (key-chord-define with-editor-mode-map "CC" 'with-editor-finish)
   (key-chord-define with-editor-mode-map "QQ" 'with-editor-cancel))
-
-(keymap-set ijkl-local-mode-map "<f1>" #'my/zob-set)
-(keymap-set ijkl-local-mode-map "<f2>" #'my/zob-reset)
-(keymap-set ijkl-local-mode-map "<f3>" #'my/zob-print)
