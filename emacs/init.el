@@ -131,6 +131,15 @@
 
 
 ;;; Helper commands
+;;;; my/mode-is-one-of-p helper function
+(defun my/mode-is-one-of-p(modes)
+  "Returns t if the current modes (minor or major) matches one in the input modes list"
+  (let (res)
+    (dolist (input-mode modes res)
+      (dolist (mode (cons major-mode minor-mode-list))
+        (when (string-equal input-mode mode)
+          (setq res t))))))
+
 ;;;; my/switch-to-last-buffer
 (defun my/switch-to-last-buffer()
   "Use `switch-to-buffer' to visit the last buffer"
@@ -214,7 +223,9 @@
     (remove-hook 'window-configuration-change-hook 'my/margin--set t)))
 
 (define-globalized-minor-mode my/margin-auto-mode my/margin-auto-local-mode
-  (lambda()(my/margin-auto-local-mode t)))
+  (lambda()
+    (unless (my/mode-is-one-of-p '("magit-log-mode"))
+      (my/margin-auto-local-mode t))))
 (my/margin-auto-mode t) ; Turn it on
 (diminish 'my/margin-auto-local-mode)
 
@@ -915,15 +926,6 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 (defun my/gen-input(KEYS)
   "Generates a key `KEYS' sequence as if the user typed it"
   (setq unread-command-events (nconc (listify-key-sequence (kbd KEYS)) unread-command-events)))
-
-;;;; my/mode-is-one-of-p helper function
-(defun my/mode-is-one-of-p(modes)
-  "Returns t if the current modes (minor or major) matches one in the input modes list"
-  (let (res)
-    (dolist (input-mode modes res)
-      (dolist (mode (cons major-mode minor-mode-list))
-        (when (string-equal input-mode mode)
-          (setq res t))))))
 
 ;;;; Helper macro key-alias
 (defmacro key-alias(keymap from to &optional except-modes)
