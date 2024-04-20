@@ -661,7 +661,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 (defun my/toggle-coverage-overlay()
   (interactive)
   (cl-case major-mode
-    ('python-mode (call-interactively #'python-coverage-overlay-mode))))
+    (python-mode (call-interactively #'python-coverage-overlay-mode))))
 
 (use-package python-coverage
   :config
