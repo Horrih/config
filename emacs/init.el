@@ -108,6 +108,7 @@
   (delete-selection-mode 1) ; If text is selected, we expect that typing will replace the selection
   (show-paren-mode 1) ; Highlight the matching parenthesis
   (put 'narrow-to-region 'disabled nil) ; Allow narrow to region without prompt
+  (customize-set-variable 'send-mail-function 'mailclient-send-it) ; E-mail : open default mail client, e.g for report-emacs-bug
 
   ;; Automatic pairing for parentheses/braces
   (add-hook 'prog-mode-hook 'electric-pair-local-mode)
@@ -1048,7 +1049,7 @@ The forwarding will only occur if the current major mode is not in EXCEPT-MODES 
 ;;;; Misc
 (keymap-set ijkl-local-mode-map "/"     'my/comment-dwim) ; Comment region or line
 (keymap-set ijkl-local-mode-map "M-s"   'multi-occur-in-matching-buffers) ; Search in all buffers
-;; (keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
+(keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
 (keymap-set ijkl-local-mode-map "<f5>"  'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
 (keymap-set ijkl-local-mode-map "<f12>" 'my/include-c-header) ; Shortcuts for a #include directive
 
