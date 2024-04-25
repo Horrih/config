@@ -912,11 +912,13 @@ This mark-ring will record all mark positions globally, multiple times per buffe
   (lambda()
     "Only enable the ijkl-local-mode on traditional buffers"
     (if (or (minibufferp)
-                (string-match "[Gg]it" (format "%s" major-mode))
-                (string-match "[Gg]it" (format "%s" major-mode))
-                (string-equal (buffer-name) "*Org Note*")
-                (string-equal (buffer-name) "*Ediff Control Panel*")
-                (string-equal (buffer-name) "COMMIT_EDITMSG"))
+            (string-match "[Gg]it" (format "%s" major-mode))
+            (string-match "[Gg]it" (format "%s" major-mode))
+            (string-equal (buffer-name) "*Org Note*")
+            (string-equal (buffer-name) "*Ediff Control Panel*")
+            (and
+             (string-equal (buffer-name) "COMMIT_EDITMSG")
+             (not (string-match-p "rebase" (buffer-string)))))
         (ijkl-insert-mode)
       (ijkl-local-mode))))
 (ijkl-mode)
