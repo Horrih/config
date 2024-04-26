@@ -71,13 +71,12 @@
 
   ;; Add a segment telling wether we are in insert or edit mode
   (doom-modeline-def-segment ijkl
-    (if (bound-and-true-p ijkl-local-mode)
-        (propertize " ijkl " 'face 'doom-modeline-project-dir)
-      (propertize " edit " 'face 'doom-modeline-evil-insert-state)))
+    (unless (bound-and-true-p ijkl-local-mode)
+        (propertize "      edit " 'face 'doom-modeline-project-dir)))
 
   ;; Use a custom modeline
   (doom-modeline-def-modeline 'main
-    '(ijkl eldoc bar buffer-info remote-host buffer-position selection-info)
+    '(eldoc bar buffer-info remote-host buffer-position selection-info ijkl)
     '(compilation misc-info battery debug lsp minor-modes buffer-encoding major-mode process vcs check time))
   (doom-modeline-mode))
 
