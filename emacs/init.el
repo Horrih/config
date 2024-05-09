@@ -5,17 +5,31 @@
 (setq gc-cons-threshold 64000000)
 (add-hook 'after-init-hook #'(lambda ()(setq gc-cons-threshold 800000)))
 
-;;;; Enable MELPA : Add the main user repository of packages
-;; cf Getting Started https://melpa.org/
-;; ELPA, the default repository, has much less available
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
+;;;; Enable straight.el package manager
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(use-package straight
+  :custom
+  (straight-use-package-by-default t)) ; use-package integration
 
 ;;;; use-package : Customize the package macro for this file
 (use-package use-package
+  :straight (:type built-in)
   :custom
-  (use-package-always-ensure t) ; Download missing packages by default
   (use-package-always-defer t)) ; Lazy load by default, use :demand otherwise
 
 ;;;; diminish : Hide the mode line string for modes (called the lighter)
@@ -26,7 +40,7 @@
   (diminish 'abbrev-mode))
 
 (use-package simple
-  :ensure nil
+  :straight (:type built-in)
   :config
   (diminish 'auto-fill-function))
 
@@ -51,6 +65,7 @@
 
 ;;;; Mode line theme : doom mode line - Must download CaskaydiaCove Nerd Font
 (use-package doom-modeline
+  :straight (:fork (:repo "Horrih/doom-modeline"))  ; Fork to fix right-margin
   :demand
   :custom-face
   (mode-line ((t :background "black")))
@@ -290,7 +305,7 @@ Does not work for strings, since they do not have separate start/end characters"
 ;;; Compilation options
 ;;;; Compilation misc
 (use-package compile
-  :ensure nil ; Emacs built in
+  :straight (:type built-in)
   :hook (compilation-mode . (lambda()(setq show-trailing-whitespace nil)))
   :custom
   (compilation-always-kill t)) ; Do not ask for confirmation when I stop current compilation
@@ -346,7 +361,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
     (ansi-color-compilation-filter)))
 
 (use-package ansi-color
-  :ensure nil ; Emacs built-in
+  :straight (:type built-in)
   :hook (compilation-filter . my/ansi-color-compilation-filter-except-ag)) ; Handle terminal colors in the compilation buffer
 
 ;;;; Error regexps : Set compilation regex for errors
@@ -374,7 +389,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 ;;; General usage packages
 ;;;; project.el : Automatic detection of project, and various related project management commands
 (use-package project
-  :ensure nil  ; built-in
+  :straight (:type built-in)
   :custom
   ;; Make `project-switch-project' open dired instead of prompting for the command to run
   (project-switch-commands 'project-dired))
@@ -388,7 +403,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;;; ediff : Built in side by side diffs of files
 (use-package ediff
-  :ensure nil ; Built-in
+  :straight (:type built-in)
   :hook (ediff-keymap-setup . (lambda()
                         (keymap-set ediff-mode-map "h" 'ediff-status-info)
                         (keymap-set ediff-mode-map "'" 'other-window)
@@ -464,7 +479,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;;; Dired : built-in navigation of folders
 (use-package dired
-  :ensure nil  ; emacs built-in
+  :straight (:type built-in)
   :bind (:map dired-mode-map
               ("u" . dired-up-directory)
               ("i" . nil))
@@ -473,6 +488,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 ;;; Org mode : Note taking and presentation
 ;;;; Org mode : package customizations
 (use-package org
+  :straight (:type built-in)
   :custom-face
   (org-warning ((t (:underline nil)))) ; Do not underline org-warnings, red is enough
   (org-done ((t (:foreground "lightgreen" :box(:color "lightgreen")) )))
@@ -503,7 +519,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
                 (add-to-list 'recentf-exclude ".*org$"))))
 
 (use-package org-indent
-  :ensure nil
+  :straight (:type built-in)
   :diminish)
 
 ;;;; Org bullets : Pretty mode for org
@@ -600,7 +616,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 ;;;; Outline mode with package outline-minor-faces
 ;;;;; Package configuration
 (use-package outline
-  :ensure nil ; emacs built-in
+  :straight (:type built-in)
   :hook
   (emacs-lisp-mode . outline-minor-mode)
   :config
@@ -620,7 +636,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;;; hide-show-mode : Hide/show sections of code : current function, class, or if/else section
 (use-package hideshow
-  :ensure nil ; Built-in emacs
+  :straight (:type built-in)
   :config
   (diminish 'hs-minor-mode)
   :hook
@@ -651,7 +667,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;;; legacy c++ mode
 (use-package cc-mode
-  :ensure nil  ; Part of emacs
+  :straight (:type built-in)
   :config
   (setq-default c-basic-offset  4) ; Base indent size when indented automatically
   (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
@@ -683,9 +699,8 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;;;; python-mode itself
 (use-package python-mode
-  :ensure nil  ; Part of emacs
+  :straight (:type built-in)
   :hook (python-mode . my/python-fill-column-display))
-
 
 ;;; Tree-Sitter Section
 ;;;; Cheatsheet
@@ -697,7 +712,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;;; Require treesit at startup
 (use-package treesit
-  :ensure nil
+  :straight (:type built-in)
   :demand t)
 
 ;;;; cmake-ts-mode : Major mode for CMakeLists.txt
@@ -779,7 +794,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;;; eglot : Built-in package for completion with LSP. Light-weight alternative to lsp-mode
 (use-package eglot
-  :ensure nil
+  :straight (:type built-in)
   :hook (eglot-managed-mode . (lambda()
                                 (eglot-inlay-hints-mode -1) ; Disable inlay hint for params by default
                                 (custom-set-variables
