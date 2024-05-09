@@ -65,7 +65,7 @@
 
 ;;;; Mode line theme : doom mode line - Must download CaskaydiaCove Nerd Font
 (use-package doom-modeline
-  :straight (:fork (:repo "Horrih/doom-modeline"))  ; Fork to fix right-margin
+  :straight (:fork "Horrih/doom-modeline")  ; Fork to fix right-margin
   :demand
   :custom-face
   (mode-line ((t :background "black")))
@@ -458,7 +458,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
   :bind (:map my/keys-mode-map
          ("M-y" . consult-yank-pop)
          :map help-map
-         ("a" . consult-apropos)
+         ("I" . consult-info)
          :map ctl-x-map
          ("b" . consult-buffer))
   :custom (consult-preview-key nil) ; Disable preview
@@ -790,6 +790,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;;; flymake : Syntax highlighting, used by eglot/lsp
 (use-package flymake
+  :straight (:type built-in)
   :custom(flymake-mode-line-lighter ""))
 
 ;;;; eglot : Built-in package for completion with LSP. Light-weight alternative to lsp-mode
@@ -1293,25 +1294,25 @@ _g_: Start GDB
 (keymap-set ijkl-local-mode-map "ç" 'my/hydra-compile/body)
 
 ;;;; Hydra go
-(defhydra my/hydra-go(:exit t :hint nil)
-  "
-^Go to^                                 ^LSP Navigation^                  ^Expressions^
--------------------------------------------------------------------------------------------
-_l_: Line n°                            _j_: Definition                   _n_: Forward expression
-_b_: Bookmark                           _J_: Definition other window      _p_: Backward expression
-_,_: Org roam file                      _e_: Next error                   _u_: Upward expression
-_r_: Register (see point-to-register)   _E_: Previous error               _g_: Go to opposite end
-_c_: Column n°
-
-"
-  ("l" goto-line)          ("j" xref-find-definitions)                ("n" forward-sexp     :color red)
-  ("b" bookmark-jump)      ("J" xref-find-definitions-other-window)   ("p" backward-sexp    :color red)
-  ("," org-roam-node-find) ("e" flymake-goto-next-error :color red)   ("u" backward-up-list :color red)
-  ("r" jump-to-register)   ("E" flymake-goto-prev-error :color red)   ("g" my/sexp-other-side)
-  ("c" move-to-column)
-
-  ("q" nil "Quit"))
-(keymap-set ijkl-local-mode-map "g" 'my/hydra-go/body)
+(transient-define-prefix my/transient-go() "Transient for various navigation commands"
+  [["Go to"
+    ("l" "Line n°"                           goto-line)
+    ("b" "Bookmark"                          bookmark-jump)
+    ("," "Org roam file"                     org-roam-node-find)
+    ("r" "Register (see point-to-register)"  jump-to-register)
+    ("c" "Column n°"                         move-to-column)]
+   ["LSP Navigation"
+    ("j" "Definition"              xref-find-definitions)
+    ("J" "Definition other window" xref-find-definitions-other-window)
+    ("m" "Symbol (imenu)" consult-imenu)
+    ("e" "Next error"     flymake-goto-next-error :transient t :if (lambda() (featurep 'flymake)))
+    ("E" "Previous error" flymake-goto-prev-error :transient t :if (lambda() (featurep 'flymake)))]
+   ["Expressions"
+    ("n" "Forward expressionn" forward-sexp     :transient t)
+    ("p" "Backward expression" backward-sexp    :transient t)
+    ("u" "Upward expression "  backward-up-list :transient t)
+    ("g" "Go to opposite end"  my/sexp-other-side)]])
+(keymap-set ijkl-local-mode-map "g" 'my/transient-go)
 
 ;;;; Rectangle
 ;;;;; my/replace-char-or-rectangle-region
