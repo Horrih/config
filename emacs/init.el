@@ -1260,7 +1260,7 @@ for some direct navigation bindings"
    ]
    ["Coding"
     ("e" "List errors (file)"     flymake-show-buffer-diagnostics :if (lambda() (featurep 'flymake)))
-    ("t" "List errors (project)"  flymake-show-project-diagnostics :if (lambda() (featurep 'flymake)))
+    ("t" "List errors (project)"  consult-flymake                 :if (lambda() (featurep 'flymake)))
     ("r" "Find references (xref)" xref-find-references)
     ("o" "Switch header/cpp"      ff-find-other-file)
     ]])
