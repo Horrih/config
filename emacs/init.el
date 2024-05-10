@@ -126,6 +126,11 @@
 
   ;; Automatic pairing for parentheses/braces
   (add-hook 'prog-mode-hook 'electric-pair-local-mode)
+
+  ;; Fill-column display
+  (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+  (setq-default fill-column 99)
+
   (customize-set-variable 'electric-pair-inhibit-predicate ; Inhibit electric pairing for single/double quotes
       (lambda (c) (if (or (char-equal c ?\')(char-equal c ?\")) t (electric-pair-default-inhibit c))))
 
@@ -667,25 +672,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
   :predicate '(c-mode c-ts-mode c++-mode c++-ts-mode c-or-c++-mode c-or-c++-ts-mode))
 (my/clang-format-auto-mode t) ; Turn it on
 
-;;;; legacy c++ mode
-(use-package cc-mode
-  :straight (:type built-in)
-  :config
-  (setq-default c-basic-offset  4) ; Base indent size when indented automatically
-  (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
-  (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
-  (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
-  (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
-  (advice-add 'c-update-modeline :override #'ignore)) ;; Don't use a modeline suffix (i.e C++//l)
-
-;;;; legacy python mode
-;;;;; my/python-fill-column-display()
-(defun my/python-fill-column-display()
-  "Displays a vertical line for the `fill-column' before the 80 chars limit"
-  (setq-local fill-column 79)
-  (display-fill-column-indicator-mode))
-
-;;;;; python-coverage overlay
+;;;; code coverage
 (defun my/toggle-coverage-overlay()
   (interactive)
   (cl-case major-mode
@@ -699,10 +686,21 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
   :config
   (require 'magit))  ; Uses magit's faces
 
-;;;;; python-mode itself
+;;;; legacy c++ mode
+(use-package cc-mode
+  :straight (:type built-in)
+  :config
+  (setq-default c-basic-offset  4) ; Base indent size when indented automatically
+  (c-set-offset 'cpp-macro 0 nil) ; Indent C/C++ macros as normal code
+  (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
+  (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
+  (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
+  (advice-add 'c-update-modeline :override #'ignore)) ;; Don't use a modeline suffix (i.e C++//l)
+
+;;;; legacy python mode
 (use-package python-mode
   :straight (:type built-in)
-  :hook (python-mode . my/python-fill-column-display))
+  :hook (python-mode . (lambda() (setq-local fill-column 79))))
 
 ;;; Tree-Sitter Section
 ;;;; Cheatsheet
