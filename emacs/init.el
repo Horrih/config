@@ -618,7 +618,9 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 (use-package outline
   :straight (:type built-in)
   :hook
-  (emacs-lisp-mode . outline-minor-mode)
+  (emacs-lisp-mode . (lambda()
+                       (setq-local outline-regexp "^;;;;* ")
+                       (outline-minor-mode)))
   :config
   (diminish 'outline-minor-mode)
   :custom
@@ -1300,7 +1302,8 @@ _g_: Start GDB
     ("b" "Bookmark"                          bookmark-jump)
     ("," "Org roam file"                     org-roam-node-find)
     ("r" "Register (see point-to-register)"  jump-to-register)
-    ("c" "Column n°"                         move-to-column)]
+    ("c" "Column n°"                         move-to-column)
+    ("h" "Outline heading"                   consult-outline)]
    ["LSP Navigation"
     ("j" "Definition"              xref-find-definitions)
     ("J" "Definition other window" xref-find-definitions-other-window)
