@@ -87,7 +87,7 @@
   ;; Add a segment telling wether we are in insert or edit mode
   (doom-modeline-def-segment ijkl
     (unless (bound-and-true-p ijkl-local-mode)
-        (propertize "      edit " 'face 'doom-modeline-project-dir)))
+        (propertize "     > edit " 'face 'doom-modeline-project-dir)))
 
   ;; Use a custom modeline
   (doom-modeline-def-modeline 'main
