@@ -77,7 +77,6 @@
   (doom-modeline-buffer-file-name-style 'relative-from-project) ; Use 'truncate-nil for full path
   (doom-modeline-unicode-fallback t)
   (doom-modeline-minor-modes t)
-  (mode-line-right-align-edge 'right-margin) ; Work around for https://github.com/seagle0128/doom-modeline/issues/701
   (display-time-format "%H:%M")  ; Display time as 13:37
   (display-time-default-load-average nil)  ; Do not show load average when displaying time
   :config
@@ -1270,8 +1269,8 @@ for some direct navigation bindings"
    ("P" "Project in other window"  my/project-find-file-other-window)
    ]
    ["Coding"
-    ("e" "List errors (file)"     flymake-show-buffer-diagnostics :if (lambda() (featurep 'flymake)))
-    ("t" "List errors (project)"  consult-flymake                 :if (lambda() (featurep 'flymake)))
+    ("e" "List errors (file)"     consult-flymake                  :if (lambda() (featurep 'flymake)))
+    ("t" "List errors (project)"  flymake-show-project-diagnostics :if (lambda() (featurep 'flymake)))
     ("r" "Find references (xref)" xref-find-references)
     ("o" "Switch header/cpp"      ff-find-other-file)
     ]])
