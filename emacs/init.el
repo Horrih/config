@@ -712,6 +712,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;;; Require treesit at startup
 (use-package treesit
+  :custom (treesit-font-lock-level 3) ; Level of syntax coloring
   :straight (:type built-in)
   :demand t)
 
