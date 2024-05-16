@@ -465,7 +465,6 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
          ("I" . consult-info)
          :map ctl-x-map
          ("b" . consult-buffer))
-  :custom (consult-preview-key nil) ; Disable preview
   :config
   (recentf-mode))
 
@@ -1123,8 +1122,8 @@ _u_: Restore tab       _M_: Move tab left
 (transient-define-prefix my/transient-buffer()
   "Transient for buffer switching"
   [["Commands"
-    ("l" "List buffers"              consult-buffer)
-    ("L" "List buffers other window" consult-buffer-other-window)
+    ("l" "List buffers (this project)" consult-project-buffer)
+    ("L" "List buffers (all projects)" consult-buffer-other-window)
     ("p" "Switch between projects"   project-switch-project)
     ("k" "Kill current buffer"       kill-current-buffer)
     ("w" "Kill current window"       delete-window)
@@ -1214,8 +1213,8 @@ for some direct navigation bindings"
     ]
    ["Occurences"
     ("o" "In file"              consult-line)
-    ("b" "In all buffers"       multi-occur-in-matching-buffers)
-    ("p" "In current project"   project-find-regexp)
+    ("b" "In all buffers"       consult-line-multi)
+    ("p" "In current project"   consult-grep)
     ("a" "In current directory" my/consult-directory)
     ]
    ["Replace"
@@ -1243,14 +1242,9 @@ for some direct navigation bindings"
    ("p" "Save point" point-to-register)
    ("w" "Save window configuration" window-configuration-to-register)
    ("d" "Save directory" my/dir-to-register)
-   ]
-   ["Register - Load"
-    ("R" "Load register" consult-register-load)
-    ("l" "List registers" list-registers)
-    ("v" "View registers" view-register)
-    ("x" "Clear register" my/clear-register)
-    ]
-   ])
+   ("R" "Load register" consult-register)
+   ("x" "Clear register" my/clear-register)
+   ]])
 (keymap-set ijkl-local-mode-map "R" 'my/transient-register)
 
 ;;;;; Clear register
@@ -1267,6 +1261,8 @@ for some direct navigation bindings"
    ("f" "By path"                  find-file)
    ("p" "Project"                  project-find-file)
    ("P" "Project in other window"  my/project-find-file-other-window)
+   ("l" "Locate file"              consult-locate)
+   ("m" "Man page"                 consult-man)
    ]
    ["Coding"
     ("e" "List errors (file)"     consult-flymake                  :if (lambda() (featurep 'flymake)))
@@ -1306,16 +1302,16 @@ _g_: Start GDB
 ;;;; Hydra go
 (transient-define-prefix my/transient-go() "Transient for various navigation commands"
   [["Go to"
-    ("l" "Line n°"                           goto-line)
+    ("l" "Line n°"                           consult-goto-line)
     ("b" "Bookmark"                          bookmark-jump)
     ("," "Org roam file"                     org-roam-node-find)
-    ("r" "Register (see point-to-register)"  jump-to-register)
     ("c" "Column n°"                         move-to-column)
     ("h" "Outline heading"                   consult-outline)]
    ["LSP Navigation"
     ("j" "Definition"              xref-find-definitions)
     ("J" "Definition other window" xref-find-definitions-other-window)
-    ("m" "Symbol (imenu)" consult-imenu)
+    ("m" "Symbol (imenu) in current buffer" consult-imenu)
+    ("M" "Symbol (imenu) in all buffers" consult-imenu-multi)
     ("e" "Next error"     flymake-goto-next-error :transient t :if (lambda() (featurep 'flymake)))
     ("E" "Previous error" flymake-goto-prev-error :transient t :if (lambda() (featurep 'flymake)))]
    ["Expressions"
