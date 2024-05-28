@@ -591,7 +591,10 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 
 ;;; Development packages and options
 ;;;; markdown-mode
-(use-package markdown-mode)
+(use-package markdown-mode
+  :hook (markdown-mode . (lambda()
+                           (setq-local fill-column 79)
+                           (display-fill-column-indicator-mode t))))
 
 ;;;; yasnippet : Snippets insertion
 (use-package yasnippet
