@@ -1125,8 +1125,7 @@ _u_: Restore tab       _M_: Move tab left
 (transient-define-prefix my/transient-buffer()
   "Transient for buffer switching"
   [["Commands"
-    ("l" "List buffers (this project)" consult-project-buffer)
-    ("L" "List buffers (all projects)" consult-buffer-other-window)
+    ("l" "List buffers" consult-buffer)
     ("p" "Switch between projects"   project-switch-project)
     ("k" "Kill current buffer"       kill-current-buffer)
     ("w" "Kill current window"       delete-window)
