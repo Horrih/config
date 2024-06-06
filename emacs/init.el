@@ -751,6 +751,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
   `(
     ((node-is ")") parent-bol 0) ; Otherwise aligned with opening parenthese
     ((node-is "compound_statement") parent-bol 0) ; Blocks with {}
+    ((parent-is "declaration_list") parent-bol 0) ; Do not indent namespace blocks
     ((parent-is "template_declaration") parent-bol 0) ; function declaration on the line following the template declaration
     ((parent-is "comment") parent-bol 0) ; Align comments at the start of the comment section
     ((match nil "argument_list" nil 1 1) parent-bol c-ts-mode-indent-offset) ; Standard indent if argument starts on next-line
