@@ -187,8 +187,8 @@
   "Computes the left margin for window `WINDOW' if width big enough, 0 otherwise"
   (let* ((width (window-width window))
          (has-margin (car (window-margins window)))
-         (prev-margin-left (if has-margin has-margin 0))
-         (prev-margin-right (if has-margin (cdr (window-margins window)) 0))
+         (prev-margin-left (or (cdr (window-margins window)) 0))
+         (prev-margin-right (or (cdr (window-margins window)) 0))
          (total-width (+ width prev-margin-left prev-margin-right)))
     (with-current-buffer (window-buffer window)
       (if (or display-line-numbers-mode (minibufferp))  ; No margin if minibuffer or line numbers
