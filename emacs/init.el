@@ -1229,6 +1229,7 @@ for some direct navigation bindings"
     ("o" "In file"              consult-line)
     ("b" "In all buffers"       consult-line-multi)
     ("p" "In current project"   consult-grep)
+    ("P" "In current project (point)" my/consult-grep)
     ("a" "In current directory" my/consult-directory)
     ]
    ["Replace"
@@ -1243,6 +1244,12 @@ for some direct navigation bindings"
   "`consult-grep' in `default-directory'"
   (interactive)
   (consult-grep default-directory))
+
+;;;;; my/consult-grep
+(defun my/consult-grep()
+  "`consult-grep' with current symbol as start string"
+  (interactive)
+  (funcall #'consult-grep nil (format "%s" (symbol-at-point))))
 
 ;;;; Transient register
 (defun my/dir-to-register(register)
