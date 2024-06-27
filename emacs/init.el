@@ -1169,20 +1169,32 @@ for some direct navigation bindings"
 (keymap-set ijkl-local-mode-map "à" 'my/hydra-outline/body)
 
 ;;;; Hydra gdb/gud
-(defhydra my/hydra-gdb(:columns 4 :color pink :foreign-keys run)
-  "GDB"
-  ("n" gud-next "Step")
-  ("u" gud-up "Up")
-  ("b" gud-break "Breakpoint on")
-  ("g" (lambda ()(interactive)(call-interactively 'gdb)(my/switch-to-last-buffer)) "Launch GDB")
-  ("s" gud-step "Step in")
-  ("d" gud-down "Down")
-  ("B" gud-remove "Breakpoint off")
-  ("r" gud-run "Run")
-  ("f" gud-finish "Finish")
-  ("p" gud-print "Print")
-  ("c" gud-go "Continue")
-  ("q" nil "Quit" :color blue))
+(transient-define-prefix my/transient-gdb()
+  "Transient for gdb/gud manipulation"
+  [["Navigation"
+    ("n" "Next line"  gud-next :transient t)
+    ("i" "Up frame"   gud-up   :transient t)
+    ("k" "Down frame" gud-down :transient t)
+    ("s" "Step in"    gud-step :transient t)
+    ("m" "Switch to *gud* buffer" gdb-display-gdb-buffer)
+    ]
+   ["Breakpoints"
+   ("b" "Enable breakpoint"  gud-break :transient t)
+   ("B" "Disable breakpoint" gud-remove)
+   ("v" "Print variable"     gud-print)
+   ]
+   ["Start/stop"
+    ("g" "Start GDB" gud-gdb    :transient t)
+    ("p" "Start PDB" pdb        :transient t)
+    ("r" "Run"       gud-run    :transient t)
+    ("f" "Finish"    gud-finish :transient t)
+    ("c" "Continue"  gud-cont   :transient t)
+    ]
+   ["Misc"
+    ("q" "Quit"                   ignore)
+    ("&" "Close other windows"    delete-other-windows :transient t)
+    ("4" "Switch to other window" other-window         :transient t)
+    ]])
 
 ;;;; Hydra hide/show
 (transient-define-prefix my/transient-hide-show()
@@ -1298,17 +1310,18 @@ _g_: Start GDB
   ("a" my/compile-all)      ("n" next-error     :color red)
   ("f" my/compile-file)     ("p" previous-error :color red)
   ("k" kill-compilation)
-  ("g" hydra-gdb/body))
+  ("g" my/transient-gdb))
 (keymap-set ijkl-local-mode-map "ç" 'my/hydra-compile/body)
 
 ;;;; Hydra go
 (transient-define-prefix my/transient-go() "Transient for various navigation commands"
   [["Go to"
-    ("l" "Line n°"                           consult-goto-line)
-    ("b" "Bookmark"                          bookmark-jump)
-    ("," "Org roam file"                     org-roam-node-find)
-    ("c" "Column n°"                         move-to-column)
-    ("h" "Outline heading"                   consult-outline)]
+    ("l" "Line n°"         consult-goto-line)
+    ("p" "Go to project"   project-switch-project)
+    ("b" "Bookmark"        bookmark-jump)
+    ("," "Org roam file"   org-roam-node-find)
+    ("c" "Column n°"       move-to-column)
+    ("h" "Outline heading" consult-outline)]
    ["LSP Navigation"
     ("j" "Definition"              xref-find-definitions)
     ("J" "Definition other window" xref-find-definitions-other-window)
@@ -1317,10 +1330,11 @@ _g_: Start GDB
     ("e" "Next error"     flymake-goto-next-error :transient t :if (lambda() (featurep 'flymake)))
     ("E" "Previous error" flymake-goto-prev-error :transient t :if (lambda() (featurep 'flymake)))]
    ["Expressions"
-    ("n" "Forward expressionn" forward-sexp     :transient t)
-    ("p" "Backward expression" backward-sexp    :transient t)
+    ("k" "Forward expressionn" forward-sexp     :transient t)
+    ("i" "Backward expression" backward-sexp    :transient t)
     ("u" "Upward expression "  backward-up-list :transient t)
-    ("g" "Go to opposite end"  my/sexp-other-side)]])
+    ("g" "Go to opposite end"  my/sexp-other-side)
+    ("q" "Quit" ignore)]])
 (keymap-set ijkl-local-mode-map "g" 'my/transient-go)
 
 ;;;; Rectangle
