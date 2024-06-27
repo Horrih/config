@@ -819,6 +819,18 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
   :custom-face
   (eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow :underline t)))))
 
+;;;; lsp-mode : Full-featured LSP client
+(defun my/lsp-if-active-workspace()
+  "Call `lsp-deferred' only if the file is in an active lsp-mode workspace"
+  (when (and (fboundp 'lsp-workspace-root) (lsp-workspace-root))
+    (require 'lsp-mode)
+    (lsp-deferred)))
+
+(use-package lsp-mode
+  :hook
+  (c++-ts-mode . my/lsp-if-active-workspace)
+  (python-mode . my/lsp-if-active-workspace))
+
 ;;; ASMR - A Simple Mark Ring - Reimplementation of an IDE-like mark ring
 ;;;; Define the global variables used
 (defgroup asmr nil "A Simple Mark Ring : Bidirectionnal global mark ring.
