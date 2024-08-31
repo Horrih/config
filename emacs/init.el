@@ -960,8 +960,9 @@ This mark-ring will record all mark positions globally, multiple times per buffe
 
 (keymap-set ijkl-local-mode-map "d" 'ijkl-local-mode) ; Leave ijkl mode with d
 (key-chord-define ijkl-insert-mode-map "jj" 'ijkl-local-mode-and-save) ; Enter ijkl mode with "jj"
-(key-chord-define ijkl-insert-mode-map "qq" 'ijkl-local-mode) ; Enter ijkl mode with "qq"
+(key-chord-define ijkl-insert-mode-map "qq" 'ijkl-local-mode) ; Leave ijkl mode with "qq"
 (keymap-set my/keys-mode-map "C-q" 'ijkl-local-mode) ; Fallback if "kk" key-chord fails (e.g high latency ssh)
+(keymap-set my/keys-mode-map "M-q" 'quoted-insert) ; Rebind the command originally bound to C-q
 (keymap-set ijkl-insert-mode-map "M-c" ijkl-local-mode-map) ; Make ijkl bindings available in insert mode
 
 (defun ijkl-local-mode-and-save()
