@@ -1459,10 +1459,12 @@ _L_: List TODOs            _,_: Toggle images
 (transient-define-prefix my/transient-magit()
   "Transient for `magit' commands"
   [["Magit commands"
-    ("s" "Status (Home)"   magit-status)
-    ("f" "File commands"   magit-file-dispatch)
-    ("v" "Global Commands" magit-dispatch)
-    ("c" "Clone"           magit-clone)
+    ("s" "Status (Home)"        magit-status)
+    ("f" "File commands"        magit-file-dispatch)
+    ("v" "Global Commands"      magit-dispatch)
+    ("b" "Browse other branch"  magit-find-file-other-window)
+    ("w" "Switch worktree"      magit-worktree-status)
+    ("c" "Clone"                magit-clone)
     ]])
 (keymap-set ijkl-local-mode-map "v" 'my/transient-magit)
 
