@@ -371,9 +371,10 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
 (let ((enabled-regexps ())
       (custom-error-list '(
         ;; Insert your custom regexps here
-        (file-path-col "^\\([a-zA-Z_/.]*\\):\\([0-9]+\\):\\([0-9]+\\):.*$" 1 2 3 0)
-        (file-path "^\\([a-zA-Z_/.]*\\):\\([0-9]+\\):.*$" 1 2 nil 0)
+        (file-path-col "^\\([0-9a-zA-Z_/.]*\\..*\\):\\([0-9]+\\):\\([0-9]+\\):.*$" 1 2 3 0)
+        (file-path "^\\([0-9a-zA-Z_/.]*\\..*\\):\\([0-9]+\\):.*$" 1 2 nil 0)
         (doctest "^\\(.*\\):\\([0-9]+\\): FATAL ERROR" 1 2 nil)
+        (cppcheck "^\\(.*\\..*\\):\\([0-9]+\\):\\([0-9]+\\):.*\\[.*\\]$" 1 2 3 1)
         (link-error "^\\(.*\\):.*: undefined reference to `\\(.*\\)'$" 1 nil nil nil nil (2 compilation-info-face))
         (jest-error "^.*\(\\(.*\\):\\([0-9]+\\):\\([0-9]+\\)\).*$" 1 2 3)
         (gcc-error "^[ ]*\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*error:\\|  required from here\\).*$" 1 2 3)
