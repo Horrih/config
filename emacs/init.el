@@ -806,6 +806,26 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
   :straight (:type built-in)
   :custom(flymake-mode-line-lighter ""))
 
+    ;; ("e" "List errors (file)"     consult-flymake                  :if (lambda() (featurep 'flymake)))
+    ;; ("t" "List errors (project)"  flymake-show-project-diagnostics :if (lambda() (featurep 'flymake)))
+(defun my/list-errors-file()
+  "Wrapper for `consult-flymake' and `flycheck-list-errors' according to which is enabled"
+  (interactive)
+  (cond
+   ((and (featurep 'flycheck) flycheck-mode) (call-interactively #'flycheck-list-errors))
+   ((and (featurep 'flymake ) flymake-mode ) (call-interactively #'consult-flymake))
+   (t (message "Neither flymake nor flycheck is enabled in current buffer"))))
+
+(defun my/list-errors-project()
+  "Wrapper for `consult-flymake' and `flycheck-list-errors' according to which is enabled"
+  (interactive)
+  (cond
+   ((and (featurep 'flycheck) (fboundp #'lsp-treemacs-errors-list) flycheck-mode)
+    (call-interactively #'lsp-treemacs-errors-list))
+   ((and (featurep 'flymake ) flymake-mode)
+    (call-interactively #'flymake-show-project-diagnostics))
+   (t (message "Neither flymake nor flycheck is enabled in current buffer"))))
+
 ;;;; eglot : Built-in package for completion with LSP. Light-weight alternative to lsp-mode
 (use-package eglot
   :straight (:type built-in)
