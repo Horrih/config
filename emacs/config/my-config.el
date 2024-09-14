@@ -15,6 +15,7 @@
   "The directory containing the various configuration elisp files")
 
 (dolist (pair my/config-modules)
-  (let ((dir (car pair)))
-    (dolist (file (cadr pair))
-      (load (format "%s%s/my-%s.el" my/config-dir dir file)))))
+  (dolist (file (cadr pair))
+    (let* ((dir (car pair))
+           (path (format "%s%s/my-%s.el"  my/config-dir dir file)))
+      (load path nil t))))
