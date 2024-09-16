@@ -196,6 +196,7 @@ for some direct navigation bindings"
   (":" eval-expression "Interpret lisp code")
   ("l" eglot "Start eglot (LSP)")
   ("e" eval-last-sexp "Interpret last lisp expression")
+  ("E" eval-buffer "Interpret the current buffer as lisp")
   ("s" shell-command "Shell Command")
   ("b" eval-buffer "Interpret the whole lisp buffer"))
 (keymap-set ijkl-local-mode-map "!" 'my/hydra-commands/body)
