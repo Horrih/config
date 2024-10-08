@@ -1,4 +1,4 @@
-;;; Compilation misc
+;;; Compilation misc -*- lexical-binding: t; -*-
 (use-package compile
   :straight (:type built-in)
   :hook (compilation-mode . (lambda()(setq show-trailing-whitespace nil)))
