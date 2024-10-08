@@ -1,3 +1,6 @@
+;;; Transient package : use the latest one and not the built-in not supported by magit
+(use-package transient)
+
 ;;; Transient for buffer switching commands
 ;;;; transient definition
 (transient-define-prefix my/transient-buffer()
