@@ -40,7 +40,6 @@
 
 ;;; Org ijkl
 (with-eval-after-load "org"
-  (message "ORG IS EVALED %s" (buffer-name))
   ;; Use ijkl in the date selection buffer
   (key-alias org-read-date-minibuffer-local-map "m" "RET")
   (key-alias org-read-date-minibuffer-local-map "i" "S-<up>")
