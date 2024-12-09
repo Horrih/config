@@ -94,6 +94,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
         (gcc-info "^\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): note:.*$" 1 2 3 0)
         (qt-test "^   Loc: \\[\\(.*\\)\(\\([0-9]+\\)\)\\]$" 1 2)
         (python-unittest "^  File \"\\(.*\\)\", line \\([0-9]+\\)[^0-9]?.*$" 1 2)
+        (pylint "^\\([0-9a-zA-Z_/.]*\\..*\\):\\([0-9]+\\):\\([0-9]+\\): [a-zA-Z][0-9]*: .*$" 1 2 3 1)
         )))
   (dolist (err custom-error-list)
     (add-to-list 'enabled-regexps (car err)))
