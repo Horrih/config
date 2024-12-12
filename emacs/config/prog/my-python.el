@@ -1,7 +1,10 @@
 ;;; legacy python mode
 (use-package python-mode
   :straight (:type built-in)
-  :hook (python-mode . (lambda() (setq-local fill-column 88))))
+  :hook (python-mode . (lambda()
+                         (setq-local fill-column 88)  ; ruff/black default limit
+                         (my/apheleia-enable-ruff) ; ruff code formatter
+                         )))
 
 ;;; code coverage
 (defun my/toggle-coverage-overlay()
@@ -17,6 +20,16 @@
   :config
   (require 'magit))  ; Uses magit's faces
 
-;;; Formatter black
-(use-package blacken
-  :hook (python-mode . (lambda() (blacken-mode))))
+
+;;; Ruff formatter through apheleia
+(defun my/apheleia-enable-ruff()
+  "Register ruff as python formatter"
+  (require 'apheleia)
+  (unless (assoc 'uv-ruff apheleia-formatters)
+    (push '(uv-ruff . ("uvx" "ruff" "format" "--stdin-filename" filepath))
+          apheleia-formatters)
+    (setf (alist-get 'python-mode apheleia-mode-alist) '(uv-ruff)))
+  (apheleia-mode-maybe))
+
+
+

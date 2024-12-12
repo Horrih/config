@@ -33,7 +33,9 @@
   :custom
   (c-ts-mode-indent-offset 4)
   (c-ts-mode-indent-style #'my/cpp-indent-style)
-  :hook (c-ts-base-mode . (lambda() (setq-local my/margin-line-width 100)))
+  :hook (c-ts-base-mode . (lambda()
+                            (setq-local my/margin-line-width 100)
+                            (apheleia-mode-maybe)))
   :init
   (advice-add 'c-ts-mode-set-modeline :override 'ignore) ; Do not add a // suffix to the modeline
   ;; Remap the standard C/C++ modes
@@ -55,28 +57,6 @@
            ((match nil nil nil 1 nil) prev-line 0) ; Otherwise align with previous-sibiling
            ((match nil nil nil nil nil) parent-bol cmake-ts-mode-indent-offset))))) ; No sibling : parent + offset
 
-;;; Clang format
-(use-package clang-format)
-(defun my/clang-format-save-hook()
-  "Create a buffer local save hook to apply `clang-format-buffer'"
-  ;; Only format if .clang-format is found
-  (when (locate-dominating-file "." ".clang-format")
-    (clang-format-buffer))
-  ;; Continue to save
-  nil)
-
-(define-minor-mode my/clang-format-on-save-mode
-  "Minor mode to enable/disable automated clang format on save"
-  :lighter " ClangFormat"
-  (if my/clang-format-on-save-mode
-      (add-hook 'before-save-hook 'my/clang-format-save-hook nil t)
-    (remove-hook 'before-save-hook 'my/clang-format-save-hook t)))
-
-(define-globalized-minor-mode my/clang-format-auto-mode my/clang-format-on-save-mode
-  (lambda()(my/clang-format-on-save-mode t))
-  :predicate '(c-mode c-ts-mode c++-mode c++-ts-mode c-or-c++-mode c-or-c++-ts-mode))
-(my/clang-format-auto-mode t) ; Turn it on
-
 ;;; Hydra gdb/gud
 (transient-define-prefix my/transient-gdb()
   "Transient for gdb/gud manipulation"
@@ -88,10 +68,10 @@
     ("m" "Switch to *gud* buffer" gdb-display-gdb-buffer)
     ]
    ["Breakpoints"
-   ("b" "Enable breakpoint"  gud-break :transient t)
-   ("B" "Disable breakpoint" gud-remove)
-   ("v" "Print variable"     gud-print)
-   ]
+    ("b" "Enable breakpoint"  gud-break :transient t)
+    ("B" "Disable breakpoint" gud-remove)
+    ("v" "Print variable"     gud-print)
+    ]
    ["Start/stop"
     ("g" "Start GDB" gud-gdb    :transient t)
     ("p" "Start PDB" pdb        :transient t)
