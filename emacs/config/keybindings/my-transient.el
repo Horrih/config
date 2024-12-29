@@ -10,6 +10,7 @@
     ("p" "Switch between projects"   project-switch-project)
     ("k" "Kill current buffer"       kill-current-buffer)
     ("w" "Kill current window"       delete-window)
+    ("r" "Rename current buffer"     my/rename-buffer)
     ]
    ["Shortcuts"
    ("b" "Go to last buffer" my/switch-to-last-buffer)
@@ -18,6 +19,14 @@
    ("m" "*messages* buffer" my/switch-to-messages)
    ]])
 (keymap-set ijkl-local-mode-map "b" 'my/transient-buffer)
+
+;;;; my/rename-buffer
+(defun my/rename-buffer()
+  "Rename current buffer, and visited file if it exists."
+  (interactive)
+  (if buffer-file-name
+      (call-interactively #'rename-visited-file)
+    (call-interactively #'rename-buffer)))
 
 ;;;; my/switch-to-messages
 (defun my/switch-to-messages()
@@ -192,17 +201,22 @@ for some direct navigation bindings"
 
 
 ;;; Execute/eval commands
-(defhydra my/hydra-commands(:exit t :columns 2)
+(transient-define-prefix my/transient-commands()
   "Execute commands"
-  ("!" execute-extended-command "Emacs command")
-  ("x" execute-extended-command)
-  (":" eval-expression "Interpret lisp code")
-  ("l" eglot "Start eglot (LSP)")
-  ("e" eval-last-sexp "Interpret last lisp expression")
-  ("E" eval-buffer "Interpret the current buffer as lisp")
-  ("s" shell-command "Shell Command")
-  ("b" eval-buffer "Interpret the whole lisp buffer"))
-(keymap-set ijkl-local-mode-map "!" 'my/hydra-commands/body)
+  [["Elisp"
+    (":" "Interpret lisp code" eval-expression)
+    ("e""Interpret last lisp expression" eval-last-sexp)
+    ("E" "Interpret the current buffer as lisp" eval-buffer)
+    ("b" "Interpret the whole lisp buffer" eval-buffer)
+    ]
+   ["bash"
+    ("s" "Shell Command" shell-command)
+    ("t" "Open a terminal" my/term-new)
+    ]
+   ["Misc"
+    ("!" "Emacs commands" execute-extended-command)
+   ]])
+(keymap-set ijkl-local-mode-map "!" 'my/transient-commands)
 
 ;;; Narrow Hydra
 (defhydra my/hydra-narrow(:exit t :columns 1)

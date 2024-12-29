@@ -30,8 +30,9 @@
 ;;;; ijkl global mode definition
 (define-globalized-minor-mode ijkl-mode ijkl-local-mode
   (lambda()
-    "Only enable the ijkl-local-mode on traditional buffers"
+    "Only enable the ijkl-local-mode by default on traditional buffers"
     (if (or (minibufferp)
+            (string= major-mode "term-mode")
             (string-match "[Gg]it" (format "%s" major-mode))
             (string-match "[Gg]it" (format "%s" major-mode))
             (string-equal (buffer-name) "*Org Note*")
@@ -42,5 +43,3 @@
         (ijkl-insert-mode)
       (ijkl-local-mode))))
 (ijkl-mode)
-
-

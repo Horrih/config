@@ -1,14 +1,15 @@
 ;;; movement and deletion bindings (accessible in both modes)
 ;;;; backwards
-(keymap-set ijkl-local-mode-map "j"   'backward-char)
-(keymap-set    my/keys-mode-map "C-j" 'backward-char)
-(key-alias     my/keys-mode-map "M-j" "M-b")
+(key-alias  ijkl-local-mode-map "j"   "<left>")
+(key-alias     my/keys-mode-map "C-j" "<left>")
+;; A simple key-alias does not work in term, so we use gen-input instead
+(keymap-set   my/keys-mode-map "M-j" (lambda() (interactive)(my/gen-input "M-b")))
 (key-alias     my/keys-mode-map "C-M-j" "C-a")
 (key-alias  ijkl-local-mode-map "a" "C-a")
 
 ;;;; forwards
-(keymap-set ijkl-local-mode-map   "l" 'forward-char)
-(keymap-set    my/keys-mode-map "C-l" 'forward-char)
+(key-alias  ijkl-local-mode-map   "l" "<right>")
+(key-alias     my/keys-mode-map "C-l" "<right>")
 (key-alias     my/keys-mode-map "M-l" "M-f")
 (key-alias     my/keys-mode-map "C-M-l" "C-e")
 (key-alias  ijkl-local-mode-map "e" "C-e")
@@ -27,23 +28,24 @@
 (key-alias ijkl-local-mode-map "A" "C-M-a")
 
 ;;;; downwards
-(keymap-set    my/keys-mode-map "C-k" 'next-line)
 (keymap-set ijkl-local-mode-map   "k" 'next-line)
-(keymap-set   my/keys-mode-map "M-k" (lambda() (interactive)(next-line 7)))
-(key-alias    my/keys-mode-map "C-M-k" "M->")
-(key-alias ijkl-local-mode-map ">" "M->")
-(key-alias ijkl-local-mode-map "E" "C-M-e")
+(key-alias     my/keys-mode-map "C-k" "C-n" '(term-mode))
+(keymap-set    my/keys-mode-map "M-k" (lambda() (interactive)(next-line 7)))
+(key-alias     my/keys-mode-map "C-M-k" "M->")
+(key-alias  ijkl-local-mode-map ">" "M->")
+(key-alias  ijkl-local-mode-map "E" "C-M-e")
 
 ;;;; deletion
 (key-alias  ijkl-local-mode-map "u" "C-M-u" '("dired-mode" "Info-mode"))
-(keymap-set    my/keys-mode-map "C-u" 'delete-backward-char)
 (keymap-set    my/keys-mode-map "C-c u" 'universal-argument)
 (keymap-set    my/keys-mode-map "C-M-u" 'my/delete-start-or-previous-line)
-(keymap-set    my/keys-mode-map "M-u" 'backward-kill-word)
-(keymap-set    my/keys-mode-map "C-o" 'delete-forward-char)
+;; A simple key-alias does not work in term, we cheat with gen-input instead
+(keymap-set    my/keys-mode-map "C-u" (lambda()(interactive)(my/gen-input "<DEL>")))
+(keymap-set    my/keys-mode-map "M-u" (lambda()(interactive)(my/gen-input "M-<DEL>")))
+(keymap-set    my/keys-mode-map "C-o" (lambda()(interactive)(my/gen-input "C-d")))
+(keymap-set    my/keys-mode-map "M-o" (lambda()(interactive)(my/gen-input "M-d")))
 (keymap-set    my/keys-mode-map "C-M-o" 'kill-line)
 (key-alias  ijkl-local-mode-map "o" "C-M-o")
-(keymap-set    my/keys-mode-map "M-o" 'kill-word)
 
 ;;; utility bindings
 (keymap-set    my/keys-mode-map "C-+" 'text-scale-increase) ; Increase text size with Ctrl +
@@ -89,7 +91,7 @@
 ;;; Misc
 (keymap-set ijkl-local-mode-map "/"     'my/comment-dwim) ; Comment region or line
 (keymap-set ijkl-local-mode-map "M-s"   'multi-occur-in-matching-buffers) ; Search in all buffers
-(keymap-set ijkl-local-mode-map "<f2>"  'rename-visited-file) ; Rename the current file/buffer
+(keymap-set ijkl-local-mode-map "<f2>"  'my/rename-buffer) ; Rename the current file/buffer
 (keymap-set ijkl-local-mode-map "<f5>"  'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
 (keymap-set ijkl-local-mode-map "<f12>" 'my/include-c-header) ; Shortcuts for a #include directive
 

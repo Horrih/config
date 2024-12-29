@@ -69,7 +69,7 @@
 
 (define-globalized-minor-mode my/margin-auto-mode my/margin-auto-local-mode
   (lambda()
-    (unless (my/mode-is-one-of-p '("magit-log-mode"))
+    (unless (my/mode-is-one-of-p '("magit-log-mode" "term-mode"))
       (my/margin-auto-local-mode t))))
 (my/margin-auto-mode t) ; Turn it on
 (diminish 'my/margin-auto-local-mode)
