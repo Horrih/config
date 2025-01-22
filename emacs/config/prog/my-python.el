@@ -35,5 +35,4 @@
 (use-package flymake-ruff
   :hook (flymake-mode . flymake-ruff-load)
   :custom
-  (flymake-ruff-program "uvx")
-  (flymake-ruff-program-args '("ruff" "check" "--select" "ALL" "--output-format" "concise" "--exit-zero" "--quiet" "-")))
+  (flymake-ruff-program-args '("check" "--select" "ALL" "--output-format" "concise" "--exit-zero" "--quiet" "-")))
