@@ -31,5 +31,9 @@
     (setf (alist-get 'python-mode apheleia-mode-alist) '(uv-ruff)))
   (apheleia-mode-maybe))
 
-
-
+;;; ruff flymake
+(use-package flymake-ruff
+  :hook (flymake-mode . flymake-ruff-load)
+  :custom
+  (flymake-ruff-program "uvx")
+  (flymake-ruff-program-args '("ruff" "check" "--select" "ALL" "--output-format" "concise" "--exit-zero" "--quiet" "-")))
