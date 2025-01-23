@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: docstring
+# key: """
+# type: command
+# --
+(yas-expand-snippet (my/yas-python-docstring) nil nil '((yas-indent-line 'fixed)))

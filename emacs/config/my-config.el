@@ -4,7 +4,7 @@
     (looks       (settings theme auto-margin doom-modeline))
     (keybindings (base ijkl keybindings transient))
     (org         (org-mode notes present))
-    (prog        (settings compilation term commands git plugins markdown
+    (prog        (settings compilation term commands git plugins markdown snippets
                   web c++ python yaml docker outline corfu linters eglot lsp-mode)))
   "Enabled init modules. Can be modified to
 - disable modules that are enabled by default here

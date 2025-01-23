@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: doxygen3
+# key: /**
+# type: command
+# --
+(yas-expand-snippet (my/yas-c++-doxygen-docstring))
+
