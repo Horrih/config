@@ -39,7 +39,7 @@ $0")
 
      ;; Display arguments if not nil
      (if args
-         (concat "Args\n" (mapconcat
+         (concat "Args:\n" (mapconcat
            (lambda(arg) (format "    %s: ${%d:Parameter %s}" arg (cl-incf count) arg))
            args "\n"))
        "")
