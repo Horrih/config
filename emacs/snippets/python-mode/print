@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: print
+# key: prf
+# --
+print(f"$0")
