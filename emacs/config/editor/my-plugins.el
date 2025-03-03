@@ -52,4 +52,7 @@
   :bind (:map dired-mode-map
               ("u" . dired-up-directory)
               ("i" . nil))
-  :custom(dired-kill-when-opening-new-dired-buffer t)) ; Auto close previous folder buffer
+  :custom
+  (dired-listing-switches "-alh")
+  (dired-kill-when-opening-new-dired-buffer t)) ; Auto close previous folder buffer
+
