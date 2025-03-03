@@ -9,6 +9,7 @@
 ;;; which-key : Displays command shortcuts when typing commands
 (use-package which-key
   :demand
+  :straight (:type built-in)
   :config (which-key-mode)
   :diminish)
 
