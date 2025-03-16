@@ -9,4 +9,3 @@ keybind = ctrl+i=text:\x1B[A
 # Usability features for fullscreen anddecorations
 keybind = f11=toggle_fullscreen
 keybind = f10=toggle_window_decorations
-window-decoration = false
