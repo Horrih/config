@@ -1,17 +1,16 @@
 * Refind
-
+** Installation
 Start by installing the refind package, then run refind install.
 
 However, be careful : your kernel options are not properly generated when booting from the
-live USB, you'll need  to edit them yourself.
+live USB, you'll need  to edit them yourself, see next sections
 
+** Auto detection
 Here is an example of working config
 
 #+begin_src bash
 cat /boot/refind_linux.conf
 "Boot with standard options"  "root=UUID=e95ec57e-0410-422c-9705-3ca5cbe992a0 rw rootflags=subvol=@"
-"Boot to single-user mode"    "root=UUID=e95ec57e-0410-422c-9705-3ca5cbe992a0 rw rootflags=subvol=@ single"
-"Boot with minimal options"   "ro root=/dev/nvme0n1p3"
 
 #+end_src
 
@@ -22,3 +21,24 @@ The UUID can be found with the following command
 #+end_src
 
 That's enough, your kernel will be auto detected !
+
+** Manual stanza
+
+Here is an example :
+
+#+begin_src bash
+dont_scan_volumes "9671200c-f6e7-4b6d-bec6-4356100d547d"
+
+menuentry "Arch Linux" {
+    icon     /EFI/refind/themes/refind-ambience/icons/os_arch.png
+    volume   "9671200c-f6e7-4b6d-bec6-4356100d547d"
+    loader   /@/boot/vmlinuz-linux-zen
+    initrd   /@/boot/initramfs-linux-zen.img
+    options  "root=UUID=e95ec57e-0410-422c-9705-3ca5cbe992a0 rw rootflags=subvol=@"
+    submenuentry "Fallback initramfs" {
+        initrd /@/boot/initramfs-linux-zen-fallback.img
+    }
+}
+
+
+#+end_src
