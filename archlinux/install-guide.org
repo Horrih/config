@@ -1,0 +1,24 @@
+* Refind
+
+Start by installing the refind package, then run refind install.
+
+However, be careful : your kernel options are not properly generated when booting from the
+live USB, you'll need  to edit them yourself.
+
+Here is an example of working config
+
+#+begin_src bash
+cat /boot/refind_linux.conf
+"Boot with standard options"  "root=UUID=e95ec57e-0410-422c-9705-3ca5cbe992a0 rw rootflags=subvol=@"
+"Boot to single-user mode"    "root=UUID=e95ec57e-0410-422c-9705-3ca5cbe992a0 rw rootflags=subvol=@ single"
+"Boot with minimal options"   "ro root=/dev/nvme0n1p3"
+
+#+end_src
+
+The UUID can be found with the following command
+
+#+begin_src bash
+  blkid /dev/nvme0n1p3
+#+end_src
+
+That's enough, your kernel will be auto detected !
