@@ -79,3 +79,25 @@ Not sure if required but I told my UEFI to trust /EFI/refind/shimx64
 On first boot it will raise a security error : enroll the EFI/refind/keys/refind_local.cer
 
 ** Automate it with a mkinitcpio script
+Check out the [[https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot#shim_with_key][arch wiki]]
+
+TL;DR :
+#+begin_src bash
+#!/usr/bin/env bash
+
+kernel="$1"
+[[ -n "$kernel" ]] || exit 0
+
+# use already installed kernel if it exists
+[[ ! -f "$KERNELDESTINATION" ]] || kernel="$KERNELDESTINATION"
+
+keypairs=(/etc/refind.d/keys/refind_local.key /etc/refind.d/keys/refind_local.crt)
+
+for (( i=0; i<${#keypairs[@]}; i+=2 )); do
+    key="${keypairs[$i]}" cert="${keypairs[(( i + 1 ))]}"
+    if ! sbverify --cert "$cert" "$kernel" &>/dev/null; then
+        sbsign --key "$key" --cert "$cert" --output "$kernel" "$kernel"
+    fi
+done
+
+#+end_src
