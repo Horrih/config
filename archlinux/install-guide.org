@@ -42,3 +42,40 @@ menuentry "Arch Linux" {
 
 
 #+end_src
+
+* Secure boot
+
+I recommend the [[https://itsfoss.community/t/setting-up-secure-boot-in-arch-based-distributions/11490][following tutorial]]
+
+Basically :
+** Install shim-signed from the AUR
+
+  #+begin_src bash
+    sudo pacman -S sbsigntools efitools refind
+    paru shim-signed
+  #+end_src
+** Install refind + shim to your EFI partition
+
+  #+begin_src bash
+sudo refind-install --shim /usr/share/shim-signed/shimx64.efi
+
+  #+end_src
+
+This will also generate private key + certificate in .crt and .cer forms and copy the public
+part to the /efi/EFI/refind/keys directory
+
+** Signed your bootloaders + kernels
+Use these keys to sign refind + your kernel. By default shim looks for grubx64 so you have to sign
+this one which should be a copy of refind.
+
+#+begin_src bash
+  sudo sbsign --key /etc/refind.d/keys/refind_local.key --cert /etc/refind.d/keys/refind_local.crt --output /efi/EFI/refind/grubx64.efi  /efi/EFI/refind/grubx64.efi
+  sudo sbsign --key /etc/refind.d/keys/refind_local.key --cert /etc/refind.d/keys/refind_local.crt --output /boot/vmlinuz-linux-zen  /boot/vmlinuz-linux-zen
+  #+end_src
+
+** Test that everything works
+Go back to your UEFI to turn on secureboot.
+Not sure if required but I told my UEFI to trust /EFI/refind/shimx64
+On first boot it will raise a security error : enroll the EFI/refind/keys/refind_local.cer
+
+** Automate it with a mkinitcpio script
