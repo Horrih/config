@@ -82,6 +82,7 @@ On first boot it will raise a security error : enroll the EFI/refind/keys/refind
 Check out the [[https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot#shim_with_key][arch wiki]]
 
 TL;DR :
+Create /etc/initcpio/post/kernel-sbsign and *make it executable*
 #+begin_src bash
 #!/usr/bin/env bash
 
