@@ -116,9 +116,10 @@ for some direct navigation bindings"
    ]
    ["Coding"
     ("e" "List errors (file)"     my/list-errors-file)
-    ("t" "List errors (project)"  flymake-show-project-diagnostics :if (lambda() (featurep 'flymake)))
+    ("E" "List errors (project)"  flymake-show-project-diagnostics :if (lambda() (featurep 'flymake)))
     ("r" "Find references (xref)" xref-find-references)
-    ("o" "Switch header/cpp"      ff-find-other-file)
+    ("o" "Switch header/cpp"      my/cpp-switch-header)
+    ("t" "Switch source/tests"    my/switch-tests)
     ]])
 (keymap-set ijkl-local-mode-map "f" 'my/transient-find)
 

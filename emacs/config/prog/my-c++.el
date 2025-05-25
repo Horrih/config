@@ -84,3 +84,43 @@
     ("&" "Close other windows"    delete-other-windows :transient t)
     ("4" "Switch to other window" other-window         :transient t)
     ]])
+
+;;; Switch header/cpp/tests
+;;;; Header switches, improves on ff-find-other-file
+(defun my/find-project-filename(filename)
+  "Finds a file named `FILENAME' in the current project and open it
+
+If the filename is not found, return nil."
+  (let* ((project-files (project-files (project-current)))
+         (result (seq-contains-p project-files filename
+                                 (lambda(f1 f2)
+                                   (when (string= (file-name-nondirectory f1) f2)
+                                     f1))))
+         )
+    (when result
+      (find-file result))))
+
+(defun my/cpp-switch-header()
+  "Switches between .h and .cpp file, like `ff-find-other-file' but works
+well even if the files are not next to each other."
+  (interactive)
+  (let* ((basename (file-name-base (buffer-file-name)))
+         (extension (file-name-extension (buffer-file-name)))
+         (other-ext (cond
+                     ((string= extension "h") "cpp")
+                     ((string= extension "cpp") "h")))
+         (other-file (format "%s.%s" basename other-ext)))
+    (unless (my/find-project-filename other-file)
+      (error "Could not perform .cpp<->.h switch : '%s' does not exist" other-file))))
+
+(defun my/switch-tests()
+  "Switches between a source file and its test file (assumed starts with test_)."
+  (interactive)
+  (let* ((basename (file-name-nondirectory (buffer-file-name)))
+         (name-with-tests (format "test_%s" basename))
+         (name-wo-tests (string-remove-prefix "test_" basename))
+         (other-file (if (string= basename name-wo-tests)
+                         name-with-tests
+                       name-wo-tests)))
+    (unless (my/find-project-filename other-file)
+      (error "Could not perform tests<->src switch : '%s' does not exist" other-file))))
