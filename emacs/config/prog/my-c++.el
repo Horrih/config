@@ -34,7 +34,7 @@
   (c-ts-mode-indent-offset 4)
   (c-ts-mode-indent-style #'my/cpp-indent-style)
   :hook (c-ts-base-mode . (lambda()
-                            (setq-local my/margin-line-width 100)
+                            (setq-local my/margin-line-width 99)
                             (apheleia-mode-maybe)))
   :init
   (advice-add 'c-ts-mode-set-modeline :override 'ignore) ; Do not add a // suffix to the modeline
