@@ -56,8 +56,9 @@
 (keymap-set ijkl-local-mode-map "<tab>" nil)  ; Do not override tab binding
 (keymap-set ijkl-local-mode-map "h" help-map) ; Use the help functions
 (keymap-set ijkl-local-mode-map "x" 'my/delete-char-or-kill-region)
-(keymap-set ijkl-local-mode-map "X" (lambda()(interactive)(just-one-space -1))) ; Just one space multiline
-(keymap-set    my/keys-mode-map "C-c SPC" (lambda()(interactive)(just-one-space -1)))
+
+(setopt cycle-spacing-actions '(delete-space-after delete-all-space restore))
+(keymap-set ijkl-local-mode-map "X" (lambda () (interactive) (cycle-spacing 0)))
 (keymap-set           ctl-x-map "k" 'kill-current-buffer) ; Replace C-x k (kill buffer) with kill-current-buffer
 (keymap-set           ctl-x-map "f" 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
 (keymap-set         ctl-x-r-map "d" 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
