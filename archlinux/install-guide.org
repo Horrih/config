@@ -104,8 +104,14 @@ done
 #+end_src
 
 * Printer
+NB : Cups out of the box did not work, it connected/detected the printer
+but printing did not work.
+HP drivers or config file seems to be required
 #+begin_src bash
-  sudo pacman -Syu cups cups-pdf hplip pyqt5
+  sudo pacman -Syu cups cups-pdf hplip # Install the drivers
   sudo systemctl enable --now cups
+
+  # Not sure if this step is still needed, you can do that through the cups web app
+  sudo pacman -Syu pyqt5  # Not sure if cups-pdf and  his required
   hp-setup  # Follow the wizard to add the printer
 #+end_src
