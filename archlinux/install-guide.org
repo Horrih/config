@@ -102,3 +102,10 @@ for (( i=0; i<${#keypairs[@]}; i+=2 )); do
 done
 
 #+end_src
+
+* Printer
+#+begin_src bash
+  sudo pacman -Syu cups cups-pdf hplip pyqt5
+  sudo systemctl enable --now cups
+  hp-setup  # Follow the wizard to add the printer
+#+end_src
