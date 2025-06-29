@@ -1,4 +1,4 @@
-;;; my/switch-to-last-buffer
+;;; my/switch-to-last-buffer  -*- lexical-binding: t; -*-
 (defun my/switch-to-last-buffer()
   "Use `switch-to-buffer' to visit the last buffer"
   (interactive)
@@ -21,14 +21,16 @@
 (defun my/pick-window-right()
   "Like `split-window-right' except it lets you pick the buffer on the other side"
   (interactive)
-  (let ((split-height-threshold (+ (frame-height) 1)))  ; Increase height threshold to avoid vertical split
+  (let ((split-height-threshold nil)  ; Forbid vertical split
+        (split-width-threshold 0))  ; Allow horizontal split up to extreme cases
     (consult-buffer-other-window)))
 
 ;;;; my/pick-window-below
 (defun my/pick-window-below()
   "Like `split-window-below' except it lets you pick the buffer on the other side"
   (interactive)
-  (let ((split-width-threshold (+ (frame-width) 1)))  ; Increase width threshold to avoid horizontal split
+  (let ((split-width-threshold nil)  ; Forbid horizontal split
+        (split-height-threshold 0)) ; Allow vertical split up to extreme cases
     (consult-buffer-other-window)))
 
 ;;; my/replace-chat-at-point
