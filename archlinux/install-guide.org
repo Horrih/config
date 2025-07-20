@@ -115,3 +115,13 @@ HP drivers or config file seems to be required
   sudo pacman -Syu pyqt5  # Not sure if cups-pdf and  his required
   hp-setup  # Follow the wizard to add the printer
 #+end_src
+
+* Nas
+Add this to fstab
+#+begin_src bash
+//nas/livres  /nas/livres  cifs credentials=/nas/credentials.txt,uid=1000,gid=1000,iocharset=utf8,nofail 0 0
+//nas/jeux    /nas/jeux    cifs credentials=/nas/credentials.txt,uid=1000,gid=1000,iocharset=utf8,nofail 0 0
+//nas/musique /nas/musique cifs credentials=/nas/credentials.txt,uid=1000,gid=1000,iocharset=utf8,nofail 0 0
+//nas/photo   /nas/photo   cifs credentials=/nas/credentials.txt,uid=1000,gid=1000,iocharset=utf8,nofail 0 0
+//nas/video   /nas/video   cifs credentials=/nas/credentials.txt,uid=1000,gid=1000,iocharset=utf8,nofail 0 0
+#+end_src
