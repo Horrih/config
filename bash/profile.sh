@@ -84,3 +84,13 @@ EOF
         done
     done
 }
+test -d ~/.local/bin || mkdir ~/.local/bin
+addpath ~/.local/bin
+
+# Add npm binaries to the PATH if enabled, typically
+#   > npm config set prefix=$HOME/.local/npm
+#   > npm install -g typescript-language-server
+NPM_BIN_DIR=~/.local/npm/bin
+if [[ -d $NPM_BIN_DIR ]]; then
+    addpath $NPM_BIN_DIR
+fi
