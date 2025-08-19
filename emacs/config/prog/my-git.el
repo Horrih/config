@@ -20,15 +20,18 @@
 ;;; Magit transient
 (transient-define-prefix my/transient-magit()
   "Transient for `magit' commands"
-  [["Magit commands"
-    ("s" "Status (Home)"        magit-status)
+  [["Top level commands"
+    ("v" "Global commands"      magit-dispatch)
     ("f" "File commands"        magit-file-dispatch)
-    ("v" "Global Commands"      magit-dispatch)
-    ("l" "Log"                  magit-log)
-    ("y" "Show branches"        magit-show-refs)
-    ("b" "Browse other branch"  magit-find-file-other-window)
+    ("s" "Status (Home)"        magit-status)
     ("w" "Switch worktree"      magit-worktree-status)
     ("c" "Clone"                magit-clone)
+    ]
+   ["Quick actions"
+    ("l" "Log"                  magit-log)
+    ("y" "Browse branches"      magit-show-refs)
+    ("b" "Branch actions"       magit-branch)
+    ("B" "Browse other branch"  magit-find-file-other-window)
     ]])
 (keymap-set ijkl-local-mode-map "v" 'my/transient-magit)
 
@@ -43,13 +46,13 @@
     (key-alias keymap "\"" "M-c 3")
     (key-alias keymap "'" "M-c '")
     (key-alias keymap "4" "M-c 4")
-    (key-alias-fallback keymap "b" "M-c b" "C-c b")
-    (key-alias-fallback keymap "v" "M-c v" "C-c v")
-    (key-alias-fallback keymap "m" "RET" "C-c m")
-    (key-alias-fallback keymap "j" "C-j" "C-c j")
-    (key-alias-fallback keymap "i" "C-p" "C-c i")
-    (key-alias-fallback keymap "l" "C-l" "C-c l")
-    (key-alias-fallback keymap "k" "C-n" "C-c k"))
+    (keymap-set keymap "b" nil)
+    (key-alias-fallback keymap "m" "RET"   "M-c m")
+    (key-alias-fallback keymap "v" "C-c v" "M-c v")
+    (key-alias-fallback keymap "i" "C-p"   "M-c i")
+    (key-alias-fallback keymap "j" "C-b"   "M-c j")
+    (key-alias-fallback keymap "k" "C-n"   "M-c k")
+    (key-alias-fallback keymap "l" "C-f"   "M-c l"))
 
   ;; hack to define the default flags for magit log
   ;; by default they were different if launched in status or from a buffer
