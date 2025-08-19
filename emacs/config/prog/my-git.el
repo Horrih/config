@@ -24,6 +24,8 @@
     ("s" "Status (Home)"        magit-status)
     ("f" "File commands"        magit-file-dispatch)
     ("v" "Global Commands"      magit-dispatch)
+    ("l" "Log"                  magit-log)
+    ("y" "Show branches"        magit-show-refs)
     ("b" "Browse other branch"  magit-find-file-other-window)
     ("w" "Switch worktree"      magit-worktree-status)
     ("c" "Clone"                magit-clone)
@@ -42,11 +44,19 @@
     (key-alias keymap "'" "M-c '")
     (key-alias keymap "4" "M-c 4")
     (key-alias-fallback keymap "b" "M-c b" "C-c b")
+    (key-alias-fallback keymap "v" "M-c v" "C-c v")
     (key-alias-fallback keymap "m" "RET" "C-c m")
     (key-alias-fallback keymap "j" "C-j" "C-c j")
     (key-alias-fallback keymap "i" "C-p" "C-c i")
     (key-alias-fallback keymap "l" "C-l" "C-c l")
-    (key-alias-fallback keymap "k" "C-n" "C-c k")))
+    (key-alias-fallback keymap "k" "C-n" "C-c k"))
+
+  ;; hack to define the default flags for magit log
+  ;; by default they were different if launched in status or from a buffer
+  ;; which I don't like
+  (cl-defmethod transient-init-value ((obj magit-log-prefix))
+    (oset obj value '("--graph" "-n256" "--decorate")))
+)
 (with-eval-after-load "git-rebase"
   (key-alias-fallback git-rebase-mode-map "m" "RET" "C-c m")
   (key-alias-fallback git-rebase-mode-map "j" "C-l" "C-c j")
