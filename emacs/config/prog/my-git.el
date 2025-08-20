@@ -47,12 +47,12 @@
     (key-alias keymap "'" "M-c '")
     (key-alias keymap "4" "M-c 4")
     (keymap-set keymap "b" nil)
-    (key-alias-fallback keymap "m" "RET"   "M-c m")
-    (key-alias-fallback keymap "v" "C-c v" "M-c v")
-    (key-alias-fallback keymap "i" "C-p"   "M-c i")
-    (key-alias-fallback keymap "j" "C-b"   "M-c j")
-    (key-alias-fallback keymap "k" "C-n"   "M-c k")
-    (key-alias-fallback keymap "l" "C-f"   "M-c l"))
+    (key-alias-fallback keymap "m" "RET"   "C-c m")
+    (key-alias-fallback keymap "v" "M-c v" "C-c v")
+    (key-alias-fallback keymap "i" "C-p"   "C-c i")
+    (key-alias-fallback keymap "j" "C-b"   "C-c j")
+    (key-alias-fallback keymap "k" "C-n"   "C-c k")
+    (key-alias-fallback keymap "l" "C-f"   "C-c l"))
 
   ;; hack to define the default flags for magit log
   ;; by default they were different if launched in status or from a buffer
