@@ -41,7 +41,7 @@
   (key-chord-define magit-log-select-mode-map "QQ" 'magit-log-select-quit)
   (dolist (keymap (list magit-diff-section-base-map magit-mode-map))
     (key-alias keymap "ç" "M-c ç")
-    (key-alias keymap "&" "M-c 1")
+    (key-alias keymap "&" "M-c &")
     (key-alias keymap "é" "M-c 2")
     (key-alias keymap "\"" "M-c 3")
     (key-alias keymap "'" "M-c '")
