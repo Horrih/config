@@ -22,13 +22,14 @@
   "Transient for `magit' commands"
   [["Top level commands"
     ("v" "Global commands"      magit-dispatch)
-    ("f" "File commands"        magit-file-dispatch)
+    ("V" "File commands"        magit-file-dispatch)
     ("s" "Status (Home)"        magit-status)
     ("w" "Switch worktree"      magit-worktree-status)
     ("c" "Clone"                magit-clone)
     ]
    ["Quick actions"
     ("l" "Log"                  magit-log)
+    ("f" "Fetch"                magit-fetch)
     ("y" "Browse branches"      magit-show-refs)
     ("b" "Branch actions"       magit-branch)
     ("B" "Browse other branch"  magit-find-file-other-window)
@@ -46,7 +47,8 @@
     (key-alias keymap "\"" "M-c 3")
     (key-alias keymap "'" "M-c '")
     (key-alias keymap "4" "M-c 4")
-    (keymap-set keymap "b" nil)
+    (key-alias keymap "f" "M-c f")
+    (key-alias keymap "b" "M-c b")
     (key-alias-fallback keymap "m" "RET"   "C-c m")
     (key-alias-fallback keymap "v" "M-c v" "C-c v")
     (key-alias-fallback keymap "i" "C-p"   "C-c i")
