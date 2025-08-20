@@ -18,7 +18,7 @@
 (key-chord-define ijkl-insert-mode-map "qq" 'ijkl-local-mode) ; Leave ijkl mode with "qq"
 (keymap-set my/keys-mode-map "C-q" 'ijkl-local-mode) ; Fallback if "kk" key-chord fails (e.g high latency ssh)
 (keymap-set my/keys-mode-map "M-q" 'quoted-insert) ; Rebind the command originally bound to C-q
-(keymap-set ijkl-insert-mode-map "M-c" ijkl-local-mode-map) ; Make ijkl bindings available in insert mode
+(keymap-set my/keys-mode-map "M-c" ijkl-local-mode-map) ; Make ijkl bindings available in insert mode
 
 (defun ijkl-local-mode-and-save()
   "Enables ijkl-local-mode and saves the current file if applicable"
