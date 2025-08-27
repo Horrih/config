@@ -94,3 +94,5 @@ NPM_BIN_DIR=~/.local/npm/bin
 if [[ -d $NPM_BIN_DIR ]]; then
     addpath $NPM_BIN_DIR
 fi
+
+alias paclare="uvx --with-editable ~/dev/github/paclare/ paclare"

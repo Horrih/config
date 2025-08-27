@@ -1,0 +1,82 @@
+[paru]
+packages = [
+    "beautyline",    # Icon pack
+    "paru",          # AUR package manager
+    "paru-debug",    # I guess installed automatically when installing paru ?
+    "shim-signed",    # Signing the kernel with some keys for secure boot
+]
+
+[pacman]
+packages = [
+    "amd-ucode",                 # Not sure what this does
+    "android-tools",             # For adb I guess
+    "base",                      # Base arch
+    "base-devel",                # group of dev tools like make, automake, autoconf, bison
+    "bluez-utils",               # bluetooth
+    "btrfs-progs",               # user space utilities for btrfs
+    "cmake",
+    "cups",                      # printer daemon
+    "cups-pdf",                  # Not sure if needed, it adds some common stuff for cups
+    "efitools",                  # Edit EFI entries from arch
+    "emacs",
+    "firefox",                   # Not flatpak since keepassxc won't work
+    "gdm",                       # Lock screen before login
+    "ghostty",                   # Terminal emulator
+    "git",
+    "gnome-backgrounds",         # Desktop images
+    "gnome-browser-connector",   # For extension install
+    "gnome-calculator",
+    "gnome-calendar",
+    "gnome-clocks",
+    "gnome-control-center",
+    "gnome-disk-utility",
+    "gnome-font-viewer",
+    "gnome-keyring",           # Gnome password manager
+    "gnome-logs",
+    "gnome-menus",             # A base for many gnome packages
+    "gnome-session",           # Start the shell and the user session in general
+    "gnome-settings-daemon",   # Stores gnome settings
+    "gnome-shell",             # The shell for the DE
+    "gnome-shell-extensions",  # Manage gnome extensions
+    "gnome-software",          # Flatpak browser
+    "gnome-tweaks",
+    "gnu-netcat",            # Provide the nc utility
+    "gvfs",                  # Various virtual file systems for the gnome file explorer
+    "gvfs-afc",              # Apple files
+    "gvfs-goa",              # Links with your gnome online accounts
+    "gvfs-google",           # Google drive
+    "gvfs-mtp",              # For android files
+    "gvfs-smb",
+    "hplip",                 # HP printer
+    "htop",
+    "iwd",                   # wireless setup
+    "linux-firmware",
+    "linux-lts",
+    "linux-zen",
+    "loupe",
+    "malcontent",
+    "man-db",
+    "meson",
+    "mlt",
+    "nautilus",
+    "networkmanager",
+    "ninja",
+    "npm",
+    "opentimelineio",
+    "orca",
+    "pacman-contrib",
+    "plocate",
+    "podman",
+    "power-profiles-daemon",
+    "python-pip",
+    "refind",                # UEFI only bootloader
+    "sbsigntools",           # to sign the bootloader
+    "steam",
+    "sudo",
+    "tailscale",
+    "timeshift",
+    "tmux",
+    "totem",                 # GNOME video player
+    "vim",
+    "wget",
+]
