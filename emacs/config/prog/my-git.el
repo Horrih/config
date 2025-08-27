@@ -1,4 +1,4 @@
-;;;; magit : Git front end (amazing!)
+;;; magit : Git front end (amazing!)
 (use-package magit
   :custom-face (magit-filename ((t :foreground "white"))) ; Otherwise untracked files have the same color as title in git status
   :custom
@@ -29,7 +29,7 @@
     ]
    ["Quick actions"
     ("l" "Log"                  magit-log)
-    ("f" "Fetch"                magit-fetch)
+    ("f" "Fetch"                magit-fetch-all-prune)
     ("y" "Browse branches"      magit-show-refs)
     ("b" "Branch actions"       magit-branch)
     ("B" "Browse other branch"  magit-find-file-other-window)
