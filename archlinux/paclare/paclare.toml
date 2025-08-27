@@ -1,11 +1,3 @@
-[paru]
-packages = [
-    "beautyline",    # Icon pack
-    "paru",          # AUR package manager
-    "paru-debug",    # I guess installed automatically when installing paru ?
-    "shim-signed",    # Signing the kernel with some keys for secure boot
-]
-
 [pacman]
 packages = [
     "amd-ucode",                 # Not sure what this does
@@ -20,6 +12,7 @@ packages = [
     "efitools",                  # Edit EFI entries from arch
     "emacs",
     "firefox",                   # Not flatpak since keepassxc won't work
+    "flatpak",
     "gdm",                       # Lock screen before login
     "ghostty",                   # Terminal emulator
     "git",
@@ -32,7 +25,6 @@ packages = [
     "gnome-disk-utility",
     "gnome-font-viewer",
     "gnome-keyring",           # Gnome password manager
-    "gnome-logs",
     "gnome-menus",             # A base for many gnome packages
     "gnome-session",           # Start the shell and the user session in general
     "gnome-settings-daemon",   # Stores gnome settings
@@ -77,6 +69,34 @@ packages = [
     "timeshift",
     "tmux",
     "totem",                 # GNOME video player
+    "uv",                    # Python package manager
     "vim",
     "wget",
 ]
+
+[flatpak]
+packages = [
+    "com.google.AndroidStudio",              # Android IDE
+    "org.gnome.Boxes",                       # GNOME VM frontend
+    "com.google.Chrome",                     # Alternative web browser
+    "org.gimp.GIMP",                         # Image editor
+    "com.heroicgameslauncher.hgl",           # Alternative game launcher for gog gaming
+    "org.kde.kdenlive",                      # Video editor
+    "org.keepassxc.KeePassXC",               # Password manager
+    "com.warlordsoftwares.media-downloader", # Youtube downloader
+    "io.missioncenter.MissionCenter",        # System monitor
+    "com.synology.SynologyDrive",            # Sync nas/pc
+    "dev.deedles.Trayscale",                 # Tailscale
+    "org.mozilla.Thunderbird",               # Mail client
+    "org.onlyoffice.desktopeditors",         # Office suite
+    "org.videolan.VLC",                      # Video player
+]
+
+[paru]
+packages = [
+    "beautyline",    # Icon pack
+    "paru",          # AUR package manager
+    "paru-debug",    # I guess installed automatically when installing paru ?
+    "shim-signed",   # Signing the kernel with some keys for secure boot
+]
+
