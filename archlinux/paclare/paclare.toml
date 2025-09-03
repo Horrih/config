@@ -52,6 +52,7 @@ packages = [
     "mlt",
     "nautilus",
     "networkmanager",
+    "net-tools",              # netstat among others
     "ninja",
     "npm",
     "opentimelineio",
@@ -60,6 +61,7 @@ packages = [
     "plocate",
     "podman",
     "power-profiles-daemon",
+    "pnpm",                  # npm but with caching across projects
     "python-pip",
     "refind",                # UEFI only bootloader
     "sbsigntools",           # to sign the bootloader
@@ -74,9 +76,18 @@ packages = [
     "wget",
 ]
 
+[uv]
+packages = [
+    "clangd",
+    "clang-format",
+    "python-lsp-server",
+    "ruff"
+]
+
 [flatpak]
 packages = [
     "com.google.AndroidStudio",              # Android IDE
+    "io.github.kolunmi.Bazaar",              # Software store, alternative to GNOME Software
     "org.gnome.Boxes",                       # GNOME VM frontend
     "com.google.Chrome",                     # Alternative web browser
     "org.gimp.GIMP",                         # Image editor
