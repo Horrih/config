@@ -14,3 +14,8 @@
 (setopt make-backup-files nil) ; Do not use backup files (filename~)
 (setopt create-lockfiles nil) ; Do not use lock files (.#filename)
 
+(use-package grep
+  :config
+  (setopt grep-find-ignored-directories
+          (append grep-find-ignored-directories '("node_modules" ".venv" "build" "dist"))))
+
