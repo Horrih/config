@@ -1,5 +1,5 @@
 ;;; Customizations
-(customize-set-variable 'vc-follow-symlinks t) ; Do not ask to follow symlinks to version controlled files (mostly my emacs config)
+(setopt vc-follow-symlinks t) ; Do not ask to follow symlinks to version controlled files (mostly my emacs config)
 
 ;; Automatic pairing for parentheses/braces
 (add-hook 'prog-mode-hook 'electric-pair-local-mode)
@@ -8,7 +8,7 @@
 (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
 (setq-default fill-column 99)
 
-(customize-set-variable 'electric-pair-inhibit-predicate ; Inhibit electric pairing for single/double quotes
+(setopt electric-pair-inhibit-predicate ; Inhibit electric pairing for single/double quotes
                         (lambda (c) (if (or (char-equal c ?\')(char-equal c ?\")) t (electric-pair-default-inhibit c))))
 
 ;;Show in red the spaces forgotten at the end of lines
@@ -16,9 +16,9 @@
 (add-hook 'special-mode-hook ; Except for special modes
           (lambda() (setq-local show-trailing-whitespace nil)))
 
-(customize-set-variable 'indent-tabs-mode nil) ; Use spaces for indent
-(customize-set-variable 'tab-width 4) ; How to display tab characters in emacs
-(customize-set-variable 'next-error-message-highlight t) ; When jumping between errors, occurs, etc, highlight the current line
+(setopt indent-tabs-mode nil) ; Use spaces for indent
+(setopt tab-width 4) ; How to display tab characters in emacs
+(setopt next-error-message-highlight t) ; When jumping between errors, occurs, etc, highlight the current line
 
 ;;; project.el : Automatic detection of project, and various related project management commands
 (use-package project
