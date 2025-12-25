@@ -10,6 +10,7 @@ packages = [
     "cups",                      # printer daemon
     "cups-pdf",                  # Not sure if needed, it adds some common stuff for cups
     "efitools",                  # Edit EFI entries from arch
+    "perl-image-exiftool",       # Edit images metadata
     "emacs",
     "firefox",                   # Not flatpak since keepassxc won't work
     "flatpak",
