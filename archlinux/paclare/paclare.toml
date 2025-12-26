@@ -52,6 +52,7 @@ packages = [
     "meson",
     "mlt",
     "nautilus",
+    "nautilus-python",        # Provide open with ghostty context menu entry
     "networkmanager",
     "net-tools",              # netstat among others
     "ninja",
