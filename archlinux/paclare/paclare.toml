@@ -65,6 +65,7 @@ packages = [
     "pnpm",                  # npm but with caching across projects
     "python-pip",
     "refind",                # UEFI only bootloader
+    "ripgrep",               # Like ag, a grep++
     "sbsigntools",           # to sign the bootloader
     "steam",
     "sudo",
