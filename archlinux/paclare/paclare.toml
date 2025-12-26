@@ -33,7 +33,7 @@ packages = [
     "gnome-shell-extensions",  # Manage gnome extensions
     "gnome-software",          # Flatpak browser
     "gnome-tweaks",
-    "gnu-netcat",            # Provide the nc utility
+    "openbsd-netcat",        # Provide the nc utility
     "gvfs",                  # Various virtual file systems for the gnome file explorer
     "gvfs-afc",              # Apple files
     "gvfs-goa",              # Links with your gnome online accounts
