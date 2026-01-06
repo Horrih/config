@@ -217,7 +217,7 @@ for some direct navigation bindings"
     ("b" "Interpret the whole lisp buffer" eval-buffer)
     ]
    ["bash"
-    ("s" "Shell Command" shell-command)
+    ("s" "Shell Command" async-shell-command)
     ("t" "Open a terminal" my/term-new)
     ]
    ["Misc"
