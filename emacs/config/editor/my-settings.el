@@ -17,5 +17,5 @@
 (use-package grep
   :config
   (setopt grep-find-ignored-directories
-          (append grep-find-ignored-directories '("node_modules" ".venv" "build" "dist"))))
+          (append grep-find-ignored-directories '("node_modules" ".venv" "build" "dist" ".pytest_cache" ".mypy_cache" ".ruff_cache" "__pycache__"))))
 
