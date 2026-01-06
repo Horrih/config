@@ -29,7 +29,9 @@ white='\[\e[0;37m\]'
 magenta='\[\e[0;35m\]'
 green='\[\e[0;32m\]'
 cyan='\[\e[0;36m\]'
-export PS1="${red}[\t] ${blue}\u${white}@${magenta}\h ${cyan}\$(parse_git_branch)${green}\w ${white}> "
+bold='\e[1m'
+reset='\e[0m'
+export PS1="${red}[\t] ${blue}\u${white}@${magenta}\h ${cyan}\$(parse_git_branch)${green}\w ${white}\n $ "
 
 function addpath() {
     args=()
