@@ -3,6 +3,7 @@
   :straight (:type built-in)
   :hook (compilation-mode . (lambda()(setq show-trailing-whitespace nil)))
   :custom
+  (compilation-max-output-line-length 10000) ; Disable the default 400char line wrapping
   (compilation-always-kill t)) ; Do not ask for confirmation when I stop current compilation
 
 ;;; Hydra compile
