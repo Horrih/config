@@ -11,6 +11,7 @@
     ("k" "Kill current buffer"       kill-current-buffer)
     ("w" "Kill current window"       delete-window)
     ("r" "Rename current buffer"     my/rename-buffer)
+    ("n" "New buffer"                my/new-buffer)
     ]
    ["Shortcuts"
    ("b" "Go to last buffer" my/switch-to-last-buffer)
@@ -27,6 +28,11 @@
   (if buffer-file-name
       (call-interactively #'rename-visited-file)
     (call-interactively #'rename-buffer)))
+
+;;;; my/new-buffer
+(defun my/new-buffer(buffer-name)
+  (interactive "sBuffer name: ")
+  (switch-to-buffer buffer-name))
 
 ;;;; my/switch-to-messages
 (defun my/switch-to-messages()
