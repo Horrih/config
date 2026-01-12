@@ -33,7 +33,8 @@
         (split-height-threshold 0)) ; Allow vertical split up to extreme cases
     (consult-buffer-other-window)))
 
-;;; my/replace-chat-at-point
+;;; Text edition
+;;;; my/replace-chat-at-point
 (defun my/replace-char-at-point(char)
   "Replaces the caracter at point by `CHAR'"
   (interactive "cReplace character at point with : ")
@@ -41,7 +42,7 @@
   (insert-char char)
   (backward-char 1))
 
-;;; my/delete-char-or-kill-region
+;;;; my/delete-char-or-kill-region
 (defun my/delete-char-or-kill-region()
   "If mark is active, kill region, otherwise delete-char"
   (interactive)
