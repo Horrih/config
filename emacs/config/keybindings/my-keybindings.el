@@ -48,10 +48,14 @@
 (key-alias  ijkl-local-mode-map "o" "C-M-o")
 
 ;;; utility bindings
-(keymap-set    my/keys-mode-map "C-+" 'text-scale-increase) ; Increase text size with Ctrl +
-(keymap-set    my/keys-mode-map "C--" 'text-scale-decrease) ; Decrease text size with Ctrl -
-(key-alias  ijkl-local-mode-map "+" "C-+" '("dired-mode")) ; See above
+;; Change text size for all buffers.
+;; The command behaves differently based on the llast keypress so weirdly enough I just put
+;; 1 in both cases
+(keymap-set    my/keys-mode-map "C-=" (lambda()(interactive)(global-text-scale-adjust 1)))
+(keymap-set    my/keys-mode-map "C--" (lambda()(interactive)(global-text-scale-adjust 1)))
+(key-alias  ijkl-local-mode-map "+" "C-=" '("dired-mode")) ; See above
 (key-alias  ijkl-local-mode-map "-" "C-\-") ; See above
+
 (keymap-set ijkl-local-mode-map "TAB" nil)    ; Do not override tab binding
 (keymap-set ijkl-local-mode-map "<tab>" nil)  ; Do not override tab binding
 (keymap-set ijkl-local-mode-map "h" help-map) ; Use the help functions
