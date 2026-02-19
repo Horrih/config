@@ -1,6 +1,7 @@
 ;;; legacy python mode
 (use-package python-mode
   :straight (:type built-in)
+  :custom (lsp-pylsp-plugins-flake8-max-line-length 88)
   :hook (python-mode . (lambda()
                          (setq-local fill-column 88)  ; ruff/black default limit
                          (my/apheleia-enable-ruff) ; ruff code formatter
