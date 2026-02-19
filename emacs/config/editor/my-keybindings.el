@@ -103,7 +103,7 @@
 
 ;;; Programming
 (keymap-set ijkl-local-mode-map "," 'my/hydra-org/body)
-(keymap-set ijkl-local-mode-map "ç" 'my/hydra-compile/body)
+(keymap-set ijkl-local-mode-map "ç" 'my/transient-compile)
 (keymap-set ijkl-local-mode-map "v" 'my/transient-magit)
 (keymap-set ijkl-local-mode-map "." 'completion-at-point) ; Trigger completion
 (keymap-set ijkl-local-mode-map "!" 'my/transient-commands)

@@ -7,25 +7,25 @@
   (compilation-always-kill t)) ; Do not ask for confirmation when I stop current compilation
 
 ;;; Hydra compile
-(defhydra my/hydra-compile(:exit t :hint nil)
-  "
-^Start compilation^             ^Buffer commands^
---------------------------------------------------------------
-_e_: Edit command               _o_: Open *compilation* buffer
-_ç_: Recompile                  _n_: Next compilation error
-_a_: Compile project            _p_: Prev compilation error
-_f_: Compile current file       _l_: Cycle error threshold
-_k_: Stop compilation
-_g_: Start GDB
-"
-  ("e" compile)             ("o" my/switch-to-compilation-other-window)
-  ("ç" my/recompile-switch) ("l" compilation-set-skip-threshold :color red)
-  ("a" my/compile-all)      ("n" next-error     :color red)
-  ("f" my/compile-file)     ("p" previous-error :color red)
-  ("k" kill-compilation)
-  ("g" my/transient-gdb))
+(transient-define-prefix my/transient-compile()
+  "Compilation command selecter"
+  [["Start compilation"
+    ("e" "Edit compile command" compile)
+    ("ç" "Recompile" my/recompile-switch)
+    ("f" "Run this buffer's tests" my/compile-file)
+    ("k" "Stop compilation" kill-compilation)
+    ("g" "Start gdb" my/transient-gdb)
+    ]
+   ["Buffer commands"
+    ("o" "Open *compilation* buffer"  my/switch-to-compilation-other-window)
+    ("l" "Cycle error levels"         compilation-set-skip-threshold :transient t)
+    ("n" "Next compilation error"     next-error                     :transient t)
+    ("p" "Previous compilation error" previous-error                 :transient t)
+    ]])
 
-;;; my/switch-to-compilation-other-window()
+;;; Compilation helper functions
+
+;;;; my/switch-to-compilation-other-window()
 (defun my/switch-to-compilation-other-window()
   "Switches to the compilation buffer in another window"
   (interactive)
@@ -38,14 +38,14 @@ _g_: Start GDB
   (my/switch-to-compilation-other-window)
   (end-of-buffer))
 
-;;; my/recompile-switch
+;;;; my/recompile-switch
 (defun my/recompile-switch()
   "Uses the recompile function and switches to the buffer end"
   (interactive)
   (recompile)
   (my/switch-to-compilation-other-window-end))
 
-;;; my/compile-all
+;;;; my/compile-all
 (defcustom my/compile-all-command nil
   "If non nil, `my/compile-all' will use it as command instead of `compile-command'
 This can be useful in conjunction to your project's variables defined in .dir-locals.el"
@@ -58,7 +58,7 @@ This can be useful in conjunction to your project's variables defined in .dir-lo
   (compile (or my/compile-all-command "make -j8"))
   (my/switch-to-compilation-other-window-end))
 
-;;; my/compile-file
+;;;; my/compile-file
 (defun my/compile-file(file-name)
   "Compiles the file FILE-NAME using a command to be define `compile-file-command'
   This function should take a filename as parameter and returning the command as output"
