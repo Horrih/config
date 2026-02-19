@@ -3,6 +3,7 @@
   "Execute commands"
   [["Elisp"
     (":" "Interpret lisp code" eval-expression)
+    ("f" "Interpret current defun expression" eval-defun)
     ("e""Interpret last lisp expression" eval-last-sexp)
     ("E" "Interpret the current buffer as lisp" eval-buffer)
     ("b" "Interpret the whole lisp buffer" eval-buffer)

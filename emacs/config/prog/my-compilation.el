@@ -9,18 +9,22 @@
 ;;; Hydra compile
 (transient-define-prefix my/transient-compile()
   "Compilation command selecter"
-  [["Start compilation"
+  [["Compilation basic"
     ("e" "Edit compile command" compile)
     ("ç" "Recompile" my/recompile-switch)
-    ("f" "Run this buffer's tests" my/compile-file)
-    ("k" "Stop compilation" kill-compilation)
+    ("k" "Stop compilation" kill-compilation)]
+   ["Testing/linting"
+    ("l" "Lint this project" my/compile-lint-project)
+    ("p" "Run this project's tests" my/compile-test-project)
+    ("f" "Run this buffer's tests" my/compile-test-file)
+    ("c" "Run this test case" my/compile-test-case)
     ("g" "Start gdb" my/transient-gdb)
     ]
    ["Buffer commands"
     ("o" "Open *compilation* buffer"  my/switch-to-compilation-other-window)
-    ("l" "Cycle error levels"         compilation-set-skip-threshold :transient t)
-    ("n" "Next compilation error"     next-error                     :transient t)
-    ("p" "Previous compilation error" previous-error                 :transient t)
+    ("L" "Cycle error levels"         compilation-set-skip-threshold :transient t)
+    ("N" "Next compilation error"     next-error                     :transient t)
+    ("P" "Previous compilation error" previous-error                 :transient t)
     ]])
 
 ;;; Compilation helper functions
@@ -45,27 +49,44 @@
   (recompile)
   (my/switch-to-compilation-other-window-end))
 
-;;;; my/compile-all
-(defcustom my/compile-all-command nil
-  "If non nil, `my/compile-all' will use it as command instead of `compile-command'
-This can be useful in conjunction to your project's variables defined in .dir-locals.el"
-  :type 'string
-  :risky nil)
-
-(defun my/compile-all()
-  "Compiles the whole project and switch to buffer end"
+;;;; my/compile-test-project
+(defun my/compile-test-project()
+  "Runs the tests contained in the current project."
   (interactive)
-  (compile (or my/compile-all-command "make -j8"))
-  (my/switch-to-compilation-other-window-end))
+  (my/compile--command-runner "project tests" 'my/compile-test-project-command))
 
-;;;; my/compile-file
-(defun my/compile-file(file-name)
-  "Compiles the file FILE-NAME using a command to be define `compile-file-command'
-  This function should take a filename as parameter and returning the command as output"
-  (interactive (list (buffer-file-name)))
-  (unless (fboundp 'compile-file-command)
-    (error "compile-file expects the compile-file-command function to be defined"))
-  (compile (compile-file-command file-name))
+
+;;;; my/compile-test-file
+(defun my/compile-test-file()
+  "Runs the tests contained in the current buffer."
+  (interactive)
+  (my/compile--command-runner "single file tests" 'my/compile-test-file-command))
+
+
+;;;; my/compile-test-case
+(defun my/compile-test-case()
+  "Runs the test case where the cursor is located."
+  (interactive)
+  (my/compile--command-runner "single test case" 'my/compile-test-case-command))
+
+;;;; my/compile-lint
+(defun my/compile-lint-project()
+  "Runs the linters for the current project."
+  (interactive)
+  (my/compile--command-runner "project lint" 'my/compile-lint-project-command))
+
+;;;; Helper function to run a compilation command defined in a symbol
+(defun my/compile--command-runner(descr command-callback)
+  "Runs the tests returned by COMMAND-CALLBACK in a compilation window.
+
+COMMAND-CALLBACK is a symbol containing a function that muse return:
+- The directory where this command should be run
+- The command to run"
+  (unless (boundp command-callback)
+    (error (concat (format "ERROR : The %s command to run is unknown.\n" descr)
+                   (format "Please define `%s' for the current major mode." command-callback))))
+  (pcase-let ((`(,default-directory ,command) (funcall (symbol-value command-callback))))
+    (compile command))
   (my/switch-to-compilation-other-window-end))
 
 ;;; ansi-color : Translate TTY escape sequences into colors
