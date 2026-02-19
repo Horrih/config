@@ -9,7 +9,7 @@
 (setq-default fill-column 99)
 
 (setopt electric-pair-inhibit-predicate ; Inhibit electric pairing for single/double quotes
-                        (lambda (c) (if (or (char-equal c ?\')(char-equal c ?\")) t (electric-pair-default-inhibit c))))
+        (lambda (c) (if (or (char-equal c ?\')(char-equal c ?\")) t (electric-pair-default-inhibit c))))
 
 ;;Show in red the spaces forgotten at the end of lines
 (setq-default show-trailing-whitespace t)
@@ -27,18 +27,15 @@
   ;; Make `project-switch-project' open dired instead of prompting for the command to run
   (project-switch-commands 'project-dired))
 
-
-;;; hide-show-mode : Hide/show sections of code : current function, class, or if/else section
-(use-package hideshow
-  :straight (:type built-in)
-  :config
-  (diminish 'hs-minor-mode)
-  :hook
-  (prog-mode . hs-minor-mode))
-
 ;;; csv-mode : Support for csv files (use csv-align-mode for alignment)
 (use-package csv-mode
   :mode "\\.csv\\'")
+
+;;; markdown-mode
+(use-package markdown-mode
+  :hook (markdown-mode . (lambda()
+                           (setq-local fill-column 79)
+                           (display-fill-column-indicator-mode t))))
 
 ;;; Require treesit at startup
 ;;;; Cheatsheet

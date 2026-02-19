@@ -3,8 +3,6 @@
   :straight (:type built-in)
   :custom(flymake-mode-line-lighter ""))
 
-    ;; ("e" "List errors (file)"     consult-flymake                  :if (lambda() (featurep 'flymake)))
-    ;; ("t" "List errors (project)"  flymake-show-project-diagnostics :if (lambda() (featurep 'flymake)))
 (defun my/list-errors-file()
   "Wrapper for `consult-flymake' and `flycheck-list-errors' according to which is enabled"
   (interactive)

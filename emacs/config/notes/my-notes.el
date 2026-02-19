@@ -25,10 +25,9 @@
   (defun org-download--dir-1 ()
     (or org-download-image-dir (concat (file-name-sans-extension (buffer-file-name)) "-img"))))
 
-
 ;;; Hydra org-roam
 (defun my/org-now-time-stamp()
-    "Inserts the timestamp of the current time without prompting the user"
+  "Inserts the timestamp of the current time without prompting the user"
   (interactive)
   (org-insert-time-stamp (current-time) t))
 
@@ -50,4 +49,3 @@ _L_: List TODOs            _,_: Toggle images
   ("N" org-time-stamp)         ("," org-toggle-inline-images)
 
   ("q" nil "Quit"))
-(keymap-set ijkl-local-mode-map "," 'my/hydra-org/body)

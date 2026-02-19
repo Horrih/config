@@ -15,7 +15,7 @@
 ;;; Pretty colors for headings
 ;; We don't use (outline-minor-mode-highlight 'override) because it applies to some non headings as well
 (use-package outline-minor-faces
-   :hook (outline-minor-mode . outline-minor-faces-mode))
+  :hook (outline-minor-mode . outline-minor-faces-mode))
 
 ;;; Hydra
 (defhydra my/hydra-outline(:columns 3)
@@ -28,4 +28,3 @@
   ("s" outline-show-subtree "show all subtree")
   ("p" outline-previous-visible-heading "prev")
   ("h" outline-hide-subtree "hide subtree"))
-(keymap-set ijkl-local-mode-map "à" 'my/hydra-outline/body)

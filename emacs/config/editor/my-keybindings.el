@@ -1,0 +1,119 @@
+;;; movement and deletion bindings (accessible in both modes)
+;;;; backwards
+(key-alias  ijkl-local-mode-map "j"   "<left>")
+(key-alias     my/keys-mode-map "C-j" "<left>")
+;; A simple key-alias does not work in term, so we use gen-input instead
+(keymap-set   my/keys-mode-map "M-j" (lambda() (interactive)(my/gen-input "M-b")))
+(key-alias     my/keys-mode-map "C-M-j" "C-a")
+(key-alias  ijkl-local-mode-map "a" "C-a")
+
+;;;; forwards
+(key-alias  ijkl-local-mode-map   "l" "<right>")
+(key-alias     my/keys-mode-map "C-l" "<right>")
+(key-alias     my/keys-mode-map "M-l" "M-f")
+(key-alias     my/keys-mode-map "C-M-l" "C-e")
+(key-alias  ijkl-local-mode-map "e" "C-e")
+
+;;;; upwards
+(keymap-set ijkl-local-mode-map "i" 'previous-line)
+;; C-i is bound to TAB in terminals. You need to remap C-i to C-p at your GUI app level
+;; For example powertoys on windows, konsole or xterm remapping on linux
+(when (display-graphic-p)
+  (keymap-set input-decode-map "C-i" "C-<i>") ; Disable C-i -> TAB
+  (key-alias my/keys-mode-map "C-<i>" "C-p")) ; Rebind C-i as previous line
+
+(keymap-set   my/keys-mode-map "M-i" (lambda() (interactive)(previous-line 7)))
+(key-alias    my/keys-mode-map "C-M-i" "M-<")
+(key-alias ijkl-local-mode-map "<" "M-<")
+(key-alias ijkl-local-mode-map "A" "C-M-a")
+
+;;;; downwards
+(keymap-set ijkl-local-mode-map   "k" 'next-line)
+(key-alias     my/keys-mode-map "C-k" "C-n" '(term-mode))
+(keymap-set    my/keys-mode-map "M-k" (lambda() (interactive)(next-line 7)))
+(key-alias     my/keys-mode-map "C-M-k" "M->")
+(key-alias  ijkl-local-mode-map ">" "M->")
+(key-alias  ijkl-local-mode-map "E" "C-M-e")
+
+;;;; Other navigation commands
+(keymap-set ijkl-local-mode-map "p" 'asmr-backward) ; Reimplementation of a mark ring
+(keymap-set ijkl-local-mode-map "n" 'asmr-forward)  ; Reimplementation of a mark ring
+(keymap-set ijkl-local-mode-map "g" 'my/transient-go)
+
+;;; Edition
+(key-alias  ijkl-local-mode-map "u" "C-M-u" '("dired-mode" "Info-mode"))
+(keymap-set    my/keys-mode-map "C-c u" 'universal-argument)
+(keymap-set    my/keys-mode-map "C-M-u" 'my/delete-start-or-previous-line)
+;; A simple key-alias does not work in term, we cheat with gen-input instead
+(keymap-set    my/keys-mode-map "C-u" (lambda()(interactive)(my/gen-input "<DEL>")))
+(keymap-set    my/keys-mode-map "M-u" (lambda()(interactive)(my/gen-input "M-<DEL>")))
+(keymap-set    my/keys-mode-map "C-o" (lambda()(interactive)(my/gen-input "C-d")))
+(keymap-set    my/keys-mode-map "M-o" (lambda()(interactive)(my/gen-input "M-d")))
+(keymap-set    my/keys-mode-map "C-M-o" 'kill-line)
+(key-alias  ijkl-local-mode-map "o" "C-M-o")
+(keymap-set ijkl-local-mode-map "x" 'my/delete-char-or-kill-region)
+(keymap-set ijkl-local-mode-map "X" (lambda () (interactive) (cycle-spacing 0)))
+(keymap-set ijkl-local-mode-map "r" 'my/replace-char-or-rectangle-region)
+(key-alias ijkl-local-mode-map "w" "C-x C-s")
+(key-alias  ijkl-local-mode-map "c" "M-w")
+(key-alias  ijkl-local-mode-map "y" "C-y")
+(key-alias  ijkl-local-mode-map "_" "C-_") ; Undo
+(key-alias  ijkl-local-mode-map "8" "C-M-_") ; redo
+(keymap-set ijkl-local-mode-map "I" 'er/expand-region)   ; Expand the selection progressively
+(keymap-set ijkl-local-mode-map "K" 'er/contract-region) ; Reduce the selection progressively
+
+;;; Windows operations
+(keymap-set    my/keys-mode-map "C-=" (lambda()(interactive)(global-text-scale-adjust 1)))
+(keymap-set    my/keys-mode-map "C--" (lambda()(interactive)(global-text-scale-adjust 1)))
+(key-alias  ijkl-local-mode-map "+" "C-=" '("dired-mode")) ; See above
+(key-alias  ijkl-local-mode-map "-" "C-\-") ; See above
+(keymap-set ijkl-local-mode-map "é"  'my/pick-window-below)
+(keymap-set ijkl-local-mode-map "\"" 'my/pick-window-right)
+(keymap-set ijkl-local-mode-map "'" 'other-window)
+(keymap-set ijkl-local-mode-map "4" 'my/other-window-reverse)
+(keymap-set ijkl-local-mode-map "t" 'my/hydra-tabs/body)
+(keymap-set ijkl-local-mode-map "R" 'my/transient-register)
+(keymap-set ijkl-local-mode-map "C-M-<right>" 'enlarge-window-horizontally)
+(keymap-set ijkl-local-mode-map "C-M-<left>" 'shrink-window-horizontally)
+(keymap-set ijkl-local-mode-map "C-M-<down>" 'enlarge-window)
+(keymap-set ijkl-local-mode-map "C-M-<up>" 'shrink-window)
+
+;;; Buffers operations
+(key-alias  ijkl-local-mode-map "1"   "C-x 0")
+(key-alias  ijkl-local-mode-map "&"   "C-x 1")
+(key-alias  ijkl-local-mode-map "2" "C-x 2")
+(key-alias  ijkl-local-mode-map "3" "C-x 3")
+(keymap-set ijkl-local-mode-map "z" 'recenter-top-bottom)
+(keymap-set ijkl-local-mode-map "à" 'my/hydra-outline/body)
+(keymap-set         ctl-x-r-map "d" 'bookmark-delete) ; Repace C-x r d (delete-rectangle) with delete bookmark
+(keymap-set ijkl-local-mode-map "b" 'my/transient-buffer)
+(keymap-set ijkl-local-mode-map "N" 'my/hydra-narrow/body)
+(keymap-set ijkl-local-mode-map "H" 'my/transient-hide-show)
+(keymap-set ijkl-local-mode-map "<f2>" 'my/rename-buffer) ; Rename the current file/buffer
+(keymap-set ijkl-local-mode-map "<f5>" 'revert-buffer-quick) ; Refreshes the current file/buffer without confirmation
+(keymap-set ijkl-local-mode-map "P" 'previous-buffer)
+(keymap-set ijkl-local-mode-map "N" 'next-buffer)
+(key-alias  ijkl-local-mode-map "<SPC>" "C-@")
+
+;;; Search
+(keymap-set           ctl-x-map "f" 'find-file) ; Replace C-x f (set-fill-column) with find-file (C-x C-f usually)
+(keymap-set           ctl-x-map "k" 'kill-current-buffer) ; Replace C-x k (kill buffer) with kill-current-bu
+(keymap-set ijkl-local-mode-map "M-s"  'multi-occur-in-matching-buffers) ; Search in all buffers
+(keymap-set ijkl-local-mode-map "f" 'my/transient-find)
+
+;;; Programming
+(keymap-set ijkl-local-mode-map "," 'my/hydra-org/body)
+(keymap-set ijkl-local-mode-map "ç" 'my/hydra-compile/body)
+(keymap-set ijkl-local-mode-map "v" 'my/transient-magit)
+(keymap-set ijkl-local-mode-map "." 'completion-at-point) ; Trigger completion
+(keymap-set ijkl-local-mode-map "!" 'my/transient-commands)
+(keymap-set ijkl-local-mode-map "/" 'my/comment-dwim) ; Comment region or line
+
+;;; utility bindings
+(keymap-set ijkl-local-mode-map "TAB" nil)    ; Do not override tab binding
+(keymap-set ijkl-local-mode-map "<tab>" nil)  ; Do not override tab binding
+(keymap-set ijkl-local-mode-map "h" help-map) ; Use the help functions
+(keymap-set ijkl-local-mode-map "s" 'my/transient-search)
+(key-alias  ijkl-local-mode-map "m"   "C-m")
+(key-alias     my/keys-mode-map "C-S-m" "S-<return>")
+(key-alias     my/keys-mode-map "M-m" "C-<return>")

@@ -1,11 +1,12 @@
 (defcustom my/config-modules
-  '((bootstrap   (bootstrap straight))
-    (editor      (settings plugins commands asmr))
-    (looks       (settings theme auto-margin doom-modeline))
-    (keybindings (base ijkl keybindings transient))
-    (org         (org-mode notes present))
-    (prog        (settings compilation term commands git plugins markdown snippets
-                  web c++ python yaml docker outline corfu linters eglot lsp-mode)))
+  '((bootstrap (bootstrap straight))
+    (utils     (mode))
+    (looks     (settings theme auto-margin doom-modeline))
+    (editor    (settings keybindings-helpers keybindings asmr buffer
+                         completion editing search window))
+    (notes     (org-mode notes present))
+    (prog      (settings compilation term commands git format snippets
+                         web c++ python yaml docker outline linters eglot lsp-mode)))
   "Enabled init modules. Can be modified to
 - disable modules that are enabled by default here
 - enable additional modules that are disabled by default here"

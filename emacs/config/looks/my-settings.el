@@ -15,6 +15,10 @@
 (show-paren-mode 1) ; Highlight the matching parenthesis
 (setopt completions-detailed t) ; Detailed description for the built in describe symbol etc
 
+;;; rainbow-delimiters : Parenthesis color based on depth
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
 ;;; diminish : Hide the mode line string for modes (called the lighter)
 (use-package diminish
   :demand

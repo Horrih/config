@@ -9,11 +9,11 @@
 (use-package ediff
   :straight (:type built-in)
   :hook (ediff-keymap-setup . (lambda()
-                        (keymap-set ediff-mode-map "h" 'ediff-status-info)
-                        (keymap-set ediff-mode-map "'" 'other-window)
-                        (keymap-set ediff-mode-map "4" 'my/other-window-reverse)
-                        (keymap-set ediff-mode-map "i" 'ediff-previous-difference)
-                        (keymap-set ediff-mode-map "k" 'ediff-next-difference)))
+                                (keymap-set ediff-mode-map "h" 'ediff-status-info)
+                                (keymap-set ediff-mode-map "'" 'other-window)
+                                (keymap-set ediff-mode-map "4" 'my/other-window-reverse)
+                                (keymap-set ediff-mode-map "i" 'ediff-previous-difference)
+                                (keymap-set ediff-mode-map "k" 'ediff-next-difference)))
   :custom
   (ediff-split-window-function 'split-window-horizontally)) ; Make ediff split side by side
 
@@ -34,7 +34,6 @@
     ("b" "Branch actions"       magit-branch)
     ("B" "Browse other branch"  magit-find-file-other-window)
     ]])
-(keymap-set ijkl-local-mode-map "v" 'my/transient-magit)
 
 ;;; Magit ijkl
 (with-eval-after-load "magit"
@@ -61,7 +60,7 @@
   ;; which I don't like
   (cl-defmethod transient-init-value ((obj magit-log-prefix))
     (oset obj value '("--graph" "-n256" "--decorate")))
-)
+  )
 (with-eval-after-load "git-rebase"
   (key-alias-fallback git-rebase-mode-map "m" "RET" "C-c m")
   (key-alias-fallback git-rebase-mode-map "j" "C-l" "C-c j")
