@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
-# name: cpplink
-# key: <cpp
+# name: cppfunc
+# key: cfunc
 # --
 
 {cpp:func}\`$1\` $0

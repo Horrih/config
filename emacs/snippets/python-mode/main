@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: main
+# key: __main
+# --
+def main() -> None:
+    """Main entry point for this program."""
+    $0pass
+
+
+if __name__ == "__main__":
+   main()
+

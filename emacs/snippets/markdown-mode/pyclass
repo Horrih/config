@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: pyclass
+# key: class
+# --
+{class}\`.$1\` $0

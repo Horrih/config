@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: pyfunc
+# key: func
+# --
+{func}\`.$1\` $0
