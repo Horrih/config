@@ -7,6 +7,7 @@
   (c-set-offset 'substatement-open 0) ; Align braces with the if/for statement. If not set, a half indent will be used
   (c-set-offset 'arglist-intro '+) ; Align multiline arguments with a standard indent (instead of with parenthesis)
   (c-set-offset 'arglist-close 0) ; Align the parenthesis at the end of the arguments with the opening statement indent
+  (my/c++-hook)
   (advice-add 'c-update-modeline :override #'ignore)) ;; Don't use a modeline suffix (i.e C++//l)
 
 
@@ -33,9 +34,7 @@
   :custom
   (c-ts-mode-indent-offset 4)
   (c-ts-mode-indent-style #'my/cpp-indent-style)
-  :hook (c-ts-base-mode . (lambda()
-                            (setq-local my/margin-line-width 99)
-                            (apheleia-mode-maybe)))
+  :hook (c-ts-base-mode . my/c++-hook)
   :init
   (advice-add 'c-ts-mode-set-modeline :override 'ignore) ; Do not add a // suffix to the modeline
   ;; Remap the standard C/C++ modes
@@ -56,6 +55,15 @@
            ((parent-is "source_file") parent-bol 0)   ; If top level, no indent
            ((match nil nil nil 1 nil) prev-line 0) ; Otherwise align with previous-sibiling
            ((match nil nil nil nil nil) parent-bol cmake-ts-mode-indent-offset))))) ; No sibling : parent + offset
+
+;;; My C++ mode hook
+(defun my/c++-hook()
+  "Various settings to set to the current buffer when enabling C++ mode or equivalent."
+  (setq-local my/margin-line-width 99)
+  (setq-local my/compile-test-project-command #'my/c++-test-project-command)
+  (setq-local my/compile-test-file-command #'my/c++-test-file-command)
+  (setq-local my/compile-test-case-command #'my/c++-test-case-command)
+  (apheleia-mode-maybe))
 
 ;;; Hydra gdb/gud
 (transient-define-prefix my/transient-gdb()
@@ -124,3 +132,67 @@ well even if the files are not next to each other."
                        name-wo-tests)))
     (unless (my/find-project-filename other-file)
       (error "Could not perform tests<->src switch : '%s' does not exist" other-file))))
+
+
+;;; Test commands for compilation-mode
+;;;; Test project command
+(defun my/c++-test-project-command()
+  "Callback used by `my/compile-test-project'"
+  (list (my/c++-root-dir) "make test -j8"))
+
+;;;; Test file command
+(defun my/c++-test-file-command()
+  "Callback used by `my/compile-test-file'"
+  (let* ((test-cases (my/c++-doctest-all-cases))
+         (doctest-options (mapconcat 'identity test-cases ","))
+         (command (format "make -j8 && ./build/Debug/tests_* -tc='%s'" doctest-options)))
+    (list (my/c++-root-dir) command)))
+
+;;;; Test single test case command
+(defun my/c++-test-case-command()
+  "Callback used by `my/compile-test-case'"
+  (let* ((this-function (my/c++-doctest-case))
+         (command (format "make -j8 && ./build/Debug/tests_* -tc='%s'" this-function)))
+    (if this-function
+        (list (my/c++-root-dir) command)
+      (error "Error : cursor is not inside a TEST_CASE section."))))
+
+;;;; my/c++-root-dir : Get the C++ root directory
+(defun my/c++-root-dir()
+  "Return the project's c++ root directory.
+- Return the upmost CMakeLists.txt
+- Else return current directory"
+  (let* ((start-dir default-directory)
+        (highest-found start-dir)
+        (current-match nil))
+    ;; Keep climbing as long as we find a pyproject.toml
+    (while (setq current-match (locate-dominating-file start-dir "CMakeLists.txt"))
+      (setq highest-found current-match)
+      ;; Move start-dir to the parent of the current match to keep climbing
+      (setq start-dir (file-name-directory (directory-file-name current-match))))
+    highest-found))
+
+;;;; my/c++-doctest-case
+(defun my/c++-doctest-case()
+  "Read the doctest TEST_CASE the cursor is in."
+  (save-excursion
+    ;; 1. Search backward for the pattern
+    (if (re-search-backward "TEST_CASE(\"\\([^\"]+\\)\")" nil t)
+        (let ((match-string (match-string 1)))
+          (message "Found: %s" match-string)
+          match-string)
+      (message "No TEST_CASE found before point.")
+      nil)))
+
+;;;; my/c++-doctest-all-cases
+(defun my/c++-doctest-all-cases()
+  "Return a list of all TEST_CASE title in the current buffer."
+  (interactive)
+  (let ((results '()))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward "TEST_CASE(\"\\([^\"]+\\)\")" nil t)
+        (push (match-string 1) results)))
+    (let ((final-list (nreverse results)))
+      (message "Found %d test cases." (length final-list))
+      final-list)))

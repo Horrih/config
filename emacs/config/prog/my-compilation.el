@@ -82,6 +82,8 @@
 COMMAND-CALLBACK is a symbol containing a function that muse return:
 - The directory where this command should be run
 - The command to run"
+  (when (derived-mode-p 'compilation-mode)
+    (quit-window))
   (unless (boundp command-callback)
     (error (concat (format "ERROR : The %s command to run is unknown.\n" descr)
                    (format "Please define `%s' for the current major mode." command-callback))))
