@@ -98,3 +98,10 @@ if [[ -d $NPM_BIN_DIR ]]; then
 fi
 
 alias paclare="uvx --with-editable ~/dev/horrih/paclare/ paclare"
+
+# Expects date as 2025:12:25
+function exifdate() {
+    date=$1;
+    shift;
+    exiftool -overwrite_original "-AllDates=${date} 12:00:00" "$@"
+}
