@@ -53,7 +53,7 @@ packages = [
     "man-db",
     "meson",
     "mlt",
-    "mokutils",               # Handle secure boot settings
+    "mokutil",                # Handle secure boot settings
     "nautilus",
     "nautilus-python",        # Provide open with ghostty context menu entry
     "networkmanager",
