@@ -4,11 +4,13 @@ packages = [
     "android-tools",             # For adb I guess
     "base",                      # Base arch
     "base-devel",                # group of dev tools like make, automake, autoconf, bison
+    "bind",                      # DNS utils like dig
     "bluez-utils",               # bluetooth
     "btrfs-progs",               # user space utilities for btrfs
     "cmake",
     "cups",                      # printer daemon
     "cups-pdf",                  # Not sure if needed, it adds some common stuff for cups
+    "libdvdcss",                 # Handbrake : support encrypted DVDs
     "efitools",                  # Edit EFI entries from arch
     "perl-image-exiftool",       # Edit images metadata
     "emacs",
@@ -37,9 +39,9 @@ packages = [
     "gvfs",                  # Various virtual file systems for the gnome file explorer
     "gvfs-afc",              # Apple files
     "gvfs-goa",              # Links with your gnome online accounts
-    "gvfs-google",           # Google drive
     "gvfs-mtp",              # For android files
     "gvfs-smb",
+    "handbrake",             # DVD ripping/transcoding
     "hplip",                 # HP printer
     "htop",
     "iwd",                   # wireless setup
@@ -51,6 +53,7 @@ packages = [
     "man-db",
     "meson",
     "mlt",
+    "mokutils",               # Handle secure boot settings
     "nautilus",
     "nautilus-python",        # Provide open with ghostty context menu entry
     "networkmanager",
@@ -68,6 +71,7 @@ packages = [
     "refind",                # UEFI only bootloader
     "ripgrep",               # Like ag, a grep++
     "sbsigntools",           # to sign the bootloader
+    "seahorse",              # GNOME secret manager
     "steam",
     "sudo",
     "tailscale",
